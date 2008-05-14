@@ -1,0 +1,992 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20070601@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="500">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+    <Require feature='grid'/>
+    <Require feature='analytics'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_20070601_redux"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20070601@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils5.js"></script>
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
+--->
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json2.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  _IG_Analytics("UA-1247731-1", "/puzzlegadget");
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function _IG_game_state() {
+    this.cur_puz = 0;
+    this.puz_count = 300;
+    this.puz_solved = new Array();
+    for (var i=0; i<this.puz_count; ++i) {
+      this.puz_solved[i] = 0;
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
+    if (this.game_state.puz_solved[puznum] == 1) {
+      return "#00FF00";
+    } else {
+      return "#FF0000";
+    }
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.score = function() {
+    var answer = 0;
+    for (var i=0; i<this.game_state.puz_count; ++i) {
+      answer += this.game_state.puz_solved[i];
+    }
+    return answer;
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+    var num = this.score();
+    if (num == 300) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = this.score();
+  }
+
+  ///////////////////////////////////////////////
+  ///  Primitive Sudoku classes.
+
+  var letters = new Array('A','B','C','D','E','F','G','H');
+
+  function sudoku_cell(id, size) {
+    this.id = id;
+    this.size = size;
+    this.fixed = false;
+    this.value = -1;
+    this.regions = new Array();
+
+    this.friend_values = new Multiset();
+  }
+
+  sudoku_cell.prototype.add_region = function (region) {
+    this.regions.push(region);
+  }
+
+  sudoku_cell.prototype.get_value = function () {
+    return this.value; 
+  }
+
+  sudoku_cell.prototype.allows = function (value) {
+    return (!this.friend_values.has(value));
+  }
+
+  sudoku_cell.prototype.allowed_letters = function () {
+    var answer = "";
+    for (var i=0; i<this.size; ++i) {
+      if (!this.friend_values.has(i)) {
+        answer += letters[i];
+      }
+    }
+    return answer;
+  }
+
+  sudoku_cell.prototype.add_placed = function (value, src_id) {
+    if (src_id == this.id) return;
+    var change_happening = (!this.friend_values.has(value));
+    this.friend_values.add(value);
+    if (change_happening)
+      this.changed(this.id);
+  }
+
+  sudoku_cell.prototype.remove_placed = function (value, src_id) {
+    if (src_id == this.id) return;
+    var change_happening = (this.friend_values.count(value) == 1);
+    this.friend_values.remove(value);
+    if (change_happening) {
+      this.changed(this.id);
+      this.value_changed(value);
+    }
+  }
+
+  sudoku_cell.prototype.set_value = function (value, fixed) {
+    for (var i = 0; i < this.regions.length; ++i) {
+      this.regions[i].remove_placed(this.value, this.id);
+      this.regions[i].add_placed(value, this.id);
+    }
+    this.fixed = fixed;
+    this.value = value;
+    this.changed(this.id);
+    this.value_changed(value);
+  }
+
+  sudoku_cell.prototype.reset_value = function () {
+    for (var i = 0; i < this.regions.length; ++i) {
+      this.regions[i].remove_placed(this.value, this.id);
+    }
+    var old_value = this.value;
+    this.value = -1;
+    this.changed(this.id);
+    this.value_changed(old_value);
+  }
+
+  sudoku_cell.prototype.changed = function (id) {
+    // callback -- indicates cell change.
+  }
+
+  sudoku_cell.prototype.value_changed = function (id) {
+    // callback -- indicates value change.
+  }
+
+  function sudoku_region(id, size, dup_ok) {
+    this.id = id;
+    this.size = size;
+    this.cells = new Array();
+    this.placed = new Multiset();
+    this.dup_ok = dup_ok;
+  }
+
+  sudoku_region.prototype.add_cell = function (cell) {
+    this.cells.push(cell);
+  }
+
+  sudoku_region.prototype.add_placed = function (value, src_id) {
+    if (value != -1) {
+      this.placed.add(value);
+      if (!this.dup_ok) {
+        for (var i = 0; i < this.cells.length; ++i) {
+          if (this.cells[i].id != src_id) {  // this check isn't really necessary but it pays to be paranoid.
+            this.cells[i].add_placed(value, src_id);
+          }
+        }
+      }
+      this.changed(this.id);
+    }
+  }
+
+  sudoku_region.prototype.has_dupes = function () {
+    if (this.dup_ok) { 
+      return false;
+    }
+    return this.placed.has_dupes();
+  }
+
+  sudoku_region.prototype.has_all = function () {
+//    for (var i = 0; i < this.cells.length; ++i) {
+    for (var i = 0; i < 5; ++i) {
+      if (this.placed.count(i) == 0) return false;
+    }
+    return true;
+  }
+
+  sudoku_region.prototype.completed = function () {
+    if (this.dup_ok) {
+      return ((this.placed.size == this.size) && (this.has_all()));
+    } else {
+      return ((this.placed.size == this.size) && (!this.placed.has_dupes()));
+    }
+  }
+
+  sudoku_region.prototype.is_bad = function () {
+    if (this.dup_ok) {
+      var dcount = 0;
+      for (var i = 0; i < 5; ++i) {
+        if (this.placed.count(i) > 2) return true;
+        if (this.placed.count(i) == 2) dcount++;
+      }
+      return (dcount > 1);
+    } else {
+      return (this.placed.has_dupes());
+    }
+  }
+
+  sudoku_region.prototype.allowed_letters = function () {
+    var answer = "";
+//    for (var i=0; i<this.size; ++i) {
+    for (var i=0; i<5; ++i) {
+      if (!this.placed.has(i)) {
+        answer += letters[i];
+      }
+    }
+    return answer;
+  }
+
+  sudoku_region.prototype.remove_placed = function (value, src_id) {
+    if (value != -1) {
+      this.placed.remove(value);
+      for (var i = 0; i < this.cells.length; ++i) {
+        if (this.cells[i].id != src_id) {  // this check isn't really necessary but it pays to be paranoid.
+          this.cells[i].remove_placed(value, src_id);
+        }
+      }
+      this.changed(this.id);
+    }
+  }
+
+  sudoku_region.prototype.changed = function (id) {
+    // callback -- indicates region change.
+  }
+
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data() {
+    this.prefix = 'http://weihwa.images02.googlepages.com/';
+//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/20070601-bridges/';
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data.prototype.resetPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+  }
+
+  puzzle_data.prototype.decode_raw_puzzle = function() {
+    this.decoded = new Array();
+    for (var i=0; i < this.raw_puzzle.length; i += 2) {
+      var code1 = (this.raw_puzzle.charCodeAt(i) - 35); if (code1 == 91) code1 = 57;
+      var code2 = (this.raw_puzzle.charCodeAt(i+1) - 35); if (code2 == 91) code2 = 57;
+      var number = code1 + code2 * 89;
+      for (var j=0; j < 5; j++) {
+        this.decoded[i/2*5+j] = number % 6;
+        number = Math.floor(number / 6);
+      }
+    }
+  }
+
+  puzzle_data.prototype.resetPuzzleData = function(index) {
+    var foo;
+    if (index < 50) {
+      foo = "%F%F&#>;M4B)]OG.u%u%h$z#HW{b``oWHWzNO#U#T4m6.aYhLV_QaQnN`N(4BYMKaF(CNEr'8#y6Ia9Ize74H677x4W+r]4=##d+KVLEyE(c<^qWg56:#9n8(:p(reH.lE1@$EO4n5OGkhfKd+'$r#e(_FZS#hXFvV(WuV*#*#3cAOy^)c>)>)$#M465)AfK2O3OFPbNvVx`,V]<E79<[4~#&#f*Vg`)jWb+0#x#pE#5WgU.LELE7E8#K$y6FfF.JFZHHGHG&C#9Se_hY5$4$4GWvV44TXeWEW@:L4oEiE;)``Z.J5G5k5.@wEDDRKUAl(D$=$V+^WMG7c_hF4I41@%FmF`6sNjh{D{D5FZY:WB)aO4=&CtIGGZHIFE9b^%Zy4L7L7X1Y138Dh`K:W'VHG/@yEsT3g?8n$c+J$(2T4DUdbWWaNaN:W.KwE+aI]?IL4v4tb$EHWh;i`[.U1j1[4`ExEN:+a>f{be(e(K$K$I7CWgA04I;04-QHW#5VXS.WBWB{BHEebT)khNK)cc1X185J5[T1g1ZHW`NA3.2T4((0TsWxE6E74%4*`^E4c[.N4/9p8{U.VyCPV(BxE6E8474{38UUe4=yE~OaNzUKV~7a`>fPT[TXQ-QyUJD~b0ZwE5@Q#P#HW5FYgI.uEzD&4O4HW[6fSaW9]JGoHLELENTrNjhwEoHWWF4F4''hHW)HWZS(EtIzD2U/c,,%E6E6Ej1M4:4aSSaIW.V0#k(t%XEEhU.L4{3hVvVses*~g'Zd+I$/@pE_F;W9gMKN#N#D$AWseubs]9I";
+    } else if (index < 100) {
+      foo = "GWbNbNN4g5)_%A#h3W4W:]pEpE%avToAGWEO9OU#N#j(gY<8E704-QQQIW;F[gN.C56:N:p8n8G4~^RKO4%4$EpI%Fv4mC]W3W3WKE]ELEicURv$:IlHKEEEF41`NT1Z%#tNGWg;T4pE3gH.KVQQdRBTPT#S,_^KLEKE^F`NHWq_?WeKE7P2U1=:n5#_Y@fKiEiEL4cQIWIUq_&IoH%Fv4{3Y5&D5gz+F4I4wb$EIFh71TgRGW]O_ON#N#T)*_RKc+]+F$x#M4kRVVAKkRYQbNnN.VA5-cH.%4j1j1F7G7FE0Po5x#w(q(b+V+Ca%_&Z{3n8`:<:E7QbrNsciWlH.@LELEs%AYQaXQQQBTNTcWfT/ct<%E$E:7I4J5M(.c?Z3`J5j1.@wEDTp]kFN#N#N]%F%FY5eW'IwEZHHVQQWQ`*d`=UHW`N$4x48`L(2eeKO4#&m(z#N]4EM]+ZwETB{3[4IWDD'_`K>:n8n8k9x4MF4T4U$#zU^WaHwEQV;gNK*#O#3OMWvVkSwe^hwExBb_%4=:v^x_U.PT[O`N:WP4@Rb^jRxE<K4C{3{3&D(PpcyE&C5@`NHWT`yG*8wE5@gNzUxeT)-eL.yEuVgNgNzU:V5c?Zd+/.N#O#wE2DqRa)ze6ETBxBLE8+yc%Z=:G5TBxByENT]g.,HWGX0#k(LEZBibXhzeG5U1R2x4q_aBTc&#j1;8F7T4e5ddI.KV2OdN{UwE33U``)FWV+r#x#n(#Fse[.QQQQDV^VwED2>h1Z1#x#~OLWKV9EtNxevE_($#lY:W4R<^^:";
+    } else if (index < 150) {
+      foo = ",bH6E7O4HW9QxX<D%#zNAW6:M40`;QEfz4&5&5a(&#^Q[XoA{3%4m4%FmFY5*RT.{DA@A@:KaHk(-_4=lEpI$EI4[4jc<^%=FWV+-#O#wE2,B`fKa:<:W1c104dcEh9I=:P;{3+CuE[<j`'ZIF:KA@5@5@E]SX^WwEaH'VGXaN28{eM.=:[4O#y#h$kS$h^W{374846ExEh+zVNDvE_($#FW^Wr_xVLFIFyC1CxB2DU%xXp$LVRVTV{%##nHa^>8jEjE$#lY:WJaLR28:IlHTBxBLE>7K]?ZNE`EC(x'8#I6zepF1#U#.2a4HW5)RVs^yUSSRTuVM4#AtXdRGW.V04$4&4JD>OoAU1(:Z:6:C53'weG.1`_QAWJ$%#d(7eYheW;Q;Q-QWQ,7RT63{U{UYWH4T4FRvX<8GW*:W1o1T4x`Qcd:sE(C[@C@8#*:-cehN4C5?WAY`NEQf`?Z3WzUHGpE_F{8kbu<GW{U0404&4U1oTh:FWDO2Oy#y#CTL]XWwExBb_%4=:A)ld^hGWQ+%#N4g5oEuN`W3WbN3OxXT4KcE`N.N#P#t#%F0clBH]=IM4j1L$J$wEsHEh-'vVtVcWF4F4,&rT8UJ5G5k5.@wEq_?W^hXQkQnNnN{UIU<`]WEWZH2D%CpEZG8g.=yEEEF4QQHW__gY[<FWZSZS{D%ExB/I9$.@5@pE(WFW`)5eO.%4j1k1I5wE44y^dhKV2O_O]ObN'8jh2ULELE7E8#K$^Q:OC3P4W1c1.VGWI7Hb_WKVjXDVwGuE=UdbYWpNnN/QYQLV6)>h2=";
+    } else if (index < 200) {
+      foo = "gFm(,#P#[4.(B`khF4I4lE$ETcX4VVv$jFlHZHxB&CZ)uV]5oVITITgO`NjR.V$ZuE4F55M5J5R@0ZzRr#X-e(>)>)Oa+RBPZ4Z4GW%#h$A5[OcKAWnN3O3OQ#n&FRP.0404a_/QHW1OPeL.yE4F5555J5e_=Q[:uE.@TALWXQ8&_bXh:IlHTBxBLEeWucXWpErE,#6-K$0`4gYW^WWQ-Q{UwEP7seXhiEiEL:=:O4a6Rcoc$#zUXQ~TvV6`jb>ZzUyNmNOTITGAMc[.g5F7p7j1U144&a=Z)ce(*#gNHWOa&a`)oH)J(E(E*#FcJY*,HWEOO#u%y#BTJYV.HWhNO#{%5'EWjdeh&#C@pHLELE:F,aKK]O~OmNGXKVA:D`khjWb+t%l(1#ITcQgW9]{DLENEHWF4w]?IEWyU%ELELEz*@^?ZnA7@7@[@ZEjRxV(KNTNTdRQQKV`_yX@UGW6:V4{%##^FgdN.T4T4bNbNIWBTaOh:oH4C&CmIzDQb$Wj$wE&CUQ3WyU9Ur]t<'$s(b)A(A(c+1c_:vEGFfezU*#+7'h3ZXWaNmNuVpE)5FhR.=:n8%9c1x4gC<f>8vEe(*#zUIWXRn_YhXQkQbNnN.V#5L][.KV]QpRNTSS(,xcYhe]3OhN(V.V>U>O,Z1`*#l(z#HWn*Hbs<GWJ$1#I;M4M5aB4hjEjEzUzUleLcfQv$H4H4%#GWse>DUXs<b5v%d+y#y#0`]`Z.g5F7K6748#i<YefKwEmI*#:W:W)Fr]kh3W5Wa_04T4G97g-Z(:p8p8B:x4(RAW1=";
+    } else if (index < 250) {
+      foo = "zeZH{D{D&COGB`dhRVxXSQ/Q-Qf)L]&ZxEz#o$j1M4N:-__KO4P5IFzDzD&8xcVhiE{BWBiB?`wS.aZ.HWOT{DtI*#{bmd4,3`v%&#lE%FZB0cehNVLV(V+#y#BTNPZP$EI@C@4C&ClBdb1=`NnNeW6:M4*`ibkh.@5@_FUTFW5:GbZ.3`(CxE2#8#yC@UH.yUmNKPOT%TOGYe_hKVKV.V1#h$G5-K@Kk(w(r#P#HWKcT]]h_O~OmNmNKVk5yG])M4E71#d+o$]EvN$SM4R2($s(K$)9~e_hH4W1$4GWeW@RvX2ZxE~AVAN#N#R^wI[FuEzD_1O4HWYG7g(=Y5I4HE$EIF2Ivc%ZgNgNmNOTxV&7LPi)X1$3j1`4wE3,-c3Zk(e(u#gNHWX-7cU.se.V.V{3L4:E1ekhEWyU5@pE{bJeg`kh'#{UYQYQvV:VndeKyE1@1@O4J5dFeS4=HWxXT4W1W1[C5g]WvEx#a$gNHWjF&_Y)t%*#7E6EIFXE+_pcE7T4{3yUIWJ6jh%=d+I$lA5@vE^4@bJUY@[@7@I@IFa%rT6fEW9K.@vEM4CTyc1U9D%CzD$EHWQVF`O.wEI@X1I4J5^b-a9'zUgNjNITPT?8{_N.HW2ON#l({#9'MP&=x4x4&4yUEWeRPT5UYF/@HGmHaHlBScJUd+I$g$k(LEF4BYT.L4{3$EIFmF*Hkh9'O4P5K$%#wEk5a^dhuEFF3W.Q1`lG6eeK?UNTWQQQDVjc`^cWxE6EN]X1M4A(5eTKxEy(,#P#[4*:T]_h2O2ObN7YvVI%Nc?Z";
+    } else {
+      foo = "yEoHGGn8M4,&uGseL4H6^66EIF;)EbS.yUyUoVpE_FZBUX~+zD$E[F=:M4<`@WMK1`)&8#$ExEYWU]`K$#=$;FGFJF^:>^RKI4%4b_lE%FdRo]98^WJVJVuEzDe_b^-=`N]OVOIT^W*:a^8DHWXQO#y#h$,IQ]_KLELE7E8#K$x6hh*ZdFC7U1O4HW#5D`jhGW]+k($#1`yOleNKxEIFK5{3{3x6~XV.%F%FP#P#Q#UCkh8D[4[4wb$EzDe(a^~hRVxXSQ/Q-QD&q]khKVKV.V1#h$X4JA3hzD7@nA(C#DOG&h.=`N]O_O^QKV'89eNKEWZH/@LEOE%Cjd_hK$J$i1`4x4@Rb^eKIWyCxBEEKEz;D^-Z&#~#~4I5wEo85e^h%#a#T4_QHW9DtT&8EW-QdRx4x4e5Ja`KFWVOYOr#y#>UMPg${3{3y4+FoHS(?hYW##{%z4y4HWG9ibkhPTtVWWaNM4g+B`jhL4KEzD<EHW=UZV-IiE/@Y@:CHWAWDfr<:IlH.@Y@LE,a9O+=&#P#ZEZEOE=a9`u<~4::n8p8wEZ6$Y_W=:n8n8T4yE$TTcYh,#v%#&`-%FmCN]pcxV]ObN.QXQTT3T(8I4%4WB_J%Fe(w_T.2#2#U4y4c`N*+afK7#c+{+h*T4]73cYhF4I4$E<EIF>b>^eWRV_QrR-Q-Q`:c`2,j1j1K6R7x4[T8eH.%C%CXF$EHW`)2eNKFWqXZSzDiE_SeSb:lElE%4%4n5RQ.adcyE;F=$=$K$/)PR])'#)&)&NExE/(>b?Zd+'$u#e(LE3+U]TK";
+    }
+
+//    if (index < 50) {
+//      this.size = 4; this.chunk = 12;
+//    } else if (index < 100) {
+      this.size = 5; this.chunk = 16;
+//    } else if (index < 150) {
+//      this.size = 6; this.chunk = 22;
+//    }
+    this.raw_puzzle = foo.substring(index % 50 * this.chunk, (index % 50 + 1) * this.chunk);
+    this.puznum = index;
+
+    this.decode_raw_puzzle();
+
+    this.area = this.size * this.size;
+    this.row_regions = new Array(this.size);
+    this.col_regions = new Array(this.size);
+    this.box_regions = new Array(this.size);
+
+    for (var i=0; i<this.size; ++i) {
+      this.row_regions[i] = new sudoku_region(i, this.size, false);
+      this.col_regions[i] = new sudoku_region(i + this.size, this.size, false);
+      if (i == this.size-1) {
+        this.box_regions[i] = new sudoku_region(i + this.size + this.size, 1, false);
+      } else {
+        this.box_regions[i] = new sudoku_region(i + this.size + this.size, (this.size+1), true);
+      }
+    }
+
+    this.cells = new Array(this.area);
+    for (var i=0; i<this.area; ++i) {
+      this.cells[i] = new sudoku_cell(i, this.size);
+      this.cells[i].add_region(this.row_regions[Math.floor(i / this.size)]);
+      this.row_regions[Math.floor(i / this.size)].add_cell(this.cells[i]);
+
+      this.cells[i].add_region(this.col_regions[i % this.size]);
+      this.col_regions[i % this.size].add_cell(this.cells[i]);
+
+      var box_num = this.box_num(i);
+      this.cells[i].add_region(this.box_regions[box_num]);
+      this.box_regions[box_num].add_cell(this.cells[i]);
+    }
+
+    this.palette_count = new Multiset();
+    for (var i=0; i<this.size; ++i) {
+      for (var j=0; j<this.size; ++j) {
+        this.palette_count.add(i);
+      }
+    }
+
+    this.affix = function (index, value) {
+      this.cells[index].set_value(value, true);
+      this.palette_count.remove(value);
+    }
+
+    for (var i=this.area; i+2<this.decoded.length; i += 3) {
+      var pos = this.decoded[i] * this.size + this.decoded[i+1];
+      this.affix(pos, this.decoded[i+2]);
+    }
+
+    var callback_this = this;
+    callback_this.cell_changed_callback = function (index) {
+      callback_this.cell_changed(index);
+    }
+    callback_this.value_changed_callback = function (index) {
+      callback_this.value_changed(index);
+    }
+    for (var i=0; i<this.area; ++i) {
+      this.cells[i].changed = this.cell_changed_callback;
+      this.cells[i].value_changed = this.value_changed_callback;
+    }
+    callback_this.region_changed_callback = function (index) {
+      if (index == -1) return;
+      var pos = index % this.size;
+      if (index < this.size) {
+        callback_this._IGG_refreshCell(2 * this.gridsize * (pos + 1) - 1);
+      } else if (index < this.size * 2) {
+        callback_this._IGG_refreshCell(this.gridarea - this.gridsize + pos + 2);
+      } else {
+        callback_this._IGG_refreshCell(this.gridarea + this.gridsize + pos);
+      }
+    }
+    for (var i=0; i<this.size; ++i) {
+      this.row_regions[i].changed = this.region_changed_callback;
+      this.col_regions[i].changed = this.region_changed_callback;
+      this.box_regions[i].changed = this.region_changed_callback;
+    }
+
+    this.gridsize = this.size*2+2;
+    this.gridarea = this.gridsize*this.gridsize;
+    this.colors = new Array("#A9C5EB", "#FFBBBB", "#FFFF88", "#DDF8CC", "#CEA8F4", "#FFBBFF");
+  }
+
+  puzzle_data.prototype.box_num = function (index) {
+    return this.decoded[index];
+  }
+  
+  puzzle_data.prototype.save_progress = function () {
+    pref_controller.setPrefs();
+  }
+
+  puzzle_data.prototype.increment_palette = function (index) {
+    if (index == -1) return;
+    this.palette_count.add(index);
+    this.cell_changed(index + this.area);
+  }
+
+  puzzle_data.prototype.decrement_palette = function (index) {
+    if (index == -1) return;
+    this.palette_count.remove(index);
+    this.cell_changed(index + this.area);
+  }
+
+  puzzle_data.prototype.value_changed = function(value) {
+    this._IGG_refreshCell(value + this.gridarea);
+  }
+
+  puzzle_data.prototype.cell_changed = function(index) {
+    if (index >= this.area) {
+      // palette or bulb.
+      this._IGG_refreshCell(index - this.area + this.gridarea);
+    } else {
+      var row = Math.floor(index / this.size); 
+      var col = index % this.size;
+      var box = this.box_num(index);
+      this._IGG_refreshCell((2*row+1)*this.gridsize + (2*col+1)); // cell
+      this._IGG_refreshCell((2*row+2)*this.gridsize - 1); // row
+      this._IGG_refreshCell(this.gridarea - this.gridsize + (2*col+1)); // col
+      this._IGG_refreshCell(this.gridarea + this.size + box); // box
+    }
+  }
+
+  puzzle_data.prototype.isSolved = function() {
+    for (var i = 0; i < this.size; ++i) {
+      if (!this.row_regions[i].completed()) return false;
+      if (!this.col_regions[i].completed()) return false;
+      if (!this.box_regions[i].completed()) return false;
+    }
+    return true;
+  }
+
+  puzzle_data.prototype.blank = function() {
+    if (pcborder == "#FFFFFF") return '';
+    return '<img src="' + this.prefix + 'blank.gif" alt="-">';
+  }
+
+  puzzle_data.prototype.black = function() {
+    return '<img src="' + this.prefix + 'black.gif" alt="-">';
+  }
+
+  puzzle_data.prototype.get_background_color = function(index) {
+    if (index >= this.gridarea + this.size) {
+      // box light
+      return this.colors[index - this.gridarea - this.size];
+    } else if (index >= this.gridarea) {
+      return "#FFFFFF";
+    } else {
+      var g_row = Math.floor(index / this.gridsize);
+      var g_col = index % this.gridsize;
+      if (g_row == this.gridsize-1 || g_col == this.gridsize-1) {
+        return "#FFFFFF";
+      } else if (g_row == 0 || g_col == 0 || g_row == this.gridsize-2 || g_col == this.gridsize-2) {
+        return pcborder;
+      } else if (g_row % 2 == 0 && g_col % 2 == 0) {
+        var row = g_row / 2 - 1;
+        var col = g_col / 2 - 1;
+        var reg1 = this.box_num(row * this.size + col);
+        if (reg1 != this.box_num(row * this.size + col+1)) return pcborder;
+        if (reg1 != this.box_num((row+1) * this.size + col)) return pcborder;
+        if (reg1 != this.box_num((row+1) * this.size + col+1)) return pcborder;
+        return this.colors[reg1];
+      } else if (g_row % 2 == 0) {
+        var row = g_row / 2 - 1;
+        var col = (g_col - 1) / 2;
+        var reg1 = this.box_num(row * this.size + col);
+        if (reg1 != this.box_num((row+1) * this.size + col)) return pcborder;
+        return this.colors[reg1];
+      } else if (g_col % 2 == 0) {
+        var row = (g_row - 1)/ 2;
+        var col = g_col / 2 - 1;
+        var reg1 = this.box_num(row * this.size + col);
+        if (reg1 != this.box_num(row * this.size + col+1)) return pcborder;
+        return this.colors[reg1];
+      } else {
+        var row = (g_row - 1) / 2;
+        var col = (g_col - 1) / 2;
+        var reg1 = this.box_num(row * this.size + col);
+        return this.colors[reg1];
+      }
+    }
+  }
+
+  puzzle_data.prototype.set_background_colors = function() {
+    for (var i=0; i<this.gridarea; ++i) {
+      _gel(grid.getCellTDID(i)).style.backgroundColor = this.get_background_color(i);
+    }
+  }
+
+  puzzle_data.prototype.get_src = function (reg) {
+    if (reg.completed()) {
+      return this.prefix + "green.png";
+    } else if (reg.is_bad()) {
+      return this.prefix + "red.png";
+    } else {
+      return this.prefix + "white.png";
+    }
+  }
+
+  puzzle_data.prototype.get_title = function (reg) {
+    if (reg.completed()) {
+      return "Completed";
+    } else if (reg.is_bad()) {
+      return "Error: Too many duplicate letters";
+    } else {
+      return "Letters left: " + reg.allowed_letters();
+    }
+  }
+
+  puzzle_data.prototype.get_row_info = function(index) {
+    var answer = '';
+    answer += '<td align="middle" valign="center">';
+    answer += '<img src="' + this.get_src(this.row_regions[index]) + '"';
+    answer += ' title="' + this.get_title(this.row_regions[index]) + '"';
+    answer += ' width="24px" height="24px">';
+    answer += '</img>';
+    answer += '</td>';
+    return answer;
+  }
+
+  puzzle_data.prototype.get_col_info = function(index) {
+    var answer = '';
+    answer += '<td align="middle" valign="center">';
+    answer += '<img src="' + this.get_src(this.col_regions[index]) + '"';
+    answer += ' title="' + this.get_title(this.col_regions[index]) + '"';
+    answer += ' width="24px" height="24px">';
+    answer += '</img>';
+    answer += '</td>';
+    return answer;
+  }
+
+  puzzle_data.prototype.get_box_info = function(index) {
+    var answer = '';
+    answer += '<td align="middle" valign="center">';
+    answer += '<img src="' + this.get_src(this.box_regions[index]) + '"';
+    answer += ' title="' + this.get_title(this.box_regions[index]) + '"';
+    answer += ' width="24px" height="24px">';
+    answer += '</img>';
+    answer += '</td>';
+    return answer;
+  }
+
+  puzzle_data.prototype.palette_html = function(value, count) {
+    var answer = '';
+    var letter = letters[value];
+    if (count == 0) {
+      color = "#C0C0C0";
+      answer += '<span style="cursor:default;font-size:16pt;color:' + color + '" title="' + letter + ' (gone)">';
+      answer += letter;
+      if (this.tiny) {
+        answer += '<br><div style="align:center;font-size:7pt">(0)</div>';
+      } else {
+        answer += '<br><div style="align:center;font-size:7pt">(gone)</div>';
+      }
+      answer += '</span>';
+    } else {
+      answer += '<span style="font-size:16pt" title="' + letter + ' (' + count + ' left)">'
+      answer += letter;
+      if (this.tiny) {
+        answer += '<br><div style="align:center;font-size:7pt">(' + count + ')</div>';
+      } else {
+        answer += '<br><div style="align:center;font-size:7pt">(' + count + ' left)</div>';
+      }
+      answer += '</span>';
+    }
+    return answer;
+  }
+
+  puzzle_data.prototype._IGG_getNormalView = function(index) {
+    if (index >= this.gridarea + this.size) {
+      return this.get_box_info(index - this.gridarea - this.size);
+    } else if (index >= this.gridarea) {
+      var number = index - this.gridarea;
+      return this.palette_html(number, this.palette_count.count(number));
+    } else {
+      var g_row = Math.floor(index / this.gridsize);
+      var g_col = index % this.gridsize;
+      if (g_row == this.gridsize-1 && g_col == this.gridsize-1) {
+        return "&nbsp;";
+      } else if (g_row == this.gridsize-1 && g_col % 2 == 0) {
+        return "";
+      } else if (g_row == this.gridsize-1) {
+        return this.get_col_info((g_col - 1)/2);
+      } else if (g_col == this.gridsize-1 && g_row % 2 == 0) {
+        return "";
+      } else if (g_col == this.gridsize-1) {
+        return this.get_row_info((g_row - 1)/2);
+      } else if (g_row % 2 == 0 || g_col % 2 == 0) {
+        return this.blank();
+      } else {
+        var row = (g_row - 1) / 2;
+        var col = (g_col - 1) / 2;
+        return this.get_cell_html(row * this.size + col);
+      }
+    }
+  }
+
+  puzzle_data.prototype._IGG_getSourceView = function(g_index) {
+    var pos = g_index - this.gridarea;
+    if (pos >= 0 && pos < this.size) {
+      return this.palette_html(pos, this.palette_count.count(pos) - 1);
+    }
+    var index = this.gtoi(g_index);
+    if (index < 0) return;
+    return this.get_raw_cell_html("", "?", "#FFFFFF", false, !this.cells[index].fixed);
+  }
+
+  puzzle_data.prototype._IGG_getTargetView = function(target, source) {
+    var pos = target - this.gridarea;
+    if (pos >= 0 && pos < this.size) {
+      return this.palette_html(pos, this.palette_count.count(pos) + 1);
+    }
+    var value = source - this.gridarea;
+    if (value < 0 || value >= this.size) {
+      value = this.value_at(source);
+    }
+    return this.get_raw_cell_html("", letters[value], "#D0D0D0", true, true);
+  }
+
+  puzzle_data.prototype.get_raw_cell_html = function(title, value, color, is_bold, is_draggable) {
+    var bold = (is_bold) ? ";font-weight:bold" : "";
+    var cursor = (is_draggable) ? "cursor:pointer;cursor:hand;" : "";
+    return '<span title="' + title + '" style="text-align:center;' + cursor + 'font-size:16pt;color:' + color + bold + '">' + value + '</span>';
+  }
+
+  puzzle_data.prototype.get_cell_html = function(index) {
+    var value = this.cells[index].get_value();
+    var fixed = this.cells[index].fixed;
+    if (value < 0) {
+      var allowed = this.cells[index].allowed_letters();
+      var title = (allowed == "") ? "No letters possible!" : ("Could be: " + allowed);
+      return this.get_raw_cell_html(title, "?", "#FFFFFF", false, false);
+    } 
+    var title = fixed ? "Given at start" : "Placed by you";
+    var color = fixed ? "#008000" : pcborder;
+    return this.get_raw_cell_html(title, letters[value], color, true, !fixed);
+  }
+
+  puzzle_data.prototype.gtoi = function(g_index) {
+    if (g_index < 0) return -1;
+    if (g_index >= this.gridarea + this.size) return -1;
+    if (g_index >= this.gridarea) return -1;
+    if (g_index % 2 == 0) return -1;
+    var g_row = Math.floor(g_index / this.gridsize);
+    if (g_row % 2 == 0) return -1;
+    var g_col = g_index % this.gridsize;
+    if (g_row == this.gridsize-1 || g_col == this.gridsize-1) return -1;
+    var row = (g_row - 1)/2;
+    var col = (g_col - 1)/2;
+    return row * this.size + col;
+  }
+
+  puzzle_data.prototype.value_at = function(g_index) {
+    var index = this.gtoi(g_index);
+    if (index == -1) return -1;
+    return this.cells[index].get_value();
+  }
+
+  puzzle_data.prototype._IGG_getSurrogateView = function(index) {
+    var value = index - this.gridarea;
+    if (value < 0) {
+      value = this.value_at(index);
+    }
+    return '<span style="font-size:18pt">' + letters[value] + '</span>';
+  }
+
+  puzzle_data.prototype._IGG_handleDrag = function(source, target) {
+    if (source == -1) return;
+    if (source == target) {
+      this._IGG_refreshCell(source);
+      return;
+    }
+    if (target == -1) {
+      if (this.value_at(source) == -1) return;
+      target = this.value_at(source) + this.gridarea;
+    }
+    if (source >= this.gridarea) {
+      // palette to grid
+      if (target >= this.gridarea) {
+        this._IGG_refreshCell(source);
+        return;
+      }
+      var digit = source - this.gridarea;
+      this.increment_palette(this.value_at(target));
+      this.decrement_palette(digit);
+      this.cells[this.gtoi(target)].set_value(digit, false);
+    } else if (target >= this.gridarea) {
+      // grid to palette
+      var digit = target - this.gridarea;
+      this.increment_palette(digit);
+      this.cells[this.gtoi(source)].reset_value();
+    } else {
+      // grid to grid
+      var digit = this.value_at(source);
+      this.increment_palette(this.value_at(target));
+      this.cells[this.gtoi(source)].reset_value();
+      this.cells[this.gtoi(target)].set_value(digit, false);
+    }
+    grid.refreshDragSources();
+    if (this.isSolved()) {
+      pref_controller.game_state.puz_solved[this.puznum] = 1;
+      this.save_progress();
+      pref_controller.updatePrefDisplay();
+    }
+  }
+
+  puzzle_data.prototype._IGG_isDragSource = function(g_index) {
+    if (g_index >= this.gridarea && g_index < this.gridarea + this.size) {
+      var digit = g_index - this.gridarea;
+      return (this.palette_count.count(digit) != 0);
+    }
+    var index = this.gtoi(g_index);
+    if (index == -1) return false;
+    if (this.cells[index].fixed) return false;
+    if (this.cells[index].get_value() == -1) return false;
+    return true;
+  }
+
+  puzzle_data.prototype._IGG_isDragTarget = function(g_index, src) {
+    if (g_index >= this.gridarea && g_index < this.gridarea + this.size) {
+      var digit = g_index - this.gridarea;
+      return (digit == this.value_at(src));
+    }
+    var index = this.gtoi(g_index);
+    if (index == -1) return false;
+    if (this.cells[index].fixed) return false;
+    return true;
+  }
+
+  ///////////////////////////////////////
+
+  var puzzle;
+  var grid;
+  var pref_controller;
+  var pcborder = "#000000";
+
+  _IG_RegisterOnloadHandler(start);
+                                                                                                                                                                  
+  function start() {
+    pref_controller = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_20070601_redux', true);
+    pref_controller.num_puzzles = 300;
+    pref_controller.box_height = 3;
+    pref_controller.box_width = 3;
+    pref_controller.rows = 15;
+    pref_controller.cols = 20;
+
+    _gel("game_state_html").innerHTML = pref_controller.getTableHTML();
+    pref_controller.getPrefs();
+                                                                                                                                                                                              
+    puzzle = new puzzle_data();
+    reset(pref_controller.game_state);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  function reset(game_state) {
+    puzzle.resetPuzzle(game_state);
+    grid = new _IG_Grid(puzzle, "mygrid", puzzle.gridsize, puzzle.gridsize);
+    _gel("table_html").innerHTML = "";
+    _gel("table_html").appendChild(grid.getTable());
+    grid.getTable().border = 0;
+    grid.getTable().cellPadding = 0;
+    grid.getTable().cellSpacing = 0;
+    make_palette();
+    make_boxcode();
+    puzzle.set_background_colors();
+                                                                                                                                                                 
+    grid.dragHandler.topMargin = 0;
+    grid.dragHandler.bottomMargin = 30;
+    grid.dragHandler.leftMargin = 10;
+    grid.dragHandler.rightMargin = 10;
+    if (navigator.userAgent.toLowerCase().match("ie")) {
+      grid.dragHandler.surrogateOffsetX = -2;
+      grid.dragHandler.surrogateOffsetY = 0;
+      grid.dragHandler.leftMargin = 10;
+      grid.dragHandler.rightMargin = 10;
+      grid.dragHandler.topMargin = 10;
+      grid.dragHandler.bottomMargin = 10;
+    } else if (navigator.userAgent.toLowerCase().match("safari")) {
+      grid.dragHandler.surrogateOffsetX = -2;
+      grid.dragHandler.surrogateOffsetY = 0;
+      grid.dragHandler.leftMargin = 5;
+      grid.dragHandler.rightMargin = 10;
+      grid.dragHandler.topMargin = 10;
+      grid.dragHandler.bottomMargin = 10;
+    }
+    puzzle._IGG_refreshAll();
+    grid.initDragging();
+  }
+
+  function make_palette() {
+    var palette_table = document.createElement('table');
+    palette_table.border = "1";
+    palette_table.cellPadding = "3px";
+    palette_table.cellSpacing = "0px";
+    palette_table.id = "palette_table";
+    palette_table.width = "40px";
+    var palette = document.createElement('tbody');
+    _gel("palette").innerHTML = "";
+    _gel("palette").appendChild(palette_table);
+    palette_table.appendChild(palette);
+    palette.appendChild(document.createElement('tr'));
+    for (var digit = 1; digit <= puzzle.size; digit++) {
+      var row = document.createElement('tr');
+      palette.appendChild(row);
+      var tabledata = document.createElement('td');
+      row.appendChild(tabledata);
+      tabledata.align = "center";
+      tabledata.appendChild(grid.getCell(digit - 1 + puzzle.gridarea));
+    }
+  }
+
+  function make_boxcode() {
+    var boxcode_table = document.createElement('table');
+    boxcode_table.border = "1";
+    boxcode_table.cellPadding = "3px";
+    boxcode_table.cellSpacing = "0px";
+    boxcode_table.id = "boxcode_table";
+    boxcode_table.width = "40px";
+    var boxcode = document.createElement('tbody');
+    _gel("boxcode").innerHTML = "";
+    _gel("boxcode").appendChild(boxcode_table);
+    boxcode_table.appendChild(boxcode);
+    var row = document.createElement('tr');
+    boxcode.appendChild(row);
+    for (var digit = 1; digit <= puzzle.size; digit++) {
+      var tabledata = document.createElement('td');
+      row.appendChild(tabledata);
+      tabledata.align = "center";
+      tabledata.style.backgroundColor = puzzle.colors[digit-1];
+      tabledata.appendChild(grid.getCell(digit - 1 + puzzle.size + puzzle.gridarea));
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+    this.nav_puz += amount;
+    if (this.nav_puz < 0) this.nav_puz = 0;
+    if (this.nav_puz >= this.game_state.puz_count) this.nav_puz = this.game_state.puz_count - 1;
+    this.update_navbar();
+  }
+
+  _IG_puzzle_pref_controller.prototype.new_puzzle_request = function() {
+    this.game_state.cur_puz = this.nav_puz;
+    reset(this.game_state);
+    this.setPrefs();
+    this.update_navbar();
+  }
+
+  function dprint(s) {
+    _gel("debug1").innerHTML += "DEBUG " + s + "<BR>";
+  }
+
+  function clear_board() {
+    pref_controller.new_puzzle_request();
+  }
+
+  function change_border() {
+    if (pcborder == "#000000") {
+      pcborder = "#FFFFFF";
+    } else {
+      pcborder = "#000000";
+    }
+    pref_controller.new_puzzle_request();
+  }
+
+//////////////////////////
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="pref_controller.change_level(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="pref_controller.change_level(-1)"/>
+<input style="font-size:10" id="levp10" type="button" value="+10" onclick="pref_controller.change_level(10)"/>
+<input style="font-size:10" disabled id="levm10" type="button" value="-10" onclick="pref_controller.change_level(-10)"/>
+<input style="font-size:10" id="levp50" type="button" value="+50" onclick="pref_controller.change_level(50)"/>
+<input style="font-size:10" disabled id="levm50" type="button" value="-50" onclick="pref_controller.change_level(-50)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller.new_puzzle_request()"/>
+</form>
+
+<b>Ssudoku</b>:  This is a variant created by my friend Tom Snyder, based on a variant called "Udoku" that I 
+created (but Udoku puzzles are harder, so I'll show you those another time).  These are not standard sudoku puzzles!
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+   Place letters into the grid such that each letter appears once in each row, once in each column,
+   and at least once in each of the size-6 regions.
+</span>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   Drag letters from the palette into the grid.  The lights will
+   turn <span style="color:#008000">yellow-green</span> or <span style="color:#FF0000">red</span>
+   depending on whether that row, column, or region is satisfied.
+</span>
+<BR>
+
+<table border="0"><tr><td rowspan=2 valign=top>
+<span id="palette"></span>
+</td><td>
+<span id="table_html"></span>
+</td><tr><tr><td>
+<center>
+<table>
+<tr><td>
+  <input id="resetbutton3" style="font-size:10" type="button" value="Clear"
+   onclick="clear_board();">
+</td></tr><tr><td>
+  <input id="border" style="font-size:9" type="button" value="Borders"
+   onclick="change_border();">
+</td></tr>
+</table>
+
+<!-- <BR>
+  <input id="sizechange" style="font-size:10n" type="button" value="Shrink"
+   onclick="puzzle__MODULE_ID__.changeSize();"> --->
+</center>
+</td><td>
+<span id="boxcode"></span>
+</td></tr></table>
+
+<HR>
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <center><span id="game_state_html"></span></center>
+                                                                                                                                                                                              
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td style="font-size:9pt">
+<span style="visibility:hidden">
+  Your points: <span id="points">?</span>
+</span>
+  <input id="resetbutton" style="font-size:10;visibility:hidden" type="button" value="Clear Stats"
+    onclick="pref_controller.resetPrefs();puzzle.resetPuzzle(pref_controller.game_state);"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+                                                                                                                                                                                              
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+<span id="showversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;font-size:x-small"
+   onclick="_gel('version').style.display='inline';_gel('showversion').style.display='none';_gel('hideversion').style.display='inline';_IG_AdjustIFrameHeight()">
+Version 1.4</span>
+<span id="hideversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none;font-size:x-small"
+   onclick="_gel('version').style.display='none';_gel('showversion').style.display='inline';_gel('hideversion').style.display='none';_IG_AdjustIFrameHeight()">
+Version 1.4</span>
+<span id="version" style="display:none;font-size:x-small">
+<BR>   v1.4 : fixed bug with lavender region never getting recognized as solved.
+<BR>   v1.3 : fixed bug with color-hover boxes (bug introduced in v1.1).
+<BR>   v1.2 : fixed bug with a whole lot of puzzles getting corrupted data.  Unfortunately, this means that all the puzzles are different and reset.  Sorry.
+<BR>   v1.1 : fixed bug with auto-suggest hover code, to make it aware that regions can have duplicate letters.
+<BR>   v1.0 : initial release.
+</span>
+<span id="version" style="display:none;font-size:x-small">
+I'll still be busy as heck until <a href="http://www.gooooogol.com/">Googol Conglomerate</a> is done, so don't expect any weekly updates :-(
+</span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

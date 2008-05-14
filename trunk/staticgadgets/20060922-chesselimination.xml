@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20060922@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="250"
+  />
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<!--
+<div style="display:none;">
+Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.epl?art_id=958
+<img src='http://weihwa.images04.googlepages.com/white-bishop.gif'>
+<img src='http://weihwa.images04.googlepages.com/white-bishop-glow.gif'>
+<img src='http://weihwa.images04.googlepages.com/white-bishop-ghost.gif'>
+<img src='http://weihwa.images04.googlepages.com/black-bishop.gif'>
+<img src='http://weihwa.images04.googlepages.com/white-knight.gif'>
+<img src='http://weihwa.images04.googlepages.com/white-knight-glow.gif'>
+<img src='http://weihwa.images04.googlepages.com/white-knight-ghost.gif'>
+<img src='http://weihwa.images04.googlepages.com/black-knight.gif'>
+<img src='http://weihwa.images04.googlepages.com/white-rook.gif'>
+<img src='http://weihwa.images04.googlepages.com/white-rook-glow.gif'>
+<img src='http://weihwa.images04.googlepages.com/white-rook-ghost.gif'>
+<img src='http://weihwa.images04.googlepages.com/black-rook.gif'>
+</div>
+--->
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20060922@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/drag.js"></script>
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils3.js"></script>
+--->
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/drag.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils3.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.prefix = 'http://weihwa.images04.googlepages.com/';
+//    this.prefix = 'http://www.ofb.net/~whuang/gp/chess/';
+//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/chess/';
+_gel("showinstructions").innerHTML = this.prefix;
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(puznum) {
+    this.resetPuzzleData(puznum);
+    this._IGGG_refreshAll();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzleData = function(puznum) {
+    this.puznum = puznum;
+
+    if (puznum == 0) {
+      this.start = new Array('x','x','n','r','b','x','x','x','x','x','x','x','x','x','b','x');
+    } else if (puznum == 1) {
+      this.start = new Array('x','x','n','x','x','x','n','x','b','r','x','x','x','b','x','x'); 
+    } else if (puznum == 2) {
+      this.start = new Array('x','r','b','x','r','x','x','r','x','n','x','x','b','x','x','x');
+    } else if (puznum == 3) {
+      this.start = new Array('x','b','x','b','n','x','x','b','n','x','b','b','x','n','x','b');
+    } else if (puznum == 4) {
+      this.start = new Array('n','n','n','n','x','n','n','x','x','n','x','x','b','n','n','b');
+    } else if (puznum == 5) {
+      this.start = new Array('n','x','x','n','b','x','x','b','n','n','n','n','n','n','b','n');
+    }
+    this.height = 4;
+    this.width = 4;
+
+    this.piece_count = 0;
+    this.current = new Array();
+    for (var i=0; i<16; ++i) {
+      this.current[i] = this.start[i];
+      if (this.start[i] != 'x') this.piece_count++;
+    }
+
+    _gel("piece_count").innerHTML = this.piece_count;
+    _gel("win").innerHTML = "";
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getNormalView = function(index) {
+    var bg = (Math.floor(index * 5 / 4) % 2) ? 'style="background-color:#00DDDD"' : 'style="background-color:#00FFFF"';
+    var filename = "blank";
+    if (this.current[index] == 'n') filename = 'white-knight';
+    if (this.current[index] == 'b') filename = 'white-bishop';
+    if (this.current[index] == 'r') filename = 'white-rook';
+    return '<img ' + bg + ' src="' + this.prefix + filename + '.gif" alt="' + filename + '" title="' + this.current[index] + '">';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSourceView = function(source, target) {
+    var bg = (Math.floor(source * 5 / 4) % 2) ? 'style="background-color:#00DDDD"' : 'style="background-color:#00FFFF"';
+    var filename = "blank";
+    if (this.current[source] == 'n') filename = 'white-knight-ghost';
+    if (this.current[source] == 'b') filename = 'white-bishop-ghost';
+    if (this.current[source] == 'r') filename = 'white-rook-ghost';
+    return '<img ' + bg + ' src="' + this.prefix + filename + '.gif" alt="' + filename + '" title="' + this.current[source] + '">';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getTargetView = function(target, source) {
+    var bg = (Math.floor(target * 5 / 4) % 2) ? 'style="background-color:#00DDDD"' : 'style="background-color:#00FFFF"';
+    var filename = "blank";
+    if (this.current[source] == 'n') filename = 'white-knight-glow';
+    if (this.current[source] == 'b') filename = 'white-bishop-glow';
+    if (this.current[source] == 'r') filename = 'white-rook-glow';
+    return '<img ' + bg + ' src="' + this.prefix + filename + '.gif" alt="' + filename + '" title="' + this.current[source] + '">';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getPossibleTargetView = function(target, source) {
+    var bg = (Math.floor(target * 5 / 4) % 2) ? 'style="background-color:#00DDDD"' : 'style="background-color:#00FFFF"';
+    var filename = "blank";
+    if (this.current[target] == 'n') filename = 'black-knight';
+    if (this.current[target] == 'b') filename = 'black-bishop';
+    if (this.current[target] == 'r') filename = 'black-rook';
+    return '<img ' + bg + ' src="' + this.prefix + filename + '.gif" alt="' + filename + '" title="' + this.current[source] + '">';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getDragView = function(index) {
+    return this._IGGG_getNormalView(index);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSurrogateView = function(index) {
+    var filename = "blank";
+    if (this.current[index] == 'n') filename = 'white-knight';
+    if (this.current[index] == 'b') filename = 'white-bishop';
+    if (this.current[index] == 'r') filename = 'white-rook';
+    return '<img src="' + this.prefix + filename + '.gif" alt="' + filename + '" title="' + this.current[index] + '">';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleDrag = function(source, target) {
+    this._IGGG_refreshDragTargets(source);
+    if (target != -1) {
+      this.current[target] = this.current[source];
+      this.current[source] = 'x';
+      this.piece_count--;
+
+      this._IGGG_refreshCell(target);
+      this._IGGG_removeDragSource(source);
+      this._IGGG_removeDragSource(target);
+      this._IGGG_addDragSource(target);
+
+      _gel("piece_count").innerHTML = this.piece_count;
+      if (this.numMoves() == 0) {
+        if (this.piece_count == 1) {
+          _gel("win").innerHTML = '<span style="font-size:12pt">You win!</span>';
+        } else {
+          _gel("win").innerHTML = '<span style="font-size:8pt">No more<br>moves</span>';
+        }
+      }
+    }
+    this._IGGG_refreshCell(source);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleClick = function(source) {
+    // do nothing
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragSource = function(index) {
+    if (this.current[index] == 'x') return false;
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.numMoves = function() {
+    var answer = 0;
+    for (var i=0; i<16; i++) {
+      for (var j=0; j<16; j++) {
+        if (i==j) continue;
+        if (this._IGGG_isDragTarget(i,j)) answer++;
+      }
+    }
+    return answer;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragTarget = function(index, sourceIndex) {
+    if (this.current[index] == 'x') return false;
+    if (this.current[sourceIndex] == 'x') return false;
+    if (index == sourceIndex) return false;
+    var t_row = Math.floor(index/4);
+    var t_col = index%4;
+    var s_row = Math.floor(sourceIndex/4);
+    var s_col = sourceIndex%4;
+    if (this.current[sourceIndex] == 'r') {
+      if (t_col == s_col) {
+        var diff = t_row - s_row;
+        if (diff == 1) return true;
+        if (diff == -1) return true;
+        if (diff == 2) {
+          if (this.current[index - 4] != 'x') return false;
+          return true;
+        }
+        if (diff == -2) {
+          if (this.current[index + 4] != 'x') return false;
+          return true;
+        }
+        if (diff == 3) {
+          if (this.current[index - 4] != 'x') return false;
+          if (this.current[index - 8] != 'x') return false;
+          return true;
+        }
+        if (diff == -3) {
+          if (this.current[index + 4] != 'x') return false;
+          if (this.current[index + 8] != 'x') return false;
+          return true;
+        }
+        return false;
+      }
+      if (t_row == s_row) {
+        var diff = t_col - s_col;
+        if (diff == 1) return true;
+        if (diff == -1) return true;
+        if (diff == 2) {
+          if (this.current[index - 1] != 'x') return false;
+          return true;
+        }
+        if (diff == -2) {
+          if (this.current[index + 1] != 'x') return false;
+          return true;
+        }
+        if (diff == 3) {
+          if (this.current[index - 1] != 'x') return false;
+          if (this.current[index - 2] != 'x') return false;
+          return true;
+        }
+        if (diff == -3) {
+          if (this.current[index + 1] != 'x') return false;
+          if (this.current[index + 2] != 'x') return false;
+          return true;
+        }
+        return false;
+      }
+      return false;
+    }
+    if (this.current[sourceIndex] == 'b') {
+      if (t_row + s_col == t_col + s_row) {
+        diff = s_row - t_row;
+        if (diff == 1) return true;
+        if (diff == -1) return true;
+        if (diff == 2) {
+          if (this.current[index + 5] != 'x') return false;
+          return true;
+        }
+        if (diff == -2) {
+          if (this.current[index - 5] != 'x') return false;
+          return true;
+        }
+        if (diff == 3) {
+          if (this.current[index + 5] != 'x') return false;
+          if (this.current[index + 10] != 'x') return false;
+          return true;
+        }
+        if (diff == -3) {
+          if (this.current[index - 5] != 'x') return false;
+          if (this.current[index - 10] != 'x') return false;
+          return true;
+        }
+        return false;
+      }
+      if (t_row + t_col == s_col + s_row) {
+        diff = s_row - t_row;
+        if (diff == 1) return true;
+        if (diff == -1) return true;
+        if (diff == 2) {
+          if (this.current[index + 3] != 'x') return false;
+          return true;
+        }
+        if (diff == -2) {
+          if (this.current[index - 3] != 'x') return false;
+          return true;
+        }
+        if (diff == 3) {
+          if (this.current[index + 3] != 'x') return false;
+          if (this.current[index + 6] != 'x') return false;
+          return true;
+        }
+        if (diff == -3) {
+          if (this.current[index - 3] != 'x') return false;
+          if (this.current[index - 6] != 'x') return false;
+          return true;
+        }
+        return false;
+      }
+      return false;
+    }
+    if (this.current[sourceIndex] == 'n') {
+      var magic_number = (t_row - s_row) * (t_col - s_col);
+      if (magic_number == 2) return true;
+      if (magic_number == -2) return true;
+      return false;
+    }
+  
+  }
+
+  // only used for objects that can't be handled.
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragStart = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetHit = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetLost = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragEnd = function(s_object, t_object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragClick = function(object) { }
+
+  //   _IGGG_refreshCell(index)
+  //   _IGGG_addDragSource(index)
+  //   _IGGG_removeDragSource(index)
+  //   _IGGG_refreshDragSources()
+  //   _IGGG_refreshDragTargets()
+
+  ///////////////////////////////////////
+
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+
+  function start__MODULE_ID__() {
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", puzzle__MODULE_ID__.height, puzzle__MODULE_ID__.width);
+    _gel("table_html").innerHTML = game__MODULE_ID__.getTableHTML();
+    game__MODULE_ID__.initDragging();
+
+    if (navigator.userAgent.toLowerCase().match("firefox")) {
+      game__MODULE_ID__.dragHandler.surrogateOffsetY = -20;
+      game__MODULE_ID__.dragHandler.topMargin = 20;
+    }
+
+  }
+
+  function reset__MODULE_ID__(puznum) {
+    _gel("form_width").value = _gel("form_width").value.replace(/[^0-9]/g, "");
+    _gel("form_height").value = _gel("form_height").value.replace(/[^0-9]/g, "");
+    puzzle__MODULE_ID__.resetPuzzle(1 * _gel("form_height").value,
+                                    1 * _gel("form_width").value,
+                                   _gel("form_wrap_vert").checked,
+                                   _gel("form_wrap_horiz").checked);
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", puzzle__MODULE_ID__.height, puzzle__MODULE_ID__.width);
+    _gel("table_html").innerHTML = game__MODULE_ID__.getTableHTML();
+    game__MODULE_ID__.initDragging();
+  }
+
+  ///////////////////////////////////////////////
+                                                                                                                                                                                                     
+  function selection_table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="0" cellpadding="0px" cellspacing="0px">';
+    for (var puznum = 0; puznum < 6; ++puznum) {
+      result += '<td align="middle" align="center">';
+      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa.images02.googlepages.com/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="puzzle__MODULE_ID__.resetPuzzle(' + puznum + ')"></img>';
+      result += '</td>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<div style="position:relative;float:left;margin-right:3px;margin-top:0px;margin-bottom:0px;">
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(selection_table_html__MODULE_ID__());
+</SCRIPT>
+</div>
+
+<b>Last Chessman Standing</b>: Invented by Vesa Timonen.  Have the pieces capture each other until there is only one.  No moves, only captures.
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   Click and drag a piece onto another to capture it.  Pieces capture as in <a target="_top" href="http://en.wikipedia.org/wiki/Rules_of_chess#Movement">standard chess</a>,
+   but color can be ignored.  When the button is held on a piece, the legal captures will turn black.  You'll be notified if there are no more moves.
+</span>
+
+<table border="0">
+<tr><td>
+<span id="table_html"></span>
+</td><td>
+  <table border="2" frame="bevel" cellpadding="2px" cellspacing="0px">
+  <tr><td align="center">
+  <span style="font-size:8pt">Chessmen:</span><br>
+  <span id="piece_count" style="font-size:24pt">0</span>
+  </td></tr><tr><td align="center">
+  <span id="win"></span>
+  </td></tr><tr><td align="center">
+  <form>
+    <input title="Reset" type="button" value="Reset" onclick="puzzle__MODULE_ID__.resetPuzzle(puzzle__MODULE_ID__.puznum)">
+  </form>
+  </td></tr>
+  </table>
+</td></tr>
+</table>
+
+<span id="debug1" style="font-size:16pt;font-weight:bold"></span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

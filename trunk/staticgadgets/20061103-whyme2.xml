@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20061103@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="100">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_1102"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20061103@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/20061027-hiddeninsults/puzzle-utils3.js"></script>
+--->
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils3.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  //////////////////////////
+
+  function _IG_game_state() {
+    this.cur_puz = 0;
+    this.puz_count = 12;
+    this.puz_solved = new Array();
+    for (var i=0; i<this.puz_count; ++i) {
+      this.puz_solved[i] = 0;
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
+    if (this.game_state.puz_solved[puznum] == 1) {
+      return "#00FF00";
+    } else {
+      return "#FF0000";
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.score = function() {
+    var answer = 0;
+    for (var i=0; i<this.game_state.puz_count; ++i) {
+      answer += this.game_state.puz_solved[i];
+    }
+    return answer;
+  }
+
+  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+    var num = this.score();
+    if (num == 12) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = this.score();
+  }
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    var answers_rot = new Array(
+      "GBJNEQF PBJNEQF",
+      "ZBYQVRE FBYQVRE",
+      "ARNEYL CRNEYL",
+      "CEBCRE TEBCRE",
+      "FRNA ORNA",
+      "ZNGGR YNGGR",
+      "CHFURF EHFURF",
+      "EVATRE SVATRE",
+      "ABIRY UBIRY",
+      "QRPNAGF FRPNAGF",
+      "JNPB GNPB",
+      "SBAQRE JBAQRE"
+    );
+    this.answers = new Array();
+    for (var i=0; i<12; i++) this.answers[i] = _IG_rot13(answers_rot[i]);
+    this.strip_answers = new Array();
+    for (var i=0; i<12; i++) this.strip_answers[i] = this.answers[i].toLowerCase().replace(/[^a-z]/g, "");
+    this.clues = new Array(
+      "In the direction of milquetoasts",
+      "A serviceman stationed closer to the tropics",
+      "Description for teeth that could be a bit whiter",
+      "The right person to be reaching",
+      "Famous actor from Sheffield",
+      "Starbucks&reg; concoction that isn't very shiny",
+      "Attempts to popularize grassy plants",
+      "What to press a doorbell with",
+      "A new sort of miserable dwelling",
+      "Pours out trigonometric functions",
+      "Mexican food from a city in central Texas",
+      "An amazing thing that one likes better"
+    );
+  
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(puzzleNum) {
+    // do nothing
+  }
+
+  puzzle_data__MODULE_ID__.prototype.checkAnswer = function() {
+    var test = _gel("subbox").value.toLowerCase().replace(/[^a-z]/g, "");
+    for (var i=0; i<12; i++) {
+      if (test == this.strip_answers[i]) {
+        pref_controller__MODULE_ID__.game_state.puz_solved[i] = 1;
+        pref_controller__MODULE_ID__.setPrefs();
+        this._IGGG_refreshAll();
+        pref_controller__MODULE_ID__.updatePrefDisplay();
+      }
+    }
+    if (test == 'pleasepleaseletmestartover') {
+      _gel("resetbutton").style.visibility = "visible";
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getNormalView = function(index) {
+    if (index < 12) {
+      if (pref_controller__MODULE_ID__.game_state.puz_solved[index] == 1) {
+        return '<div title="' + this.clues[index] + '"><font size=-1><b>' + this.answers[index] + '</b></font></div>';
+      } else {
+        return '<div title="' + this.clues[index] + '"><font size=-1>' + this.clues[index] + '</font></div>';
+      }
+    } else if (index == 12) {
+      if (pref_controller__MODULE_ID__.score() == 12) {
+        return '<input id="subbox" type="text" onkeyup="puzzle__MODULE_ID__.checkAnswer()" value="Congratulations!"/>';
+      } else {
+        return '<input id="subbox" type="text" onkeyup="puzzle__MODULE_ID__.checkAnswer()"/>';
+      }
+    } else {
+      return index;
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSourceView = function(source, target) {
+    return this._IGGG_getNormalView(source);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getTargetView = function(source, target) {
+    return this._IGGG_getNormalView(target);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getDragView = function(index) {
+    return this._IGGG_getNormalView(index);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSurrogateView = function(index) {
+    return ("&nbsp;");
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleDrag = function(source, target) {
+    // do nothing
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleClick = function(source) {
+    // do nothing
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragSource = function(index) {
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragTarget = function(index) {
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragStart = function(object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetHit = function(object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetLost = function(object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragEnd = function(s_object, t_object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragClick = function(object) {
+  }
+
+  //   _IGGG_refreshCell(index)
+  //   _IGGG_addDragSource(index)
+  //   _IGGG_removeDragSource(index)
+  //   _IGGG_refreshDragSources()
+  //   _IGGG_addDragTarget(index)
+  //   _IGGG_removeDragTarget(index)
+  //   _IGGG_refreshDragTargets()
+
+  ///////////////////////////////////////
+
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  var pref_controller__MODULE_ID__;
+
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+                                                                                                                                                                  
+  function start__MODULE_ID__() {
+    pref_controller__MODULE_ID__ = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_1102', false);
+
+    _gel("game_state_html").innerHTML = pref_controller__MODULE_ID__.getTableHTML();
+
+    pref_controller__MODULE_ID__.getPrefs();
+
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+
+    reset__MODULE_ID__(pref_controller__MODULE_ID__.game_state.cur_puz);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  function reset__MODULE_ID__(puznum) {
+    puzzle__MODULE_ID__.resetPuzzle(puznum);
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", 13, 1);
+    _gel("table_html").innerHTML = game__MODULE_ID__.getTableHTML();
+    game__MODULE_ID__.initDragging();
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<b>Whyme Rhyme 2</b>:  From the given clues, find the non-rhyming pairs of words that only differ in their first letter, such as <b>LEMON DEMON</b>.
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+   The words may or may not be proper nouns.  Pronunciations are assumed to be standard American English, but these pairs will fail to 
+   rhyme in almost all dialects of English.  (For more Whyme Rhymes, check out the archive.)
+</span>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+  Simply type your guess in the box.  Spaces and capitalization don't count, but spelling does!  You can try as much as you want without penalty.
+  If you have solved a puzzle already and want to see the original clue, try parking your mouse over the answer.
+</span>
+<BR>
+
+<BR>
+<center><span id="table_html"></span></center>
+
+<HR>
+
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <center><span id="game_state_html"></span></center>
+
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td style="font-size:9pt">
+<span style="visibility:hidden">
+  Your points: <span id="points">?</span>
+</span>
+  <input id="resetbutton" style="font-size:10;visibility:hidden" type="button" value="Clear Stats" 
+    onclick="pref_controller__MODULE_ID__.resetPrefs();puzzle__MODULE_ID__._IGGG_refreshAll();"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

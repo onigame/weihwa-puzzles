@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzle: 2006-08-04"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20060804@gmail.com"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="440"
+    render_inline="optional"
+  />
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,helvetica,sans-serif;}
+span.s {font-family:lucida console,times,serif;}
+</style>
+
+<!---
+
+Good job finding the hidden message and this message too!
+
+Here's your bonus hidden puzzle:
+
+I have a card in my pocket with the numbers from 1 through 48 written on it.
+Some of the numbers are red, some are blue.  They are arranged in a grid like
+this:
+ 
+ 14   25    8  ( 1)   4    5
+ 41  ( 6)  35   30  (27) (26)
+(29) (18)  47  (42)  39  (38)
+ 21   32  ( 3)  10  ( 7)  12
+(34) (23) (40) (45)  48  (43)
+( 2)  37   20  (13)  16   17
+( 9)  44  (15)  22  (19)  24
+ 46  (11) (28) (33)  36  (31)
+ 
+The numbers in parentheses are red.
+
+What is this card used for?
+
+(This puzzle is based on an actual card I got from Will Strijbos.)
+
+--->
+
+<font size=-1>
+
+<b>Retrospective</b>:
+I'm busy chatting with puzzlers at t<span class="s">h</span>e opening of the
+<a target="_top" href="http://www.indiana.edu/~liblilly/calendar.shtml#puzzles">Slocum
+Puzzle Room</a> at the L<span class="s">i</span>lly Library at
+In<span class="s">d</span>iana University; so, nothing too sophisticate<span class="s">d</span> this week.
+Inst<span class="s">e</span>ad, I've created a <a target="_top" href="http://weihwa.feedback.googlepages.com/home">home page</a>, where
+you ca<span class="s">n</span>
+browse and <span class="s">p</span>lay with any of the previo<span class="s">u</span>s weeks' puz<span class="s">z</span>les:
+
+<UL>
+<LI>2006-07-28: <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage10">Mini Kakuro</A> 
+<LI>2006-07-21: <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage9">Give and Take</A> 
+<LI>2006-07-14: <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage8">Knight Swap</A> 
+<LI>2006-07-07: <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage7">US States Jigsaw Sudoku</A> 
+<LI>2006-06-30: <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage6">Confounded Compounds</A> 
+<LI>2006-06-23: <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage5">Dance Ma<span class="s">z</span>e</A> 
+<LI>2006-06-16: <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage4">Minesweeper</A> 
+<LI>2006-06-09: <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage3">Distance</A> 
+<LI>2006-06-02: <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage2">Whyme Rhyme</A> 
+<LI>2006-05-26: <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage1">3, 3, 8, 8</A></LI></UL>
+
+I'm getting <span class="s">l</span>ots of great id<span class="s">e</span>as from puzzlers and other fans, so stay tuned!
+In the meantime, <span class="s">i</span>f you have
+a<span class="s">n</span>y comments, suggestions, puzzle ideas, go a<span class="s">h</span>ead and send wha<span class="s">t</span>ever's
+on your mind to <span class="s">m</span>e at
+<a target="_top" href="mailto:weihwa.feedback+20060804@gmail.com">weihwa.feedback+more@gmai<span class="s">l</span>.com</a>.
+
+
+</FONT>
+
+
+  ]]> 
+
+  </Content>
+</Module>
+

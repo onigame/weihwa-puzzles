@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20070126@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="500">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+    <Require feature='analytics'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_20070126"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20070126@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/igoogle_gridlib_old.js"></script>
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/igoogle_gridlib.js"></script>
+--->
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json2.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  _IG_Analytics("UA-1247731-1", "/puzzlegadget");
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function _IG_game_state() {
+    this.cur_puz = 0;
+    this.puz_count = 32;
+    this.puz_solved = new Array();
+    this.puz_progress = new Array();
+    for (var i=0; i<this.puz_count; ++i) {
+      this.puz_solved[i] = 0;
+      this.puz_progress[i] = new Array();
+    }
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
+    if (this.game_state.puz_solved[puznum] == 1) {
+      return "#00FF00";
+    } else {
+      return "#FF0000";
+    }
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.score = function() {
+    var answer = 0;
+    for (var i=0; i<this.game_state.puz_count; ++i) {
+      answer += this.game_state.puz_solved[i];
+    }
+    return answer;
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+    var num = this.score();
+    if (num == 32) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = this.score();
+  }
+
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.prefix = 'http://weihwa.images03.googlepages.com/';
+//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/20070126-bridges/';
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+    this.load_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzleData = function(index) {
+    if (index == 0) {
+      this.rowcount = 4; this.colcount = 4; this.answer = new Array(5,7,1,6,7,5,6,1,2,7,1,6,7,5,6,5);
+    } else if (index == 1) {
+      this.rowcount = 5; this.colcount = 5; this.answer = new Array(5,7,1,6,5,7,3,6,3,6,2,7,5,7,5,7,1,7,5,6,5,6,2,7,0);
+    } else if (index == 2) {
+      this.rowcount = 5; this.colcount = 5; this.answer = new Array(1,7,5,7,5,7,5,7,3,6,3,6,3,7,1,7,5,7,5,7,1,7,5,6,2);
+    } else if (index == 3) {
+      this.rowcount = 6; this.colcount = 6; this.answer = new Array(5,7,1,6,3,6,7,5,6,5,7,5,3,6,5,7,5,7,7,2,6,2,7,1,5,7,5,6,4,6,7,1,7,5,7,5);
+    } else if (index == 4) {
+      this.rowcount = 6; this.colcount = 6; this.answer = new Array(5,6,5,7,5,7,7,2,6,4,6,3,5,7,0,7,5,7,6,5,6,5,6,5,1,7,1,7,1,7,7,1,7,1,7,5);
+    } else if (index == 5) {
+      this.rowcount = 6; this.colcount = 6; this.answer = new Array(0,7,1,6,1,7,6,3,6,5,6,5,2,6,5,6,5,6,7,5,6,2,7,0,2,7,0,7,3,6,7,5,6,5,7,5);
+    } else if (index == 6) {
+      this.rowcount = 6; this.colcount = 6; this.answer = new Array(5,7,5,7,1,7,6,3,7,1,7,1,5,7,5,6,5,6,6,5,7,5,7,5,0,7,3,6,3,7,6,5,7,0,7,1);
+    } else if (index == 7) {
+      this.rowcount = 7; this.colcount = 7; this.answer = new Array(0,7,1,7,5,6,5,6,5,7,5,6,1,7,5,6,3,6,3,6,5,7,5,6,5,7,1,7,1,7,2,6,5,7,5,6,3,7,1,6,3,7,5,7,5,6,1,7,1);
+    } else if (index == 8) {
+      this.rowcount = 7; this.colcount = 7; this.answer = new Array(5,7,2,6,5,7,5,7,1,7,2,6,4,6,5,6,5,7,1,7,5,7,5,6,5,7,1,7,2,6,2,7,5,6,5,6,5,7,5,6,3,6,0,7,2,6,5,7,5);
+    } else if (index == 9) {
+      this.rowcount = 7; this.colcount = 7; this.answer = new Array(1,7,0,7,2,6,5,7,5,6,5,7,2,6,5,7,1,6,3,7,5,7,3,6,5,7,5,6,5,7,5,6,3,7,1,7,1,7,5,7,5,7,2,6,3,6,5,6,2);
+    } else if (index == 10) {
+      this.rowcount = 7; this.colcount = 7; this.answer = new Array(5,6,5,7,2,6,5,6,3,6,5,7,1,7,0,7,1,7,1,7,5,6,5,7,2,6,3,7,5,7,5,6,5,7,2,6,3,7,0,7,2,7,5,7,5,6,5,7,5);
+    } else if (index == 11) {
+      this.rowcount = 7; this.colcount = 7; this.answer = new Array(5,6,5,7,1,6,2,7,2,6,5,6,5,7,5,7,0,7,2,6,5,6,5,6,2,7,2,6,0,7,5,6,5,7,1,6,5,6,2,6,2,7,5,7,1,6,2,6,5);
+    } else if (index == 12) {
+      this.rowcount = 7; this.colcount = 7; this.answer = new Array(5,7,5,7,1,6,1,6,3,6,3,6,5,6,5,6,5,6,2,6,1,7,1,7,1,6,2,6,2,7,5,6,3,6,5,7,2,7,0,7,5,7,1,7,5,6,5,6,2);
+    } else if (index == 13) {
+      this.rowcount = 8; this.colcount = 8; this.answer = new Array(5,7,5,6,5,7,1,7,6,4,6,2,7,5,7,5,5,7,5,7,1,7,3,6,7,5,6,3,6,5,7,5,2,6,3,6,3,6,2,7,6,2,7,5,7,5,6,2,1,7,3,6,2,7,1,6,7,5,7,5,6,5,6,5);
+    } else if (index == 14) {
+      this.rowcount = 8; this.colcount = 8; this.answer = new Array(5,6,5,7,1,7,1,7,7,0,7,5,7,2,7,5,5,6,5,7,1,7,5,6,7,1,6,5,6,4,6,2,5,6,2,6,2,7,5,7,7,1,6,5,7,5,6,3,5,6,3,6,2,7,1,7,6,1,7,5,6,5,7,5);
+    } else if (index == 15) {
+      this.rowcount = 8; this.colcount = 8; this.answer = new Array(5,6,3,6,5,7,1,7,6,5,7,5,7,5,7,5,1,6,3,7,2,6,3,7,6,2,7,3,6,1,7,2,5,7,5,7,5,6,5,7,6,4,6,5,7,0,7,5,5,7,5,6,5,6,5,7,6,3,6,1,7,5,6,2);
+    } else if (index == 16) {
+      this.rowcount = 8; this.colcount = 8; this.answer = new Array(0,7,5,7,5,6,1,7,6,2,7,2,7,5,6,2,5,6,5,7,1,7,2,6,6,3,6,4,6,2,7,0,1,7,0,7,5,6,5,6,7,5,6,5,6,2,6,1,2,6,3,6,5,6,3,6,6,5,7,5,6,1,7,5);
+    } else if (index == 17) {
+      this.rowcount = 9; this.colcount = 9; this.answer = new Array(5,6,3,6,5,6,3,6,5,6,2,7,0,7,5,7,1,6,5,7,5,6,2,7,5,6,5,7,5,6,5,6,2,7,1,6,1,7,0,7,1,6,5,6,2,6,5,6,5,6,5,7,0,7,0,7,5,7,1,6,5,6,5,6,5,6,4,6,5,6,5,6,5,6,1,7,1,6,1,7,0);
+    } else if (index == 18) {
+      this.rowcount = 9; this.colcount = 9; this.answer = new Array(0,7,5,7,5,7,5,6,2,6,3,6,3,6,3,6,5,7,1,6,2,6,2,6,5,6,5,6,5,6,5,6,3,6,2,6,1,6,5,7,1,7,5,6,1,6,5,6,2,7,1,7,2,6,0,7,5,6,5,6,2,7,1,6,5,7,1,6,3,6,5,7,0,7,5,6,5,7,5,7,1);
+    } else if (index == 19) {
+      this.rowcount = 9; this.colcount = 9; this.answer = new Array(1,7,1,7,5,6,2,6,5,7,2,7,1,7,5,6,5,6,2,7,5,6,3,6,3,6,1,7,5,6,5,6,5,7,1,6,2,7,1,7,0,7,5,6,2,7,5,7,5,6,5,6,2,7,5,6,4,6,5,7,0,7,1,6,2,7,5,7,5,6,5,6,5,7,5,6,3,6,1,7,5);
+    } else if (index == 20) {
+      this.rowcount = 9; this.colcount = 9; this.answer = new Array(5,7,1,7,5,6,1,7,5,7,1,7,2,7,1,6,2,7,5,6,2,7,5,6,2,6,5,6,5,6,3,6,5,6,1,7,1,6,2,6,5,6,2,6,5,6,5,6,5,6,5,6,1,7,0,7,1,6,2,7,5,6,3,6,5,6,2,7,5,7,1,7,1,6,1,7,1,7,5,7,1);
+    } else if (index == 21) {
+      this.rowcount = 11; this.colcount = 9; this.answer = new Array(5,7,2,6,5,7,2,6,5,7,2,7,5,7,1,7,1,6,2,7,2,7,2,6,3,6,2,7,1,7,5,6,5,6,1,7,5,6,2,7,1,7,2,6,5,6,5,6,5,7,1,7,2,6,2,6,2,7,2,6,5,7,5,7,1,7,5,6,5,7,3,6,5,7,5,7,5,7,2,7,5,7,2,6,3,7,1,7,2,6,2,6,1,7,2,6,3,6,5);
+    } else if (index == 22) {
+      this.rowcount = 11; this.colcount = 9; this.answer = new Array(5,6,3,6,5,7,1,7,5,6,5,7,5,7,5,7,1,7,1,6,5,7,3,6,3,6,5,6,1,7,2,7,2,6,5,6,1,6,5,7,5,7,1,7,0,6,5,6,4,6,5,7,5,6,5,6,5,7,2,6,3,7,0,7,1,6,3,7,1,7,2,6,3,6,5,7,5,7,5,6,5,7,5,7,1,7,5,7,1,6,5,6,3,6,2,7,2,6,5);
+    } else if (index == 23) {
+      this.rowcount = 13; this.colcount = 9; this.answer = new Array(1,6,3,6,5,6,1,7,5,6,5,7,1,7,5,6,4,6,2,6,2,7,1,7,5,7,0,7,5,6,5,6,5,7,5,6,3,6,5,6,5,6,3,6,5,7,5,6,2,6,2,6,1,7,5,6,2,6,3,6,2,6,2,7,2,6,2,7,5,6,3,6,5,7,5,7,2,6,5,7,1,6,3,7,5,6,5,7,2,7,5,7,3,6,1,7,2,7,1,6,2,7,5,6,5,7,5,6,5,6,2,7,1,6,2,7,0);
+    } else if (index == 24) {
+      this.rowcount = 13; this.colcount = 9; this.answer = new Array(2,6,1,7,5,7,1,6,2,7,5,6,5,7,5,6,5,7,5,6,5,6,4,6,5,7,1,6,2,6,2,7,5,7,5,6,1,6,5,7,5,6,3,6,1,6,2,7,1,7,5,6,3,6,1,7,5,6,5,6,2,7,1,7,5,6,3,6,5,7,5,7,2,7,0,7,2,6,3,7,1,7,5,6,5,7,5,7,5,6,5,7,5,6,5,7,2,7,1,6,4,6,2,7,2,7,2,7,5,7,5,7,1,7,5,7,1);
+    } else if (index == 25) {
+      this.rowcount = 15; this.colcount = 9; this.answer = new Array(5,7,1,6,2,7,1,7,1,7,3,6,5,7,1,7,5,7,1,7,5,6,5,6,2,7,5,6,2,7,1,7,2,6,5,6,1,6,3,7,5,7,5,7,0,6,1,7,1,7,3,6,5,6,1,6,3,6,5,7,0,7,5,6,3,6,5,7,3,6,5,6,0,7,5,6,5,7,5,7,0,6,3,7,2,6,3,7,5,6,5,7,1,7,1,7,2,6,2,6,5,6,2,7,5,6,5,7,1,6,3,6,5,6,1,7,5,6,5,7,2,6,3,6,5,7,5,7,1,7,5,7,0,7,1);
+    } else if (index == 26) {
+      this.rowcount = 15; this.colcount = 9; this.answer = new Array(5,6,5,7,5,6,3,6,5,7,1,6,2,7,5,7,2,6,2,6,5,6,3,7,1,7,5,6,1,7,5,7,5,6,5,7,5,6,5,7,2,7,5,6,2,7,2,6,5,7,5,7,2,6,5,7,1,7,2,7,5,7,0,7,2,7,1,7,2,6,3,6,1,7,3,6,4,6,5,6,5,6,5,7,5,7,2,6,2,6,2,6,2,7,5,7,5,6,5,7,2,6,2,7,2,7,1,7,5,7,1,6,2,7,1,7,5,7,2,6,3,6,5,6,2,7,5,6,5,7,1,6,5,6,5);
+    } else if (index == 27) {
+      this.rowcount = 17; this.colcount = 9; this.answer = new Array(5,7,0,7,2,6,5,6,5,7,2,6,5,7,5,7,1,6,5,6,5,6,5,6,5,6,2,7,2,6,2,6,2,7,1,7,1,7,2,6,2,7,2,7,5,6,3,7,1,7,1,7,5,6,5,7,2,7,5,6,5,6,1,7,5,7,1,7,5,7,1,6,1,7,5,6,2,7,5,6,2,6,4,6,5,6,4,6,2,7,0,7,0,7,0,7,1,7,5,6,5,6,5,6,5,7,5,6,2,6,5,6,5,6,3,6,1,7,2,6,1,7,1,6,2,6,5,7,5,6,4,6,5,6,5,6,5,7,0,7,5,7,0,7,0,7,5,6,3,6,5,6,5);
+    } else if (index == 28) {
+      this.rowcount = 17; this.colcount = 9; this.answer = new Array(2,6,2,7,5,7,0,7,5,7,5,7,5,6,5,6,2,7,1,7,1,7,1,6,2,6,5,6,5,6,5,6,5,6,2,6,1,6,3,6,5,7,2,6,5,6,5,7,1,7,5,7,0,7,0,7,5,7,5,6,5,6,5,6,5,6,3,6,2,7,0,7,5,7,5,6,5,7,5,6,5,6,4,6,2,6,4,6,5,6,5,7,5,6,1,7,5,7,0,6,3,6,2,6,5,7,3,6,5,6,5,6,5,6,5,7,5,6,3,6,5,7,1,6,2,7,0,7,1,7,5,6,2,6,3,6,3,7,5,6,5,6,5,7,0,7,5,7,1,6,2,6,5);
+    } else if (index == 29) {
+      this.rowcount = 19; this.colcount = 9; this.answer = new Array(5,6,5,6,2,6,5,6,5,6,1,7,5,6,5,6,3,6,2,6,3,7,0,7,1,7,0,7,5,7,5,6,5,7,5,6,3,6,3,6,5,6,3,7,0,7,5,6,3,6,1,7,5,6,5,6,2,7,5,6,3,6,2,7,0,7,1,7,5,6,5,7,5,6,5,6,5,6,3,6,5,7,0,7,5,6,5,7,0,7,5,6,3,7,0,7,5,6,5,6,1,7,5,6,3,6,5,7,5,6,5,7,1,6,5,6,3,6,3,6,4,6,5,7,0,7,0,7,5,7,5,7,3,6,5,6,5,6,2,7,5,7,5,7,5,6,2,6,4,6,4,6,3,7,5,6,5,7,1,7,5,7,2,6,2,6,2,7,5,7,1);
+    } else if (index == 30) {
+      this.rowcount = 19; this.colcount = 9; this.answer = new Array(5,7,1,7,5,6,2,7,5,6,5,7,2,6,1,7,5,6,0,7,2,6,5,6,4,6,2,6,3,6,5,7,1,7,5,7,5,6,5,7,5,7,5,6,2,7,1,6,4,6,4,6,5,6,2,6,5,7,1,7,5,7,0,6,5,7,2,7,5,7,5,6,1,6,5,7,1,7,1,7,5,6,5,7,2,6,5,6,3,7,2,6,5,6,5,7,5,7,2,7,1,7,1,6,2,7,1,7,5,7,2,6,2,6,4,6,5,7,3,6,5,6,5,7,1,7,5,7,2,6,5,6,5,7,5,7,5,7,0,7,1,7,3,6,2,6,3,6,5,7,5,7,0,6,2,6,1,7,2,7,2,6,5,6,2,6,2,7,2,6,5);
+    } else if (index == 31) {
+      this.rowcount = 21; this.colcount = 9; this.answer = new Array(5,6,5,6,5,6,2,6,5,6,2,7,0,7,2,6,2,6,1,7,3,6,5,7,5,6,5,7,1,7,5,6,4,6,2,6,5,6,2,7,5,7,5,6,2,7,1,6,5,7,3,6,1,7,5,6,5,7,2,7,1,6,5,7,1,7,5,7,5,6,1,7,1,7,2,6,3,6,5,6,5,6,5,6,5,6,5,7,1,6,5,6,5,6,3,6,4,6,2,6,3,6,1,7,5,7,5,7,0,7,2,6,5,6,3,7,1,6,2,7,1,6,2,7,5,6,5,6,5,6,5,7,5,6,2,6,3,6,1,7,5,6,1,7,1,7,2,6,5,7,5,6,3,7,5,7,5,6,2,7,5,7,5,6,5,7,1,6,3,7,5,7,0,7,5,6,2,7,3,6,5,6,5,7,0,7,5,7,5);
+    }
+    this.area = this.rowcount * this.colcount;
+    this.userGrid = new Array();
+    for (var i = 0; i < this.answer.length; ++i) {
+      if (this.answer[i] < 6) {
+        this.userGrid[i] = this.answer[i];
+      } else {
+        this.userGrid[i] = 8;
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.load_progress = function () {
+    if (!this._IGGG_refreshCell) {
+      this._IGGG_refreshCell = function () {};
+    }
+    if (!this.game_state.puz_progress) {
+      this.game_state.puz_progress = new Array();
+    }
+    if (!this.game_state.puz_progress[this.game_state.cur_puz]) {
+      this.game_state.puz_progress[this.game_state.cur_puz] = new Array();
+    }
+    if (this.game_state.puz_progress[this.game_state.cur_puz].length == 0) return;
+    for (var i=0; i<this.area; i++) {
+      if (this.game_state.puz_progress[this.game_state.cur_puz][i]) {
+        this.userGrid[i] = this.game_state.puz_progress[this.game_state.cur_puz][i];
+      }
+    }
+    if (this._IGGG_refreshAll)
+      this._IGGG_refreshAll();
+  }
+                                                                                                                                                                                              
+  puzzle_data__MODULE_ID__.prototype.save_progress = function () {
+    if (!this.game_state.puz_progress) {
+      this.game_state.puz_progress = new Array();
+    }
+    if (!this.game_state.puz_progress[this.game_state.cur_puz]) {
+      this.game_state.puz_progress[this.game_state.cur_puz] = new Array();
+    }
+    for (var i=0; i<this.area; i++) {
+      this.game_state.puz_progress[this.game_state.cur_puz][i] = this.userGrid[i];
+    }
+    pref_controller__MODULE_ID__.game_state = this.game_state;
+    pref_controller__MODULE_ID__.setPrefs();
+  }
+
+
+  puzzle_data__MODULE_ID__.prototype.userDataAt = function(row, col) {
+    if (row < 0) return -1;
+    if (row >= this.rowcount) return -1;
+    if (col < 0) return -1;
+    if (col >= this.colcount) return -1;
+    return (this.userGrid[row*this.colcount+col]);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.color = function(row, col) {
+    var score = 0;
+    var filled = true;
+    if (this.userDataAt(row-1, col) == 7) score++;
+    if (this.userDataAt(row+1, col) == 7) score++;
+    if (this.userDataAt(row, col-1) == 6) score++;
+    if (this.userDataAt(row, col+1) == 6) score++;
+    if (this.userDataAt(row-1, col) == 8) filled = false;
+    if (this.userDataAt(row+1, col) == 8) filled = false;
+    if (this.userDataAt(row, col-1) == 8) filled = false;
+    if (this.userDataAt(row, col+1) == 8) filled = false;
+    if (!filled) return "black";
+    if (score == this.userDataAt(row, col)) return "green";
+    return "red";
+  }
+
+  puzzle_data__MODULE_ID__.prototype.gridHTML = function(row, col) {
+    var value = this.userDataAt(row, col);
+    if (value == 8) {
+      return '<img src="' + this.prefix + 'bridges-ocean.png" alt="|">';
+    } else if (value == 7) {
+      return '<img src="' + this.prefix + 'bridges-bridge7.png" alt="|">';
+    } else if (value == 6) {
+      return '<img src="' + this.prefix + 'bridges-bridge6.png" alt="|">';
+    } else if (value == 5) {
+      return '<img src="' + this.prefix + 'bridges-land5.png" alt="?">';
+    } else {
+      return '<img src="' + this.prefix + 'bridges-land' + value + '-' + this.color(row, col) + '.png" alt="' + value + ' ' + this.color(row, col) + '">';
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isSolved = function() {
+    for (var i = 0; i < this.area; ++i) {
+      if (this.userGrid[i] != this.answer[i] && this.userGrid[i] != 5) return false;
+    }
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getNormalView = function(index) {
+    var row = Math.floor(index / this.colcount);
+    var col = index % this.colcount;
+    return this.gridHTML(row, col);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSurrogateView = function(index) {
+    return ("");
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleDrag = function(source, target) {
+    if (game__MODULE_ID__.isRightButton()) {
+      --this.userGrid[source];
+      if (this.userGrid[source] == 5) this.userGrid[source] = 8;
+    } else {
+      ++this.userGrid[source];
+      if (this.userGrid[source] == 9) this.userGrid[source] = 6;
+    }
+    this._IGGG_refreshCell(source);
+    if (source >= this.colcount) this._IGGG_refreshCell(source-this.colcount);
+    if (source < this.area-this.colcount) this._IGGG_refreshCell(source+this.colcount);
+    if (source % this.colcount != 0) this._IGGG_refreshCell(source-1);
+    if (source % this.colcount != this.colcount-1) this._IGGG_refreshCell(source+1);
+    if (this.isSolved()) {
+      pref_controller__MODULE_ID__.game_state.puz_solved[pref_controller__MODULE_ID__.game_state.cur_puz] = 1;
+      pref_controller__MODULE_ID__.updatePrefDisplay(); 
+    }
+    this.save_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragSource = function(index) {
+    var row = Math.floor(index / this.colcount);
+    var col = index % this.colcount;
+    return ((row + col) % 2 == 1);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragTarget = function(index) {
+    return false;
+  }
+
+  ///////////////////////////////////////
+
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  var pref_controller__MODULE_ID__;
+
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+                                                                                                                                                                  
+  function start__MODULE_ID__() {
+    pref_controller__MODULE_ID__ = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_20070126', true);
+    pref_controller__MODULE_ID__.num_puzzles = 32;
+    pref_controller__MODULE_ID__.box_height = 5;
+    pref_controller__MODULE_ID__.box_width = 5;
+    pref_controller__MODULE_ID__.rows = 4;
+    pref_controller__MODULE_ID__.cols = 8;
+
+    _gel("game_state_html").innerHTML = pref_controller__MODULE_ID__.getTableHTML();
+    pref_controller__MODULE_ID__.getPrefs();
+                                                                                                                                                                                              
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+    reset__MODULE_ID__(pref_controller__MODULE_ID__.game_state);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  function reset__MODULE_ID__(game_state) {
+    puzzle__MODULE_ID__.resetPuzzle(game_state);
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", puzzle__MODULE_ID__.rowcount, puzzle__MODULE_ID__.colcount);
+    _gel("table_html").innerHTML = "";
+    _gel("table_html").appendChild(game__MODULE_ID__.getTable());
+    puzzle__MODULE_ID__._IGGG_refreshAll();
+    game__MODULE_ID__.initDragging();
+  }
+
+  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+    this.nav_puz += amount;
+    if (this.nav_puz < 0) this.nav_puz = 0;
+    if (this.nav_puz > this.game_state.puz_count) this.nav_puz = this.game_state.puz_count;
+    this.update_navbar();
+  }
+
+  _IG_puzzle_pref_controller.prototype.new_puzzle_request = function() {
+    this.game_state.cur_puz = this.nav_puz;
+    reset__MODULE_ID__(this.game_state);
+    this.setPrefs();
+    this.update_navbar();
+  }
+
+//////////////////////////
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="pref_controller__MODULE_ID__.change_level(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="pref_controller__MODULE_ID__.change_level(-1)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller__MODULE_ID__.new_puzzle_request()"/>
+</form>
+
+<b>Bridges</b>:  Construct bridges on the open sea so that each island has the specified number
+of bridges connected to it.  These are a bit harder than <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage27">last time.</a>
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+   Bridges go vertically or horizonally.
+   If an island is numbered, that many bridges (and no more) must connect to it.
+</span>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   All empty water spaces must be labeled with a bridge before the puzzle can be considered solved.
+   Click on a water space to cycle between bridges and water.
+   The numbers will turn <span style="color:#008000">yellow-green</span> or <span style="color:#FF0000">red</span>
+   (depending on whether it is satisfied) when you have constructed all the bridges around that island.
+</span>
+<BR>
+
+<span id="table_html"></span>
+
+<HR>
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <center><span id="game_state_html"></span></center>
+                                                                                                                                                                                              
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td style="font-size:9pt">
+<span style="visibility:hidden">
+  Your points: <span id="points">?</span>
+</span>
+  <input id="resetbutton" style="font-size:10;visibility:hidden" type="button" value="Clear Stats"
+    onclick="pref_controller__MODULE_ID__.resetPrefs();puzzle__MODULE_ID__.resetPuzzle(pref_controller__MODULE_ID__.game_state);"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+                                                                                                                                                                                              
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

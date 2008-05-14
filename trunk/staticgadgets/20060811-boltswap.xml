@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzle Challenges"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20060811@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="350"
+    render_inline="optional"
+  />
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<span id="debug" style="font-size:16pt;font-weight:bold"></span>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20060811@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+                                                                                                                                                        
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  Drag.min_x = 15;
+  Drag.min_y = 50;
+  Drag.max_x = 10;
+  Drag.max_y = -10;
+  Drag.basis_offset_y = 20;
+  Drag.basis_offset_x = 0;
+  if (navigator.userAgent.toLowerCase().match("msie")) {
+    Drag.basis_offset_y = 0;
+    Drag.basis_offset_x = 10;
+    Drag.min_x = 15;
+    Drag.max_x = 10;
+    Drag.min_y = 20;
+    Drag.max_y = 20;
+  }
+
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.reset_puzzle(1);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.reset_puzzle = function(index) {
+    this.board = new Array(1,1,1,1,1,1,1,1,1);
+    this.kings = new Array(1,1,1, 0,0,0, 2,2,2);
+    this.width = 3;
+    this.height = 3;
+    this.dest_list = new Set();
+    this.yanked = -1;
+    this.move_from = new Array();
+    this.move_to = new Array();
+    this.move_count = 0;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.move_count_change = function() {
+    // callback -- updates move_count display
+  }
+
+  puzzle_data__MODULE_ID__.prototype.deregister = function(index) {
+    // callback -- deregisters a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.register = function(index) {
+    // callback -- registers a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.cell_changed = function(index) {
+    // callback -- modifies a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.clear_sinks = function() {
+    // callback -- clears all sinks.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.add_sink = function(index) {
+    // callback -- adds a sink.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.open_space = function (row, col, src) {
+    if (row < 0) return false;
+    if (row >= this.height) return false;
+    if (col < 0) return false;
+    if (col >= this.width) return false;
+    if (this.board[src] == 0) return false;
+    if (this.kings[src] != 0) return false;
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.pieceat = function (row, col, src) {
+    if (row < 0) return 0;
+    if (row >= this.height) return 0;
+    if (col < 0) return 0;
+    if (col >= this.width) return 0;
+    return (this.kings[src]);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.reregister = function () {
+    for (var row=0; row<8; ++row) {
+      for (var col=0; col<8; ++col) {
+        var src = row*this.width+col;
+        if (this.pieceat(row, col, src) == 0) {
+          this.deregister(src);
+          continue;
+        }
+        if (this.pieceat(row, col-1, src-1) == this.pieceat(row, col, src)) {
+          this.register(src);
+          continue;
+        }
+        if (this.pieceat(row, col+1, src+1) == this.pieceat(row, col, src)) {
+          this.register(src);
+          continue;
+        }
+        if (this.pieceat(row-1, col+1, src-2) == this.pieceat(row, col, src)) {
+          this.register(src);
+          continue;
+        }
+        if (this.pieceat(row+1, col-1, src+2) == this.pieceat(row, col, src)) {
+          this.register(src);
+          continue;
+        }
+        this.deregister(src);
+        continue;
+      }
+    }  
+  }
+
+  puzzle_data__MODULE_ID__.prototype.moves = function (src) {
+    var row = Math.floor(src / this.width);
+    var col = src % this.width;
+    var temp = new Set();
+    var roffset = new Array(-1,-1,-1,0,0,1,1,1);
+    var coffset = new Array(-1,0,1,-1,1,-1,0,1);
+    for (var i=0; i<8; ++i) {
+      var nr = row + roffset[i];
+      var nc = col + coffset[i];
+      var ns = nr * this.width + nc;
+      if (this.open_space(nr,nc,ns)) temp.add(ns);
+    }
+    return temp;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.yank = function (src) {
+    if (this.kings[src] == 0) return;  // can't yank when no piece.
+
+    this.yanked = src;
+
+    this.dest_list = this.moves(src);
+
+    this.clear_sinks();
+
+    this.add_sink(src);
+    this.cell_changed(src);
+
+    for (var value=0; value < this.width * this.height; value++) {
+      if (this.dest_list.has(value)) {
+        this.add_sink(value);
+        this.cell_changed(value);
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.place = function (dest) {
+    // if dropped to nowhere, same as going back.
+    if (dest == -1) dest = this.yanked;
+
+    if (dest != this.yanked) {
+      this.kings[dest] = this.kings[this.yanked];
+      this.kings[this.yanked] = 0;
+      this.cell_changed(dest);
+      this.reregister();
+    
+      // Is this actually an undo?
+      if (this.move_from[this.move_count-1] == dest && this.move_to[this.move_count-1] == this.yanked) {
+        this.move_count--;
+      } else {
+        this.move_from[this.move_count] = this.yanked;
+        this.move_to[this.move_count] = dest;
+        this.move_count++;
+        while (this.move_from.length > this.move_count) {
+          this.move_from.splice(this.move_count, 1);
+          this.move_to.splice(this.move_count, 1);
+        }
+      }
+      this.move_count_change();
+    }
+
+    var old_yanked = this.yanked;
+    var old_dest_list = this.dest_list;
+    this.yanked = -1;
+    this.dest_list = new Set();
+    this.cell_changed(old_yanked);
+    for (var value=0; value < this.width * this.height; value++) {
+      if (old_dest_list.has(value)) {
+        this.cell_changed(value);
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.undo = function () {
+    if (this.yanked == -1) {
+      this.move_count--;
+      var old_from = this.move_from[this.move_count];
+      var old_to = this.move_to[this.move_count];
+      this.kings[old_from] = this.kings[old_to];
+      this.kings[old_to] = 0;
+      this.reregister();
+      this.cell_changed(old_from);
+      this.cell_changed(old_to);
+      this.move_count_change();
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.redo = function () {
+    if (this.yanked == -1) {
+      var old_from = this.move_from[this.move_count];
+      var old_to = this.move_to[this.move_count];
+      this.move_count++;
+      this.kings[old_to] = this.kings[old_from];
+      this.kings[old_from] = 0;
+      this.reregister();
+      this.cell_changed(old_from);
+      this.cell_changed(old_to);
+      this.move_count_change();
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.redo_possible = function () {
+    return (this.move_from.length > this.move_count);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.undo_possible = function () {
+    return (this.move_count > 0);
+  }
+
+  // actions.
+  puzzle_data__MODULE_ID__.prototype.get_text = function (index, is_sink) {
+    if (index < 0) return '';
+    var color = 0;
+    if (this.yanked != -1) {
+      color = this.kings[this.yanked];
+    }
+    if (index == this.yanked) {
+      if (color == 1) {
+        return '<img title="moving this piece" src="http://weihwa.images02.googlepages.com/white-king-glow.gif" alt="WS"></img>';
+      } else {
+        return '<img title="moving this piece" src="http://weihwa.images02.googlepages.com/black-king-glow.gif" alt="BS"></img>';
+      }
+    }
+    if (is_sink) {
+      if (color == 1) {
+        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/white-king-ghost.gif" alt="WD"></img>';
+      } else {
+        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/black-king-ghost.gif" alt="BD"></img>';
+      }
+    } 
+    if (this.dest_list.has(index)) {
+      if (color == 1) {
+        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/white-dot.gif" alt="WD"></img>';
+      } else {
+        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/black-dot.gif" alt="BD"></img>';
+      }
+    } 
+    if (this.kings[index] == 1) {
+      return '<img title="white king" src="http://weihwa.images02.googlepages.com/white-king.gif" alt="WN"></img>';
+    }
+    if (this.kings[index] == 2) {
+      return '<img title="black king" src="http://weihwa.images02.googlepages.com/black-king.gif" alt="BN"></img>';
+    }
+    return '<img title="blank" src="http://weihwa.images02.googlepages.com/blank.gif" alt="--"></img>';
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "front end".
+
+  function game_setup__MODULE_ID__() {
+    var game_setup = this;
+
+    game_setup.source = 0;
+    game_setup.sink = -1;
+
+    game_setup.highlight = -1;
+
+    game_setup.show_best = false;
+
+    game_setup.puzzle = new puzzle_data__MODULE_ID__();
+
+    // define callbacks.
+    game_setup.refresh = function (index) {
+      if (index != -1)
+        _gel(game_setup.get_cell_id(index)).innerHTML = game_setup.get_value_at(index);
+    }
+    game_setup.puzzle.cell_changed = this.refresh;
+
+    game_setup.score_refresh = function (index) {
+      _gel("scoreboard__MODULE_ID__").innerHTML = game_setup.score_html();
+    }
+    game_setup.puzzle.move_count_change = this.score_refresh;
+
+    game_setup.deregister = function (index) {
+      Drag.remove_source(index);
+    }
+    game_setup.puzzle.deregister = this.deregister;
+
+    game_setup.register = function (index) {
+      Drag.add_source(index, _gel(game_setup.get_cell_id(index)));
+    }
+    game_setup.puzzle.register = this.register;
+
+    game_setup.clear_sinks = function () {
+      Drag.clear_sinks();
+    }
+    game_setup.puzzle.clear_sinks = this.clear_sinks;
+
+    game_setup.add_sink = function (index) {
+      Drag.add_sink(index, _gel(game_setup.get_cell_id(index)));
+    }
+    game_setup.puzzle.add_sink = this.add_sink;
+  }
+
+  game_setup__MODULE_ID__.prototype.get_value_at = function (index) {
+    return this.puzzle.get_text(index, (index == this.sink));
+  }
+
+  game_setup__MODULE_ID__.prototype.refresh_all = function (index) {
+    for (var i=0; i<this.puzzle.width * this.puzzle.height; i++) {
+      this.refresh(i);
+    }
+    this.score_refresh();
+  }
+
+  game_setup__MODULE_ID__.prototype.get_cell_id = function (index) {
+    return ('cell_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.value_from_id = function (id) {
+    var regexp = /cell_(.*)___MODULE_ID__/;
+    var matches = regexp.exec(id);
+    return matches[1];
+  }
+
+  game_setup__MODULE_ID__.prototype.score_html = function() {
+    var result = "";
+    result += '<table border="2" frame="bevel" cellpadding="2px" cellspacing="0px">';
+    result += '<tr><td align="center">';
+    result += 'Moves:<br>';
+    result += '<span style="font-size:24pt">' + this.puzzle.move_count + '</span>';
+    if (this.puzzle.undo_possible()) {
+      result += '<form><input title="Click here to undo your last move" type="button" value="undo" onclick="game__MODULE_ID__.action_handle_undo()"></form>';
+    } else {
+      result += '<form><input disabled title="Undo not possible" type="button" value="undo"></form>';
+    }
+    if (this.puzzle.redo_possible()) {
+      result += '<form><input title="Click here to redo your last move" type="button" value="redo" onclick="game__MODULE_ID__.action_handle_redo()"></form>';
+    } else {
+      result += '<form><input disabled title="Redo not possible" type="button" value="redo"></form>';
+    }
+    result += '</td></tr>';
+
+    result += '<tr><td align="center">';
+    result += '<form><input title="Click here to reset" type="button" value="reset" onclick="game__MODULE_ID__.action_reset_puzzle()"></form>';
+    result += '</td></tr>';
+
+    result += '</table>';
+    return result;
+  }
+
+  game_setup__MODULE_ID__.prototype.table_html = function(puznum) {
+    var result = "";
+    var tw = this.puzzle.width * 36;
+    var th = this.puzzle.height * 36;
+    result += '<table border="4" frame="bevel" rules="none" cellpadding="0px" cellspacing="0px" width="' + tw + 'px" height="' + th + 'px" background="http://weihwa.images02.googlepages.com/background33.gif">';
+    for (var row = 0; row < this.puzzle.height; ++row) {
+      result += '<tr>';
+      for (var col = 0; col < this.puzzle.width; ++col) {
+        result += '<td>';
+        result += '<span id="' + game__MODULE_ID__.get_cell_id(row * this.puzzle.width + col);
+        result += '" onclick="game__MODULE_ID__.action_handle_click(' + (row * this.puzzle.width + col) + ')">';
+        result += game__MODULE_ID__.get_value_at(row * this.puzzle.width + col);
+        result += '</span>';
+        result += '</td>';
+      }
+      result += '</tr>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+
+  ////////////////////////////////////////////////////
+  // UI actions.
+
+  game_setup__MODULE_ID__.prototype.action_dragging_started = function (index) {
+    this.puzzle.yank(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_hit_sink = function (index) {
+    var last_sink = this.sink;
+    this.sink = index;
+    this.refresh(last_sink);
+    this.refresh(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_lost_sink = function () {
+    var last_sink = this.sink;
+    this.sink = -1;
+    this.refresh(last_sink);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_dragging_ended = function (index) {
+    var last_sink = this.sink;
+    this.puzzle.place(this.sink);
+    this.sink = -1;
+    this.refresh(last_sink);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_handle_click = function (index) {
+    // no clicks yet
+  }
+
+  game_setup__MODULE_ID__.prototype.action_reset_puzzle = function(puznum) {
+    this.puzzle.reset_puzzle(puznum);
+    this.show_best = false;
+    _gel("gameboard__MODULE_ID__").innerHTML = this.table_html(puznum);
+    this.puzzle.reregister();
+    this.refresh_all();
+  }
+
+  game_setup__MODULE_ID__.prototype.action_handle_undo = function (index) {
+    this.puzzle.undo();
+  }
+
+  game_setup__MODULE_ID__.prototype.action_handle_redo = function (index) {
+    this.puzzle.redo();
+  }
+
+  game_setup__MODULE_ID__.prototype.action_hide_best = function (index) {
+    this.show_best = false;
+    this.score_refresh();
+  }
+
+  game_setup__MODULE_ID__.prototype.action_show_best = function (index) {
+    this.show_best = true;
+    this.score_refresh();
+  }
+
+
+  ////////////////////////////////////////////////////
+  // Dragging callback overrides.
+
+  Drag.dragging_started = function (object) {
+    game__MODULE_ID__.action_dragging_started(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag.hit_sink = function (object) {
+    game__MODULE_ID__.action_hit_sink(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag.lost_sink = function () {
+    game__MODULE_ID__.action_lost_sink();
+  }
+
+  Drag.dragging_ended = function (object) {
+    game__MODULE_ID__.action_dragging_ended(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag.click_happened = function (object) {
+    game__MODULE_ID__.action_handle_click(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+
+  ///////////////////////////////////////
+  // Direct access functions.
+  
+  var game__MODULE_ID__ = new game_setup__MODULE_ID__();
+
+  function table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="0"><tr><td>';
+
+    result += '<span id="scoreboard__MODULE_ID__">';
+    result += game__MODULE_ID__.score_html();
+    result += '</span>';
+
+    result += '</td><td>';
+
+    result += '<span id="gameboard__MODULE_ID__">';
+    result += game__MODULE_ID__.table_html(1);
+    result += '</span>';
+
+
+    result += '</td><tr>';
+
+    result += '</table>';
+
+
+    return result;
+  }
+
+  function init_dragging__MODULE_ID__() {
+    Drag.set_basis(_gel("dummy"));
+    game__MODULE_ID__.puzzle.reregister();
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<b>Bolt Swap</b>:  This little gem was shown to me by Markus G&ouml;tz.
+Swap the positions of the white and black kings in as few moves as possible -- however, there is a hidden rule
+that governs whether a king can be moved or not.  Try to discover the rule; it will be pretty hard
+to solve the puzzle without knowing it!
+
+<BR>
+
+<div style="position:relative;margin-right:3px;margin-top:3px" id="grid__MODULE_ID__">
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(table_html__MODULE_ID__());
+</SCRIPT>
+</div>
+
+<span id="dummy" style="cursor:pointer;cursor:hand;font-size:12pt;position:absolute;left:0px;top:0px"></span>
+<SCRIPT LANGUAGE="JavaScript">
+  init_dragging__MODULE_ID__();
+</SCRIPT>
+
+
+</FONT>
+
+
+  ]]> 
+
+  </Content>
+</Module>
+

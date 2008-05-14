@@ -1,0 +1,938 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzle Challenges" 
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20050615@gmail.com"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    render_inline="optional"
+    height="400"
+  /> 
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  function _gel(thing) {
+    return document.getElementById(thing);
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the Minesweeper "back end".
+  ///  Encodes a minesweeper puzzle.
+
+
+  function puzzle_data__MODULE_ID__(width, height, num_mines, use_knight) {
+    this.width = width;
+    this.height = height;
+    this.num_mines = num_mines;
+    this.use_knight = use_knight;
+
+    this.size = this.width * this.height;  // convenience value
+    this.mine_locations = new Array(this.size);
+    this.user_revealed = new Array(this.size);
+    this.mine_count = new Array(this.size);
+    this.get_position = puzzle_data_get_position__MODULE_ID__;
+    this.maybe_add_mine_count = puzzle_data_maybe_add_mine_count__MODULE_ID__;
+    this.calculate_mine_count = puzzle_data_calculate_mine_count__MODULE_ID__;
+    this.maybe_spider_move = puzzle_data_maybe_spider_move__MODULE_ID__;
+    this.respider = puzzle_data_respider__MODULE_ID__;
+
+    // Generate the mine locations.
+    var mines_to_place = num_mines;
+    for (var i=0; i < this.size; ++i) {
+      this.mine_locations[i] = false;
+      this.user_revealed[i] = false;
+      this.mine_count[i] = 0;
+      if (Math.random() < mines_to_place/(this.size - i)) {
+        this.mine_locations[i] = true;
+        mines_to_place--;
+      }
+    }
+
+    // Pre-generate the mine numbers.
+    this.calculate_mine_count();
+    
+  }
+
+  function puzzle_data_get_position__MODULE_ID__(row, col) {
+    if (row < 0) return -1; 
+    if (col < 0) return -1; 
+    if (row >= this.height) return -1;
+    if (col >= this.width) return -1;
+    return (row * this.width + col);
+  }
+
+  function puzzle_data_maybe_add_mine_count__MODULE_ID__(row, col) {
+    var pos = this.get_position(row, col);
+    if (pos != -1) {
+      this.mine_count[pos] ++;
+    }
+  }
+
+  function puzzle_data_calculate_mine_count__MODULE_ID__() {
+    for (var i=0; i < this.size; ++i) {
+      this.mine_count[i] = 0;
+    }
+    for (var i=0; i < this.size; ++i) {
+      if (this.mine_locations[i]) {
+        row = Math.floor( i / this.width );
+        col = i % this.width;
+        if (this.use_knight) {
+          this.maybe_add_mine_count(row-2, col-1);
+          this.maybe_add_mine_count(row-2, col+1);
+          this.maybe_add_mine_count(row-1, col-2);
+          this.maybe_add_mine_count(row-1, col+2);
+          this.maybe_add_mine_count(row+1, col-2);
+          this.maybe_add_mine_count(row+1, col+2);
+          this.maybe_add_mine_count(row+2, col-1);
+          this.maybe_add_mine_count(row+2, col+1);
+        } else {
+          this.maybe_add_mine_count(row-1, col-1);
+          this.maybe_add_mine_count(row-1, col);
+          this.maybe_add_mine_count(row-1, col+1);
+          this.maybe_add_mine_count(row, col-1);
+          this.maybe_add_mine_count(row, col+1);
+          this.maybe_add_mine_count(row+1, col-1);
+          this.maybe_add_mine_count(row+1, col);
+          this.maybe_add_mine_count(row+1, col+1);
+        }
+      }
+    }
+  }
+
+  function puzzle_data_maybe_spider_move__MODULE_ID__(row, col, direction, legal_pos, already_moved) {
+    var pos;
+    if (already_moved[this.get_position(row, col)]) return false;
+    if (direction == 0) pos = this.get_position(row+1, col);
+    if (direction == 1) pos = this.get_position(row, col+1);
+    if (direction == 2) pos = this.get_position(row, col-1);
+    if (direction == 3) pos = this.get_position(row-1, col);
+    if (pos == -1) return false;
+    if (legal_pos[pos] != 0) return false;
+    if (this.mine_locations[pos]) return false;
+
+    var denominator = 1;
+    if (direction == 0) {
+      temp_pos = this.get_position(row+1, col-1); if (temp_pos != -1 && this.mine_locations[temp_pos] && !already_moved[temp_pos]) denominator++;
+      temp_pos = this.get_position(row+1, col+1); if (temp_pos != -1 && this.mine_locations[temp_pos]) denominator++;
+      temp_pos = this.get_position(row+2, col  ); if (temp_pos != -1 && this.mine_locations[temp_pos]) denominator++;
+    } else if (direction == 1) {
+      temp_pos = this.get_position(row  , col+2); if (temp_pos != -1 && this.mine_locations[temp_pos]) denominator++;
+      temp_pos = this.get_position(row+1, col+1); if (temp_pos != -1 && this.mine_locations[temp_pos]) denominator++;
+    } else if (direction == 2) {
+      temp_pos = this.get_position(row+1, col-1); if (temp_pos != -1 && this.mine_locations[temp_pos] && !already_moved[temp_pos]) denominator++;
+    } else if (direction == 3) {
+    }
+
+//    _gel("debug").innerHTML += "spider " + row + col + " " + direction + " " + temp_pos + " " + denominator + " ";
+
+    if (Math.random() * denominator > 1) return false;
+    this.mine_locations[pos] = true;
+    already_moved[pos] = true;
+    this.mine_locations[this.get_position(row, col)] = false;
+    return true;
+  }
+
+  function puzzle_data_respider__MODULE_ID__(legal_pos) {
+    var already_moved = new Array(this.size);
+    for (var i=0; i < this.size; ++i) {
+      already_moved[i] = false;
+    }
+    for (var i=0; i < this.size; ++i) {
+      if (this.mine_locations[i]) {
+        row = Math.floor( i / this.width );
+        col = i % this.width;
+        var direction = Math.floor(Math.random() * 4);
+        var moved = this.maybe_spider_move(row, col, direction, legal_pos, already_moved);
+        if (!moved) moved = this.maybe_spider_move(row, col, (direction+1)%4, legal_pos, already_moved);
+        if (!moved) moved = this.maybe_spider_move(row, col, (direction+2)%4, legal_pos, already_moved);
+        if (!moved) moved = this.maybe_spider_move(row, col, (direction+3)%4, legal_pos, already_moved);
+      }
+    }
+    this.calculate_mine_count();
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the Minesweeper "front end".
+  ///  Encodes the user's current "state" (with flags and the like).
+
+  function state_data__MODULE_ID__(width, height, mine_count, auto_reveal_zero, show_zero, free_first_move, use_symbol, use_memory, use_spider, use_knight) {
+    this.width = width;
+    this.height = height;
+
+    // options
+    this.auto_reveal_zero = auto_reveal_zero;
+    this.show_zero = show_zero;
+    this.free_first_move = free_first_move;
+
+    this.use_symbol = use_symbol;
+    this.use_memory = use_memory;
+    this.use_spider = use_spider;
+    this.use_knight = use_knight;
+
+    this.set_state = set_state__MODULE_ID__;
+    this.alt_text = alt_text__MODULE_ID__;
+    this.src_image = src_image__MODULE_ID__;
+    this.get_cell_id = get_cell_id__MODULE_ID__;
+
+    // accessors
+    this.surrounding_spaces = surrounding_spaces__MODULE_ID__;
+    this.surrounding_flags = surrounding_flags__MODULE_ID__;
+    this.is_space = is_space__MODULE_ID__;
+
+    this.action_cancel = action_cancel__MODULE_ID__;
+    this.action_mark = action_mark__MODULE_ID__;
+    this.action_consider = action_consider__MODULE_ID__;
+    this.action_commit = action_commit__MODULE_ID__;
+    this.action_show = action_show__MODULE_ID__;
+    this.action_spider = action_spider__MODULE_ID__;
+    this.consider_surrounding_spaces = consider_surrounding_spaces__MODULE_ID__;
+    this.consider_if_space = consider_if_space__MODULE_ID__;
+   
+    this.set_num_mines = action_set_num_mines__MODULE_ID__;
+    this.set_num_flags = action_set_num_flags__MODULE_ID__;
+    this.set_num_spaces = action_set_num_spaces__MODULE_ID__;
+
+    this.game_over = false;
+
+    this.make_game_over = make_game_over__MODULE_ID__;
+    this.at_first_move = true;
+
+    this.puzzle = new puzzle_data__MODULE_ID__(width, height, mine_count, this.use_knight);
+    this.flag_count = 0;
+    this.cell_state = new Array(this.puzzle.size);
+    // 0 = unclicked;
+    // 1 = depressed (as part of a "consider");
+    // 2 = unclicked with ?
+    // 3 = depressed with ?
+    // 4 = marked with flag
+    // 5 = open
+    // 6 = displayed bomb (only used if gameover)
+    // 7 = incorrect flag (only used if gameover)
+
+    this.num_mines = mine_count;
+    this.num_flags = mine_count;
+    this.num_spaces = this.puzzle.size - mine_count;
+
+    this.considerations = new Array(0);  // a dynamic array that stores the potential considers.
+    this.consideration_type = 0;
+    // 0 = "fake" -- a commit will rollback.
+    // 1 = "reveal" -- a commit will reveal.
+    // 2 = "flag" -- a commit will flag.
+
+    for (var i=0; i < this.puzzle.size; ++i) {
+      this.cell_state[i] = 0;
+    }
+
+    if (this.use_symbol) {
+      // create a symbol table.
+      this.symbol_table = new Array(9);
+      for (var i=0; i<9; ++i) {
+        this.symbol_table[i] = i;
+      }
+      for (var i=1; i<9; ++i) {
+        rand_pos = Math.floor(Math.random()*(i+1));
+        if (rand_pos != i) {
+          var temp = this.symbol_table[i];
+          this.symbol_table[i] = this.symbol_table[rand_pos];
+          this.symbol_table[rand_pos] = temp;
+        }
+      }
+    }
+    if (this.use_memory) {
+      this.last_seen = 0;
+    }
+  }
+
+  function is_space__MODULE_ID__(value) {
+    if (value == 0) return true;
+    if (value == 2) return true;
+    return false;
+  }
+
+  function surrounding_spaces__MODULE_ID__(row, col) {
+    var answer = 0;
+    var pos = 0;
+    if (this.use_knight) {
+      pos = this.puzzle.get_position(row-2, col-1); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row-2, col+1); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row-1, col+2); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row-1, col-2); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row+1, col+2); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row+1, col-2); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row+2, col-1); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row+2, col+1); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+    } else {
+      pos = this.puzzle.get_position(row-1, col-1); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row-1, col  ); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row-1, col+1); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row  , col-1); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row  , col+1); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row+1, col-1); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row+1, col  ); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+      pos = this.puzzle.get_position(row+1, col+1); if (pos != -1 && this.is_space(this.cell_state[pos])) answer++;
+    }
+    return answer;
+  }
+  
+  function surrounding_flags__MODULE_ID__(row, col) {
+    var answer = 0;
+    var pos = 0;
+    if (this.use_knight) {
+      pos = this.puzzle.get_position(row-2, col-1); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row-2, col+1); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row-1, col+2); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row-1, col-2); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row+1, col+2); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row+1, col-2); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row+2, col-1); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row+2, col+1); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+    } else {
+      pos = this.puzzle.get_position(row-1, col-1); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row-1, col  ); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row-1, col+1); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row  , col-1); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row  , col+1); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row+1, col-1); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row+1, col  ); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+      pos = this.puzzle.get_position(row+1, col+1); if (pos != -1 && this.cell_state[pos] == 4) answer++;
+    }
+    return answer;
+  }
+
+  ///////////////////////////////////////////////
+  // Output UI.
+
+  function get_cell_id__MODULE_ID__(row, col) {
+    return ("cell_" + row + "_" + col + "___MODULE_ID__");
+  }
+
+  function set_state__MODULE_ID__(pos, state) {
+    this.cell_state[pos] = state;
+    var row = Math.floor(pos / this.width);
+    var col = pos % this.width;
+    var id = this.get_cell_id(row, col);
+    _gel(id).src = this.src_image(row, col);
+    _gel(id).alt = this.alt_text(row, col);
+    _gel(id).title = this.alt_text(row, col);
+  }
+
+  function alt_text__MODULE_ID__(row, col) {
+    var pos = this.puzzle.get_position(row, col);
+    if (pos == -1) {
+      return "Invalid cell " + row + " " + col; 
+    } else {
+      var state = this.cell_state[pos];
+
+      if (state == 0) return ".";
+      if (state == 1) return ".";
+      if (state == 2) return "?";
+      if (state == 3) return "?";
+      if (state == 4) return "M";
+      if (state == 5) {
+        if (this.use_symbol) {
+          return "S";
+        } else {
+          return this.puzzle.mine_count[pos];
+        }
+      }
+      if (state == 6) return "B";
+    }
+  }
+
+  function src_image__MODULE_ID__(row, col) {
+    var pos = this.puzzle.get_position(row, col);
+    if (pos == -1) {
+      return "Invalid cell " + row + " " + col; 
+    } else {
+      var state = this.cell_state[pos];
+
+      if (this.use_memory && state == 5 && pos != this.last_seen) {
+        return "http://weihwa.images02.googlepages.com/unclicked.png";
+      }
+
+      if (state == 0) return "http://weihwa.images02.googlepages.com/unclicked.png";
+      if (state == 1) return "http://weihwa.images02.googlepages.com/depressed.png";
+      if (state == 2) return "http://weihwa.images02.googlepages.com/unclicked_mark.png";
+      if (state == 3) return "http://weihwa.images02.googlepages.com/depressed_mark.png";
+      if (state == 4) return "http://weihwa.images02.googlepages.com/flag.png";
+      if (state == 5) {
+        if (!this.show_zero && this.puzzle.mine_count[pos] == 0) {
+          return "http://weihwa.images02.googlepages.com/revealed_empty.png";
+        } else {
+          if (this.use_symbol) {
+            return "http://weihwa.images02.googlepages.com/symbol_" + this.symbol_table[this.puzzle.mine_count[pos]] + ".png";
+          } else {
+            return "http://weihwa.images02.googlepages.com/revealed_" + this.puzzle.mine_count[pos] + ".png";
+          }
+        }
+      }
+      if (state == 6) return "http://weihwa.images02.googlepages.com/bomb.png";
+      if (state == 7) return "http://weihwa.images02.googlepages.com/flag_bad.png";
+    }
+  }
+
+  function make_game_over__MODULE_ID__(win) {
+    stop_timer__MODULE_ID__();
+    var used_memory = this.use_memory;
+    this.use_memory = false;
+    for (var i=0; i<this.puzzle.size; ++i) {
+      if (this.puzzle.mine_locations[i] && (this.cell_state[i] != 4)) {
+        this.set_state(i, 6);
+      }
+      if (!this.puzzle.mine_locations[i] && (this.cell_state[i] == 4)) {
+        this.set_state(i, 7);
+      }
+      if (used_memory) {
+        this.set_state(i, this.cell_state[i]);
+      }
+    }
+    this.game_over = true;
+    if (win) {
+      _gel("restart_button__MODULE_ID__").value = "Success!";
+    } else {
+      _gel("restart_button__MODULE_ID__").value = "Kaboom!";
+    }
+  }
+
+  ///////////////////////////////////////////////
+  // Timer code.
+
+  seconds_elapsed__MODULE_ID__ = 0;
+  timer_running__MODULE_ID__ = true;
+
+  function reset_timer__MODULE_ID__() {
+    seconds_elapsed__MODULE_ID__ = 0;
+  }
+
+  function stop_timer__MODULE_ID__() {
+    timer_running__MODULE_ID__ = false;
+  }
+
+  function start_timer__MODULE_ID__() {
+    timer_running__MODULE_ID__ = true;
+  }
+
+  function count_timer_second__MODULE_ID__() {
+    if (timer_running__MODULE_ID__) {
+      ++seconds_elapsed__MODULE_ID__;
+    }
+    _gel("text_num_seconds__MODULE_ID__").innerHTML = '<font size="-1">Time: ' + seconds_elapsed__MODULE_ID__ + '</font>';
+    setTimeout("count_timer_second__MODULE_ID__()", 1000); 
+  }
+
+
+  ///////////////////////////////////////////////
+  // Input UI.
+
+  function push_if_new__MODULE_ID__(ary, value) {
+    var is_new = true;
+    for (var i=0; i < ary.length; ++i) {
+      if (ary[i] == value) {
+        is_new = false;
+        break;
+      }
+    }
+    if (is_new) {
+      ary.push(value);
+    }
+  }
+
+  function action_spider__MODULE_ID__() {
+    // first, clean up all the flags.
+    for (var pos=0; pos<this.puzzle.size; ++pos) {
+      if (this.cell_state[pos] < 5) {
+        if (this.cell_state[pos] == 4) this.num_flags++;
+        this.set_state(pos, 0);
+      }
+    }
+
+    this.set_num_flags(this.num_flags);
+
+    this.puzzle.respider(this.cell_state);
+
+    // now, redo all the numbers.
+    for (var pos=0; pos<this.puzzle.size; ++pos) {
+      if (this.cell_state[pos] == 5) {
+        this.set_state(pos, 5);
+      }
+    }
+  }
+
+  function action_set_num_mines__MODULE_ID__(value) {
+    _gel("text_num_mines__MODULE_ID__").innerHTML = '<font size="-1">Mines: ' + value + '</font>';
+  }
+
+  function action_set_num_flags__MODULE_ID__(value) {
+    if (value < 0) {
+      _gel("text_num_flags__MODULE_ID__").innerHTML = '<font size="-1" color="#FF0000">Flags Left: ' + value + '</font>';
+    } else {
+      _gel("text_num_flags__MODULE_ID__").innerHTML = '<font size="-1">Flags Left: ' + value + '</font>';
+    }
+  }
+
+  function action_set_num_spaces__MODULE_ID__(value) {
+    if (value == 0) {
+      this.make_game_over(true);
+    }
+    _gel("text_num_spaces__MODULE_ID__").innerHTML = '<font size="-1">To Reveal: ' + value + '</font>';
+  }
+
+  function action_cancel__MODULE_ID__() {
+    if (this.considerations.length == 0) return;
+    if (this.game_over) return;
+    this.consideration_type = 0;
+    this.action_commit();
+  }
+
+  function action_show__MODULE_ID__(row, col) {
+    if (!this.use_memory) return;
+
+    var oldrow = Math.floor(this.last_seen / this.width);
+    var oldcol = (this.last_seen % this.width);
+
+    var pos = row * this.width + col;
+    this.last_seen = pos;
+
+    var id = this.get_cell_id(oldrow, oldcol);
+    _gel(id).src = this.src_image(oldrow, oldcol);
+    _gel(id).alt = this.alt_text(oldrow, oldcol);
+    _gel(id).title = this.alt_text(oldrow, oldcol);
+
+    var id = this.get_cell_id(row, col);
+    _gel(id).src = this.src_image(row, col);
+    _gel(id).alt = this.alt_text(row, col);
+    _gel(id).title = this.alt_text(row, col);
+  }
+
+  function action_mark__MODULE_ID__(row, col) {
+    if (this.game_over) return;
+    this.action_cancel();
+    var pos = row * this.width + col;
+    var state = this.cell_state[pos];
+
+    if (state == 0) {
+      this.set_state(pos, 4);
+      this.set_num_flags(--this.num_flags);
+    } else if (state == 4) {
+      this.set_state(pos, 2);
+      this.set_num_flags(++this.num_flags);
+    } else if (state == 2) {
+      this.set_state(pos, 0);
+    }
+  }
+
+  function consider_if_space__MODULE_ID__(row, col) {
+    var pos = this.puzzle.get_position(row, col); 
+    if (pos == -1) return;
+    var state = this.cell_state[pos];
+    if (this.is_space(state)) {
+      this.set_state(pos, state + 1);
+      push_if_new__MODULE_ID__(this.considerations, pos);
+    }
+  }
+
+  function consider_surrounding_spaces__MODULE_ID__(row, col) {
+    var pos = 0;
+    if (this.use_knight) {
+      this.consider_if_space(row-2, col-1);
+      this.consider_if_space(row-2, col+1);
+      this.consider_if_space(row-1, col+2);
+      this.consider_if_space(row-1, col-2);
+      this.consider_if_space(row+1, col+2);
+      this.consider_if_space(row+1, col-2);
+      this.consider_if_space(row+2, col-1);
+      this.consider_if_space(row+2, col+1);
+    } else {
+      this.consider_if_space(row-1, col-1);
+      this.consider_if_space(row-1, col);
+      this.consider_if_space(row-1, col+1);
+      this.consider_if_space(row  , col-1);
+      this.consider_if_space(row  , col+1);
+      this.consider_if_space(row+1, col-1);
+      this.consider_if_space(row+1, col);
+      this.consider_if_space(row+1, col+1);
+    }
+  }
+
+  function action_consider__MODULE_ID__(row, col, type) {
+    if (this.game_over) return;
+    this.action_cancel();
+    var pos = row * this.width + col;
+    var state = this.cell_state[pos];
+
+    if (type == 1) {
+      // normal reveal
+      // only applies to "clickable" cells.
+      if (state != 0 && state != 2) return;
+      this.consideration_type = 1;
+      this.set_state(pos, state + 1);
+      push_if_new__MODULE_ID__(this.considerations, pos);
+    } else if (type == 2) {
+      // smart reveal
+      if (this.cell_state[pos] != 5) {
+        this.consideration_type = 0;
+      } else if (this.surrounding_flags(row, col) == this.puzzle.mine_count[pos]) {
+        this.consideration_type = 1;
+      } else {
+        this.consideration_type = 0;
+      }
+      this.consider_surrounding_spaces(row, col);
+    } else if (type == 3) {
+      // super reveal
+      if (this.cell_state[pos] != 5) {
+        this.consideration_type = 0;
+      } else if (this.surrounding_flags(row, col) == this.puzzle.mine_count[pos]) {
+        this.consideration_type = 1;
+      } else if (this.surrounding_spaces(row, col) + this.surrounding_flags(row, col) == this.puzzle.mine_count[pos]) {
+        this.consideration_type = 2;
+      } else {
+        this.consideration_type = 0;
+      }
+      this.consider_surrounding_spaces(row, col);
+    }
+  }
+
+  function action_commit__MODULE_ID__() {
+    if (this.game_over) return;
+
+    var spider_override = (this.considerations.length == 0);
+
+    while (this.considerations.length > 0) {
+      var pos = this.considerations.pop();
+      var value = this.cell_state[pos];
+      if (this.consideration_type == 0) {
+        spider_override = true;
+        this.set_state(pos, value - 1);
+      } else if (this.consideration_type == 1) {
+        if (this.puzzle.mine_locations[pos]) {
+          if (this.at_first_move && this.free_first_move) {
+            // okay, they get a reprieve
+            var newpos = 0;
+            while ((newpos < this.puzzle.size) && (this.puzzle.mine_locations[newpos] || (newpos == pos))) {
+              newpos++;
+            }
+            if (newpos == this.puzzle.size) {
+              // dang, screwed.
+              this.make_game_over(false);
+            } else {
+              this.puzzle.mine_locations[newpos] = true;
+              this.puzzle.mine_locations[pos] = false;
+              this.puzzle.calculate_mine_count();
+              push_if_new__MODULE_ID__(this.considerations, pos);  // try again.
+            }
+          } else {
+            // bomb!
+            this.make_game_over(false);
+          }
+        } else {
+          this.at_first_move = false;
+          this.set_state(pos, 5);  // safe
+          this.set_num_spaces(--this.num_spaces);
+          if (this.auto_reveal_zero && this.puzzle.mine_count[pos] == 0) {
+            this.consider_surrounding_spaces(Math.floor(pos/this.width), pos % this.width);
+          }
+        }
+      } else if (this.consideration_type == 2) {
+        spider_override = true;
+        this.set_state(pos, 4);
+        this.set_num_flags(--this.num_flags);
+      }
+    } 
+    
+    if (!spider_override && this.use_spider && !this.game_over) {
+      this.action_spider();
+    }
+  }
+
+  ////////////////////////////////////////////////////
+  // Mouse event interpretation.
+
+  // Interpreting the keys works this way.
+  // There are seven actions:
+  //   0.  Cancelling a consideration.
+  //   1.  Marking a flag.
+  //   2.  Considering a reveal.
+  //   3.  Committing the current reveal.
+  //   4.  Considering a smart reveal.
+  //   5.  Considering a super reveal (not in Windows).
+  //
+  // Here is how Windows Minesweeper interprets mouse buttons.
+  // If we're in Internet Explorer, uses these interpretations.
+  //   0.  MouseOut.
+  //   1.  Right MouseDown.  (If no other buttons are down.)
+  //   2.  Left MouseDown.  (If no other buttons are down.)
+  //   3.  Any MouseUp.  (If we are in a "consider" state.)
+  //   4.  Any other MouseDown.
+  //   5.  Can't make this happen.
+  //
+  // However, we don't have the luxury of knowing which buttons are down, unless we are IE.
+  // So, 4 will only get triggered by the middle button.
+  //
+  // Holding down the Ctrl key results in a reinterpretation of the buttons:
+  //   A Left action is treated as a Right action.
+  //   A Right action is treated as a Middle action.
+  //   A Middle action is treated as a Left action.
+  //
+  // Holding down the Shift key results in a remapping of the results:
+  //   2 and 4 are switched.
+  //   1 and 5 are switched.
+
+  function on_mouse_down__MODULE_ID__(event, row, col) {
+    var result_code;
+    if (typeof(event.which) == "undefined") {
+      // Internet Explorer uses event.button as a bit vector.  1 is Left, 2 is Right, 4 is Middle.
+      var button_value = event.button;
+      if (event.ctrlKey) {
+        // This is, interestingly enough, a right-shift.
+        button_value = event.button % 4 * 2 + (event.button > 3 ? 1 : 0);
+      }
+      if (button_value == 2) {
+        result_code = 1;
+      } else if (button_value == 1) {
+        result_code = 2;
+      } else {
+        result_code = 4;
+      }
+    } else {
+      var button_value = event.which;
+      if (event.ctrlKey) {
+        button_value--;
+      }
+      if (button_value == 1) {
+        result_code = 2;
+      } else if (button_value == 2) {
+        result_code = 4;
+      } else if (button_value == 3 || button_value == 0) {
+        result_code = 1;
+      }
+    }
+    if (event.shiftKey) {
+      result_code = 6 - result_code;
+    }
+    if (result_code == 1) {
+      game__MODULE_ID__.action_mark(row, col);
+    } else if (result_code == 2) {
+      game__MODULE_ID__.action_consider(row, col, 1);
+    } else if (result_code == 4) {
+      game__MODULE_ID__.action_consider(row, col, 2);
+    } else if (result_code == 5) {
+      game__MODULE_ID__.action_consider(row, col, 3);
+    }
+  }
+
+  function on_mouse_out__MODULE_ID__(event, row, col) {
+    game__MODULE_ID__.action_cancel(row, col);
+  }
+
+  function on_mouse_up__MODULE_ID__(event, row, col) {
+    game__MODULE_ID__.action_commit(row, col);
+  }
+
+  function on_mouse_over__MODULE_ID__(event, row, col) {
+    game__MODULE_ID__.action_show(row, col);
+  }
+
+  function on_mouse_click__MODULE_ID__(event, row, col) {
+// We don't do anything with MouseClick events yet, but we might in the future.
+//    if (typeof(event.which) == "undefined") {
+//      _gel("bloop").value = "mouse click IE " + event.button + " " + row + " " + col + " " + event.altKey + " " + event.ctrlKey + " " + event.shiftKey;
+//    } else {
+//      _gel("bloop").value = "mouse click other " + event.which + " " + row + " " + col + " " + event.altKey + " " + event.ctrlKey + " " + event.shiftKey;
+//    }
+  }
+
+  ///////////////////////////////////////
+  // Direct access functions.
+  
+  var start_num_mines__MODULE_ID__ = 15;
+  var start_width__MODULE_ID__ = 10;
+  var start_height__MODULE_ID__ = 10;
+  var game__MODULE_ID__ = new state_data__MODULE_ID__(start_width__MODULE_ID__,
+                                                      start_height__MODULE_ID__,
+                                                      start_num_mines__MODULE_ID__,
+                                                      true, false, true,
+                                                      false, false, false, false);
+
+  function get_new_puzzle__MODULE_ID__() {
+    // Hide everything first
+    for (var i=0; i < game__MODULE_ID__.puzzle.size; ++i) {
+      game__MODULE_ID__.set_state(i, 0);
+    }
+   
+    if (_gel("count_change__MODULE_ID__").selectedIndex == 1) {
+      start_num_mines__MODULE_ID__ -= 8;
+    } else if (_gel("count_change__MODULE_ID__").selectedIndex == 2) {
+      start_num_mines__MODULE_ID__ -= 3;
+    } else if (_gel("count_change__MODULE_ID__").selectedIndex == 3) {
+      start_num_mines__MODULE_ID__ += 2;
+    } else if (_gel("count_change__MODULE_ID__").selectedIndex == 4) {
+      start_num_mines__MODULE_ID__ += 7;
+    }
+    _gel("count_change__MODULE_ID__").selectedIndex = 0;
+
+    if (_gel("variant__MODULE_ID__").selectedIndex == 0) {  // standard
+      game__MODULE_ID__ = new state_data__MODULE_ID__(start_width__MODULE_ID__,
+                                                      start_height__MODULE_ID__,
+                                                      start_num_mines__MODULE_ID__,
+                                                      true, false, true,
+                                                      false, false, false, false);
+    } else if (_gel("variant__MODULE_ID__").selectedIndex == 1) {  // zeroes
+      game__MODULE_ID__ = new state_data__MODULE_ID__(start_width__MODULE_ID__,
+                                                      start_height__MODULE_ID__,
+                                                      start_num_mines__MODULE_ID__,
+                                                      false, true, true,
+                                                      false, false, false, false);
+    } else if (_gel("variant__MODULE_ID__").selectedIndex == 2) { // spider
+      game__MODULE_ID__ = new state_data__MODULE_ID__(start_width__MODULE_ID__,
+                                                      start_height__MODULE_ID__,
+                                                      start_num_mines__MODULE_ID__,
+                                                      false, true, true,
+                                                      false, false, true, false);
+    } else if (_gel("variant__MODULE_ID__").selectedIndex == 3) { // symbol
+      game__MODULE_ID__ = new state_data__MODULE_ID__(start_width__MODULE_ID__,
+                                                      start_height__MODULE_ID__,
+                                                      start_num_mines__MODULE_ID__,
+                                                      false, true, true,
+                                                      true, false, false, false);
+    } else if (_gel("variant__MODULE_ID__").selectedIndex == 4) {  // memory
+      game__MODULE_ID__ = new state_data__MODULE_ID__(start_width__MODULE_ID__,
+                                                      start_height__MODULE_ID__,
+                                                      start_num_mines__MODULE_ID__,
+                                                      false, true, true,
+                                                      false, true, false, false);
+    } else if (_gel("variant__MODULE_ID__").selectedIndex == 5) {  // knight
+      game__MODULE_ID__ = new state_data__MODULE_ID__(start_width__MODULE_ID__,
+                                                      start_height__MODULE_ID__,
+                                                      start_num_mines__MODULE_ID__,
+                                                      false, true, true,
+                                                      false, false, false, true);
+    } else {
+      // Huh, weird.  Shouldn't get here.  Let's just do standard.
+      game__MODULE_ID__ = new state_data__MODULE_ID__(start_width__MODULE_ID__,
+                                                      start_height__MODULE_ID__,
+                                                      start_num_mines__MODULE_ID__,
+                                                      true, false, true,
+                                                      false, false, false, false);
+    }
+
+    _gel("minesweeper_grid__MODULE_ID__").innerHTML = table_html__MODULE_ID__();
+
+    _gel("restart_button__MODULE_ID__").value = "Start Over";
+    game__MODULE_ID__.set_num_mines(game__MODULE_ID__.num_mines);
+    game__MODULE_ID__.set_num_flags(game__MODULE_ID__.num_flags);
+    game__MODULE_ID__.set_num_spaces(game__MODULE_ID__.num_spaces);
+    reset_timer__MODULE_ID__();
+    start_timer__MODULE_ID__();
+  }
+
+  function table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="0" cellpadding="0px" cellspacing="0px">';
+    for (var row = 0; row < game__MODULE_ID__.height; ++row) {
+      result += '<tr>';
+      for (var col = 0; col < game__MODULE_ID__.width; ++col) {
+        result += '<td>';
+        result += '<img';
+          result += ' id="' + game__MODULE_ID__.get_cell_id(row, col) + '"';
+          result += ' src="' + game__MODULE_ID__.src_image(row, col) + '"';
+          result += ' alt="' + game__MODULE_ID__.alt_text(row, col) + '"';
+          result += ' title="' + game__MODULE_ID__.alt_text(row, col) + '"';
+          result += ' onMouseDown="on_mouse_down__MODULE_ID__(event, ' + row + ', ' + col + ')"';
+          result += ' onMouseOut="on_mouse_out__MODULE_ID__(event, ' + row + ', ' + col + ')"';
+          result += ' onMouseUp="on_mouse_up__MODULE_ID__(event, ' + row + ', ' + col + ')"';
+          result += ' onMouseOver="on_mouse_over__MODULE_ID__(event, ' + row + ', ' + col + ')"';
+          result += ' onClick="on_mouse_click__MODULE_ID__(event, ' + row + ', ' + col + ')"';
+        result += '>';
+        result += '<td>';
+      }
+      result += '</tr>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<div style="position:relative;width:93px;float:left;margin-right:2px;margin-top:2px;margin-bottom:0px;">
+<IMG SRC="http://www.google.com/ig/images/weihwa.jpg"
+     WIDTH="90px"
+     ALT="Wei-Hwa Huang: Googler &amp; Four-Time World Puzzle Champion"
+     TITLE="Wei-Hwa Huang: Googler &amp; Four-Time World Puzzle Champion"
+>
+</div>
+
+<B>June 15th, 2006</B>:
+It's hard not to be tempted by <a target="_top" href="http://videoontheweb.wordpress.com/2006/06/08/google-minesweeper-launches/">parody</a>.
+It will probably be a while until we can actually get online collaboration, but I was able to come up with
+some interesting variants of <a target="_top" href="http://en.wikipedia.org/wiki/Minesweeper_%28computer_game%29">Minesweeper</a>.  You
+can try them out (as well as the standard game) this week:
+
+
+<div style="position:relative;float:left;margin-right:3px;margin-top:3px" id="minesweeper_grid__MODULE_ID__">
+<SCRIPT LANGUAGE="JavaScript">document.write(table_html__MODULE_ID__());</SCRIPT>
+</div>
+
+<FORM>
+  <DIV id="text_num_mines__MODULE_ID__"><font size=-1>Mines: 15</font></DIV>
+  <DIV id="text_num_flags__MODULE_ID__"><font size=-1>Flags Left: 15</font></DIV>
+  <DIV id="text_num_spaces__MODULE_ID__"><font size=-1>To Reveal: 85</font></DIV>
+  <DIV id="text_num_seconds__MODULE_ID__"><font size=-1>Time: 0</font></DIV>
+  <INPUT type="button" value="Start Over" id="restart_button__MODULE_ID__" onClick="get_new_puzzle__MODULE_ID__()">
+  <SCRIPT LANGUAGE="JavaScript">count_timer_second__MODULE_ID__();</SCRIPT>
+  <BR><SELECT id="variant__MODULE_ID__">
+    <OPTION SELECTED>Standard
+    <OPTION>Zeroes
+    <OPTION>Spider (slow)
+    <OPTION>Symbol
+    <OPTION>Memory
+    <OPTION>Knight
+  </SELECT>
+  <BR><SELECT id="count_change__MODULE_ID__">
+    <OPTION SELECTED>(Minecount?)
+    <OPTION>8 fewer mines
+    <OPTION>3 fewer mines
+    <OPTION>2 more mines
+    <OPTION>7 more mines
+  </SELECT>
+  <SCRIPT LANGUAGE="JavaScript">_gel("variant__MODULE_ID__").selectedIndex = 0;</SCRIPT>
+</FORM>
+
+<DIV id="debug"></DIV>
+
+<font size=-2>
+Your puzzle, of course, is to figure out what the rules to the variants are.  Shouldn't be too hard, although
+there are quite a few secrets to discover!  If you'd like to have my Minesweeper game for longer than one week, please add my Minesweeper Gadget by clicking
+on this link -- I'll be adding new enhancements and variants as time allows.
+</font>
+<BR>
+<a target="_top" href="http://fusion.google.com/add?moduleurl=http%3A//weihwa.feedback.googlepages.com/minesweeper.xml"><img src="http://buttons.googlesyndication.com/fusion/add.gif" width="104" height="17" border="0" alt="Add to
+Google"></a>
+
+<HR>
+<font size=-2>Symbol Minesweeper is based on an idea by Doug Zongker.</font>
+
+</FONT>
+
+
+  ]]> 
+
+  </Content>
+</Module>

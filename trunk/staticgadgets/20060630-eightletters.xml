@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzle: 2006-06-30"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20060630@gmail.com"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="390"
+    render_inline="optional"
+  />
+  <Content type="html">
+                                                                                                                                                                                                                                              
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  function _gel(thing) {
+    return document.getElementById(thing);
+  }
+ 
+
+  // build a rot13 map.
+  var alphabet_rot13__MODULE_ID__ = "abcdefghijklmnopqrstuvwxyzabcdefghijklm";
+  var map_rot13__MODULE_ID__ = new Array();
+  for (i = 0; i < 26; ++i)
+    map_rot13__MODULE_ID__[alphabet_rot13__MODULE_ID__.charAt(i)] = alphabet_rot13__MODULE_ID__.charAt(i+13);
+
+  function rot13__MODULE_ID__(text) {
+    var result = "";
+    for (i = 0; i < text.length; ++i) {
+      result += map_rot13__MODULE_ID__[text.charAt(i)];
+    }
+    return result;
+  }
+
+  ///////////////////////////////////////////////
+  //  This is the Dragging object.
+
+  // This is a (heavily) modified form of dom-drag.js from
+  // http://youngpup.net/2001/domdrag
+  // The original is written by Aaron Boodman, who works at Google.
+
+  // Modfied such that it uses a "basis" item for dragging instead of
+  // allowing dragging of the actual item.
+
+  var Drag__MODULE_ID__ = {
+    obj : null,
+    basis : null,
+    is_dragging : false,
+    register_attach : function(o, x, y) {},
+    dragging_started : function(o) {},
+    dragging_happening : function(o, x, y) {},
+    dragging_ended : function(o) {},
+    xposition : function(o) {
+      var answer = 0;
+      if (o.offsetParent) {
+        while (o.offsetParent) {
+          answer += o.offsetLeft;
+          o = o.offsetParent;
+        }
+      } else if (o.x) {
+        answer = o.x;
+      }
+      return answer;
+    },
+    yposition : function(o) {
+      var answer = 0;
+      if (o.offsetParent) {
+        while (o.offsetParent) {
+          answer += o.offsetTop;
+          o = o.offsetParent;
+        }
+      } else if (o.y) {
+        answer = o.y;
+      }
+      return answer;
+    },
+    set_basis : function(o) {
+      Drag__MODULE_ID__.basis = o;
+      Drag__MODULE_ID__.basis.style["position"] = "absolute";
+      Drag__MODULE_ID__.basis.style["cursor"] = "move";
+      Drag__MODULE_ID__.basis.style["left"] = "0px";
+      Drag__MODULE_ID__.basis.style["top"] = "0px";
+    },
+    attach : function(o) {
+      o.onmousedown  = Drag__MODULE_ID__.start;
+      o.style.left   = Drag__MODULE_ID__.xposition(o) + "px";
+      o.style.top    = Drag__MODULE_ID__.yposition(o) + "px";
+      Drag__MODULE_ID__.register_attach(o, Drag__MODULE_ID__.xposition(o), Drag__MODULE_ID__.yposition(o));
+    },
+    detach : function(o) {
+      o.onmousedown  = null;
+    },
+    start : function(e) {
+      Drag__MODULE_ID__.obj = this;
+      e = Drag__MODULE_ID__.fixE(e);
+      Drag__MODULE_ID__.is_dragging = true;
+      Drag__MODULE_ID__.basis.style["left"] = parseInt(Drag__MODULE_ID__.obj.style.left) + "px";
+      Drag__MODULE_ID__.basis.style["top"] = parseInt(Drag__MODULE_ID__.obj.style.top) + "px";
+      Drag__MODULE_ID__.basis.lastMouseX    = e.clientX;
+      Drag__MODULE_ID__.basis.lastMouseY    = e.clientY;
+      var x_offset = Drag__MODULE_ID__.xposition(Drag__MODULE_ID__.obj) - e.clientX;
+      var y_offset = Drag__MODULE_ID__.yposition(Drag__MODULE_ID__.obj) - e.clientY;
+
+      document.onmousemove    = Drag__MODULE_ID__.drag;
+      document.onmouseup   = Drag__MODULE_ID__.end;
+      Drag__MODULE_ID__.dragging_started(Drag__MODULE_ID__.obj, x_offset, y_offset);
+      return false;
+    },
+    drag : function(e) {
+      e = Drag__MODULE_ID__.fixE(e);
+      if (e.which == 0) return Drag__MODULE_ID__.end();
+      var ey    = e.clientY;
+      var ex    = e.clientX;
+      var y = parseInt(Drag__MODULE_ID__.basis.style.top);
+      var x = parseInt(Drag__MODULE_ID__.basis.style.left);
+      var nx, ny;
+
+      nx = x + (ex - Drag__MODULE_ID__.basis.lastMouseX);
+      ny = y + (ey - Drag__MODULE_ID__.basis.lastMouseY);
+
+      Drag__MODULE_ID__.basis.style["left"] = nx + "px";
+      Drag__MODULE_ID__.basis.style["top"] = ny + "px";
+      Drag__MODULE_ID__.basis.lastMouseX    = ex;
+      Drag__MODULE_ID__.basis.lastMouseY    = ey;
+
+      Drag__MODULE_ID__.dragging_happening(Drag__MODULE_ID__.obj, nx, ny);
+      return false;
+    },
+    end : function() {
+      document.onmousemove = null;
+      document.onmouseup  = null;
+      Drag__MODULE_ID__.is_dragging = false;
+      Drag__MODULE_ID__.dragging_ended(Drag__MODULE_ID__.obj);
+      Drag__MODULE_ID__.obj = null;
+    },
+    fixE : function(e) {
+      if (typeof e == 'undefined') e = window.event;
+      if (typeof e.layerX == 'undefined') e.layerX = e.offsetX;
+      if (typeof e.layerY == 'undefined') e.layerY = e.offsetY;
+      return e;
+    }
+};
+
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "back end".
+
+  function puzzle_data__MODULE_ID__() {
+    this.values = new Array(
+      "antiquated", "genuine", "blemish", "harvest",
+      "chessman", "inlet", "chimney", "innate",
+      "circlet", "maiden", "classify", "municipality",
+      "completed", "obligation", "comprehend", "oppugn",
+
+      "constraint", "pinnacle", "discomfort", "placed",
+      "enthusiasm", "platter", "equitable", "pome",
+      "fashion", "remnant", "fellow", "spoken",
+      "forfeit", "supplication", "fulminate", "unrestrained"
+    );
+
+    var rot13answers = new Array(
+       // note: rot13 code, for anyone reading this code who doesn't want to spoil themselves.
+      "fghoobea", "fcnexvat", "fpnepvgl", "ervairag", 
+      "ernccrne", "ernqwhfg", "cyrnfher", "cnfgbeny",
+      "zhfgnpur", "zbqrengr", "zvffcrnx", "serrmvat",
+      "qvfpybfr", "pbirentr", "puncynva", "onaqntrq"
+    );
+  
+    this.answers = new Array();
+    for (var i=0; i<16; ++i) {
+      this.answers[i] = rot13__MODULE_ID__(rot13answers[i]);
+    }
+
+    this.user_answers = new Array();
+
+    this.mapping = new Array(
+      15, 6, 2, 4, 1, 13, 3, 0, 15, 10, 9, 2, 7, 8, 5, 1,
+      3, 10, 8, 14, 11, 12, 5, 4, 9, 0, 14, 7, 12, 6, 13, 11
+    );
+
+    this.correct_column = new Array(
+      1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0,
+      0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0
+    );
+  }
+ 
+  puzzle_data__MODULE_ID__.prototype.get_partner = function(index) {
+    if (index % 2 == 0) return (index - (-1)); 
+    return (index - 1);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_color = function (index) {
+    var partner_index = this.get_partner(index);
+    if (this.mapping[partner_index] == this.mapping[index]) {
+      if (this.correct_column[index] == index % 2) {
+        return '#ABFF73';  // pastel green
+      } else {
+        return '#FFFF84';  // pastel yellow
+      }
+    } else {
+      return 'transparent';
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.cell_changed = function(index) {
+    // callback -- modifies a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.deregister = function(index) {
+    // callback -- makes a cell unmovable.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.display_answer = function(index, answer) {
+    // callback -- displays an answer at position index.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.display_message = function(message) {
+    // callback -- displays a message.
+  }
+
+  // actions.
+  puzzle_data__MODULE_ID__.prototype.get_text = function (index) {
+    if (index == -1) {
+      // blank (grey)
+//      return '<span style="border:thin dashed grey;font-size:8pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
+//    This commented version is the original, which worked fine on Firefox but not in IE.  :-(
+ //     return '<span style="font-size:8pt"><img src="http://weihwa.feedback.googlepages.com/dotted.png"/></span>';
+      return '<span style="font-size:8pt"></span>';
+    }
+    return '<span style="background-color:' + this.get_color(index) + ';font-size:8pt">' + this.values[index] + '</span>';
+  }
+
+  puzzle_data__MODULE_ID__.prototype.swap = function (pos1, pos2) {
+    if (pos1 == pos2) return;
+
+    var ocp1 = this.get_color(this.get_partner(pos1));
+    var ocp2 = this.get_color(this.get_partner(pos2));
+ 
+    var temp = this.values[pos1];
+    this.values[pos1] = this.values[pos2];
+    this.values[pos2] = temp;
+    temp = this.mapping[pos1];
+    this.mapping[pos1] = this.mapping[pos2];
+    this.mapping[pos2] = temp;
+    temp = this.correct_column[pos1];
+    this.correct_column[pos1] = this.correct_column[pos2];
+    this.correct_column[pos2] = temp;
+
+    this.cell_changed(pos1);
+    this.cell_changed(pos2);
+  
+    if (this.get_partner(pos1) != pos2) {
+      if (ocp1 != this.get_color(this.get_partner(pos1))) {
+        this.cell_changed(this.get_partner(pos1));
+      }
+      if (ocp2 != this.get_color(this.get_partner(pos2))) {
+        this.cell_changed(this.get_partner(pos2));
+      }
+    }
+    this.display_message("Check");
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_answer_index = function (answer) {
+    for (var i=0; i<16; ++i) {
+      if (answer == this.answers[i]) return i;
+    }
+    return -1;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.matches_existing_answer = function (answer) {
+    for (var i=0; i<this.user_answers.length; ++i) {
+      if (answer == this.user_answers[i]) return true;
+    }
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.find_half = function (answer_index, column) {
+    for (var i=0; i<32; ++i) {
+      if (this.mapping[i] == answer_index && this.correct_column[i] == column) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.check_user_answer = function (answer) {
+    if (this.matches_existing_answer(answer)) {
+      this.display_message("Already done");
+      return false;
+    }
+    var answer_index = this.get_answer_index(answer);
+    if (answer_index == -1) {
+      this.display_message("Incorrect");
+      return false;
+    }
+    var row = this.user_answers.length;
+    this.swap(this.find_half(answer_index, 0), row * 2);
+    this.swap(this.find_half(answer_index, 1), row * 2 + 1);
+    this.deregister(row * 2);
+    this.deregister(row * 2 + 1);
+    this.user_answers.push(answer);
+    this.display_answer(row, answer);
+    this.display_message((row + 1) + " Correct!");
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "front end".
+  ///  Encodes the user's current "state".
+
+  function game_setup__MODULE_ID__() {
+    var game_setup = this;
+
+    game_setup.width = 2;
+    game_setup.height = 16;
+    game_setup.size = 32;
+
+    game_setup.start_position = 0;
+    game_setup.mouse_position = 0;
+
+    game_setup.x_values = new Array(this.size);
+    game_setup.y_values = new Array(this.size);
+
+    game_setup.game_over = false;
+    game_setup.game_over_state = 0;  // 0 = time over, 1 = too slow, 2 = victory;
+
+    game_setup.detached = new Array(
+      false, false, false, false, false, false, false, false,
+      false, false, false, false, false, false, false, false,
+      false, false, false, false, false, false, false, false,
+      false, false, false, false, false, false, false, false
+    );
+
+    game_setup.puzzle = new puzzle_data__MODULE_ID__();
+
+    // define callbacks.
+    game_setup.refresh = function (index) {
+      if (index != -1)
+        _gel(game_setup.get_cell_id(index)).innerHTML = game_setup.get_value_at(index);
+    }
+    game_setup.puzzle.cell_changed = this.refresh;
+
+    game_setup.deregister = function (index) {
+      Drag__MODULE_ID__.detach(_gel(game_setup.get_cell_id(index)));
+      _gel(game_setup.get_cell_id(index)).style["cursor"] = "auto";
+      game_setup.detached[index] = true;
+    }
+    game_setup.puzzle.deregister = this.deregister;
+
+    game_setup.display_answer = function (index, answer) {
+      _gel(game_setup.get_answer_id(index)).innerHTML = '<span style="background-color:#ABFF73;font-size:8pt;font-weight:bold">' + answer + '</span>';
+    }
+    game_setup.puzzle.display_answer = this.display_answer;
+
+    game_setup.display_message = function (message) {
+      _gel("verify_button__MODULE_ID__").value = message;
+    }
+    game_setup.puzzle.display_message = this.display_message;
+
+  }
+
+  game_setup__MODULE_ID__.prototype.get_cell_id = function (index) {
+    return ('cell_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.get_answer_id = function (index) {
+    return ('answer_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.value_from_id = function (id) {
+    var regexp = /cell_(.*)___MODULE_ID__/;
+    var matches = regexp.exec(id);
+    return matches[1];
+  }
+
+  game_setup__MODULE_ID__.prototype.get_value_at = function (index) {
+    if (!Drag__MODULE_ID__.is_dragging) {
+      return this.puzzle.get_text(index);
+    } else if (this.mouse_position == index) {
+      return this.puzzle.get_text(-1);
+    } else if (this.start_position == index) {
+      return this.puzzle.get_text(this.mouse_position);
+    } else {
+      return this.puzzle.get_text(index);
+    }
+  }
+
+  ////////////////////////////////////////////////////
+  // UI actions.
+
+  game_setup__MODULE_ID__.prototype.action_verify_answer = function (user_answer) {
+    var expression = user_answer.toLowerCase().replace(/[^a-z]/g, "");
+    this.puzzle.check_user_answer(expression);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_register_attach = function (index, x, y) {
+    this.x_values[index] = x;
+    this.y_values[index] = y;
+  }
+
+  game_setup__MODULE_ID__.prototype.action_dragging_started = function (index, x, y) {
+    _gel("dummy").innerHTML = this.puzzle.get_text(index);
+    _gel("dummy").width = _gel(this.get_cell_id(index)).width;
+    this.start_position = index;
+    this.mouse_position = index;
+    this.x_offset = x;
+    this.y_offset = y;
+    this.refresh(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_dragging_happening = function (index, x, y) {
+    if (Drag__MODULE_ID__.is_dragging) {
+      var over = 0;
+      while (this.detached[over]) over++;
+      for (var i=0; i<this.size; ++i) {
+        if (this.detached[i]) continue;
+        if ((x >= this.x_values[i] + this.x_offset) && (y >= this.y_values[i] + this.y_offset))
+          over = i;
+      }
+      var old_position = this.mouse_position;
+      this.mouse_position = over;
+      this.refresh(old_position);
+      this.refresh(this.mouse_position);
+      this.refresh(this.start_position);
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.action_dragging_ended = function (index) {
+    if (index != this.mouse_position) {
+      this.puzzle.swap(this.mouse_position, index);
+    }
+    this.refresh(index);
+    _gel("dummy").innerHTML = "";
+  }
+
+  ////////////////////////////////////////////////////
+  // Dragging callback overrides.
+
+  function Drag_register_attach__MODULE_ID__(object, x, y) {
+    game__MODULE_ID__.action_register_attach(game__MODULE_ID__.value_from_id(object.id), x, y);
+  }
+
+  Drag__MODULE_ID__.register_attach = Drag_register_attach__MODULE_ID__;
+
+  function Drag_dragging_started__MODULE_ID__(object, x, y) {
+    game__MODULE_ID__.action_dragging_started(game__MODULE_ID__.value_from_id(object.id), x, y);
+  }
+
+  Drag__MODULE_ID__.dragging_started = Drag_dragging_started__MODULE_ID__;
+
+  function Drag_dragging_happening__MODULE_ID__(object, x, y) {
+    game__MODULE_ID__.action_dragging_happening(game__MODULE_ID__.value_from_id(object.id), x, y);
+  }
+
+  Drag__MODULE_ID__.dragging_happening = Drag_dragging_happening__MODULE_ID__;
+
+  function Drag_dragging_ended__MODULE_ID__(object) {
+    game__MODULE_ID__.action_dragging_ended(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag__MODULE_ID__.dragging_ended = Drag_dragging_ended__MODULE_ID__;
+
+  ///////////////////////////////////////
+  // Direct access functions.
+  
+  var game__MODULE_ID__ = new game_setup__MODULE_ID__();
+
+  function table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="1" cellpadding="0px" cellspacing="0px">';
+    for (var row = 0; row < game__MODULE_ID__.height; ++row) {
+      result += '<tr>';
+      for (var col = 0; col < game__MODULE_ID__.width; ++col) {
+        result += '<td align="center">';
+        result += '<div';
+          result += ' id="' + game__MODULE_ID__.get_cell_id(row * game__MODULE_ID__.width + col) + '"';
+          result += ' style="cursor:move"';
+        result += '>';
+        result += game__MODULE_ID__.get_value_at(row * game__MODULE_ID__.width + col);
+        result += '</div>';
+        result += '</td>';
+      }
+      result += '<td align="center">';
+      result += '<div';
+      result += ' id="' + game__MODULE_ID__.get_answer_id(row) + '"';
+      result += ' style="font-size:8pt"';
+      result += '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      result += '</div>';
+      result += '</tr>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+  function init_dragging__MODULE_ID__() {
+    Drag__MODULE_ID__.set_basis(_gel("dummy"));
+    for (var row = 0; row < game__MODULE_ID__.height; ++row) {
+      for (var col = 0; col < game__MODULE_ID__.width; ++col) {
+        Drag__MODULE_ID__.attach(_gel(game__MODULE_ID__.get_cell_id(row * game__MODULE_ID__.width + col)));
+      }
+    }
+  }
+
+  function verify__MODULE_ID__() {
+    game__MODULE_ID__.action_verify_answer(_gel("user_input__MODULE_ID__").value);
+    _gel("user_input__MODULE_ID__").value = "";
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<b>Confounded Compounds</b>:
+Each of these words is the synonym of a 4-letter word.  Pair them up to create 8-letter words.
+For instance, if you saw "quotation" and "treatise", you could come up with <i>textbook</i>.  Warning: These "compound" words
+are anything but textbook!
+<BR>
+
+<div style="position:relative;float:left;margin-right:3px;margin-top:3px" id="grid__MODULE_ID__">
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(table_html__MODULE_ID__());
+</SCRIPT>
+</div>
+<BR>
+<form action="javascript:verify__MODULE_ID__()">
+  <font size=-1>When you think you have an 8-letter word, enter it here.  If you're right, it will appear next to the appropriate pair.</font><BR>
+  <input id="user_input__MODULE_ID__" size="9" type="text" name="answer" style="font-size:8pt"/>
+  <input id="verify_button__MODULE_ID__" type="button" value="Check" onclick="verify__MODULE_ID__()"/>
+  <font size=-1><BR>Need help?  Try dragging the words around to swap their positions.
+  A correct pair will turn <span style="background-color:#ABFF73">green</span>, while a correctly-paired set in the wrong order will turn <span style="background-color:FFFF84">yellow</span>.</font>
+</form>
+
+<div id="dummy" align="center"></div>
+<img width="0px" height="0px" src="http://weihwa.feedback.googlepages.com/dotted.png"/>
+<div id="debug" align="center"></div>
+
+<SCRIPT LANGUAGE="JavaScript">
+  init_dragging__MODULE_ID__();
+</SCRIPT>
+
+</FONT>
+
+
+  ]]> 
+
+  </Content>
+</Module>
+

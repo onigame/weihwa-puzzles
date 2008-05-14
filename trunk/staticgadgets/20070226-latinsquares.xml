@@ -1,0 +1,958 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20070208@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="500">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+    <Require feature='grid'/>
+    <Require feature='analytics'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_20070226"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20070226@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils5.js"></script>
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
+--->
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json2.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  _IG_Analytics("UA-1247731-1", "/puzzlegadget");
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function _IG_game_state() {
+    this.cur_puz = 0;
+    this.puz_count = 150;
+    this.puz_solved = new Array();
+    this.puz_progress = new Array();
+    for (var i=0; i<this.puz_count; ++i) {
+      this.puz_solved[i] = 0;
+      this.puz_progress[i] = new Array();
+    }
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
+    if (this.game_state.puz_solved[puznum] == 1) {
+      return "#00FF00";
+    } else {
+      return "#FF0000";
+    }
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.score = function() {
+    var answer = 0;
+    for (var i=0; i<this.game_state.puz_count; ++i) {
+      answer += this.game_state.puz_solved[i];
+    }
+    return answer;
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+    var num = this.score();
+    if (num == 150) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = this.score();
+  }
+
+  ///////////////////////////////////////////////
+  ///  Primitive Sudoku classes.
+
+  var letters = new Array('A','B','C','D','E','F','G','H');
+
+  function sudoku_cell(id, size) {
+    this.id = id;
+    this.size = size;
+    this.fixed = false;
+    this.value = -1;
+    this.regions = new Array();
+
+    this.friend_values = new Multiset();
+  }
+
+  sudoku_cell.prototype.add_region = function (region) {
+    this.regions.push(region);
+  }
+
+  sudoku_cell.prototype.get_value = function () {
+    return this.value; 
+  }
+
+  sudoku_cell.prototype.allows = function (value) {
+    return (!this.friend_values.has(value));
+  }
+
+  sudoku_cell.prototype.allowed_letters = function () {
+    var answer = "";
+    for (var i=0; i<this.size; ++i) {
+      if (!this.friend_values.has(i)) {
+        answer += letters[i];
+      }
+    }
+    return answer;
+  }
+
+  sudoku_cell.prototype.add_placed = function (value, src_id) {
+    if (src_id == this.id) return;
+    var change_happening = (!this.friend_values.has(value));
+    this.friend_values.add(value);
+    if (change_happening)
+      this.changed(this.id);
+  }
+
+  sudoku_cell.prototype.remove_placed = function (value, src_id) {
+    if (src_id == this.id) return;
+    var change_happening = (this.friend_values.count(value) == 1);
+    this.friend_values.remove(value);
+    if (change_happening) {
+      this.changed(this.id);
+      this.value_changed(value);
+    }
+  }
+
+  sudoku_cell.prototype.set_value = function (value, fixed) {
+    for (var i = 0; i < this.regions.length; ++i) {
+      this.regions[i].remove_placed(this.value, this.id);
+      this.regions[i].add_placed(value, this.id);
+    }
+    this.fixed = fixed;
+    this.value = value;
+    this.changed(this.id);
+    this.value_changed(value);
+  }
+
+  sudoku_cell.prototype.reset_value = function () {
+    for (var i = 0; i < this.regions.length; ++i) {
+      this.regions[i].remove_placed(this.value, this.id);
+    }
+    var old_value = this.value;
+    this.value = -1;
+    this.changed(this.id);
+    this.value_changed(old_value);
+  }
+
+  sudoku_cell.prototype.changed = function (id) {
+    // callback -- indicates cell change.
+  }
+
+  sudoku_cell.prototype.value_changed = function (id) {
+    // callback -- indicates value change.
+  }
+
+  function sudoku_region(id, size) {
+    this.id = id;
+    this.size = size;
+    this.cells = new Array();
+    this.placed = new Multiset();
+  }
+
+  sudoku_region.prototype.add_cell = function (cell) {
+    this.cells.push(cell);
+  }
+
+  sudoku_region.prototype.add_placed = function (value, src_id) {
+    if (value != -1) {
+      this.placed.add(value);
+      for (var i = 0; i < this.cells.length; ++i) {
+        if (this.cells[i].id != src_id) {  // this check isn't really necessary but it pays to be paranoid.
+          this.cells[i].add_placed(value, src_id);
+        }
+      }
+      this.changed(this.id);
+    }
+  }
+
+  sudoku_region.prototype.has_dupes = function () {
+    return this.placed.has_dupes();
+  }
+
+  sudoku_region.prototype.completed = function () {
+    return ((this.placed.size == this.size) && (!this.placed.has_dupes()));
+  }
+
+  sudoku_region.prototype.allowed_letters = function () {
+    var answer = "";
+    for (var i=0; i<this.size; ++i) {
+      if (!this.placed.has(i)) {
+        answer += letters[i];
+      }
+    }
+    return answer;
+  }
+
+  sudoku_region.prototype.remove_placed = function (value, src_id) {
+    if (value != -1) {
+      this.placed.remove(value);
+      for (var i = 0; i < this.cells.length; ++i) {
+        if (this.cells[i].id != src_id) {  // this check isn't really necessary but it pays to be paranoid.
+          this.cells[i].remove_placed(value, src_id);
+        }
+      }
+      this.changed(this.id);
+    }
+  }
+
+  sudoku_region.prototype.changed = function (id) {
+    // callback -- indicates region change.
+  }
+
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data() {
+    this.prefix = 'http://weihwa.images02.googlepages.com/';
+//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/20070226-bridges/';
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data.prototype.resetPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+  }
+
+  puzzle_data.prototype.decode_raw_puzzle = function() {
+    this.decoded = new Array();
+    for (var i=0; i < this.raw_puzzle.length; i += 2) {
+      var code1 = (this.raw_puzzle.charCodeAt(i) - 35); if (code1 == 91) code1 = 57;
+      var code2 = (this.raw_puzzle.charCodeAt(i+1) - 35); if (code2 == 91) code2 = 57;
+      var number = code1 + code2 * 89;
+      for (var j=0; j < 5; j++) {
+        this.decoded[i/2*5+j] = number % 6;
+        number = Math.floor(number / 6);
+      }
+    }
+  }
+
+  puzzle_data.prototype.resetPuzzleData = function(index) {
+    var foo;
+    if (index < 50) {
+      foo = "4C~S_(8&.O&$C@VS>7V11CV#rGGF$$G#Y2s#cN`9T4j2w4E$nNOG):O6E2J$QT&5H#(4wQ'$QCKV9$]QyC2#m%:ObHn6]9?$q&P#)E%#oVz#/:I$<@W1=H9$V1vQAW75&$n#m%nVgHH4HH,#>7h&tNL%GE8$VA$Ek4UBJH,#<@~S):5@#D~#j10Q-C*:C7&#{Ty#(4K2%R&$uN%4REo%KH2#fQP#<@75[O7#fQNEm#`*H9+#O+G5-CJ699K$cNtVS4F2#AK$URA(iEn8E&~#O+G5-Cp8:9y#WTl*]1BAz2'$fQP#<@K%E$E$I%rGAWA9F77#V1{8AWH4n*K$m%PVbHv8DAP#s%GA%Fp%4C+#*RLV<$F4t*y#~1zUhHA9w2,#]O$955@9x@V#k9i&~#99R27#~1zUhHq'YQ7#<*H5TE>*IGT#QTM&F4k#XOy#9+J$54s6l4?$uN$E>7n%&H&#;:gBiEo'N9&#BT1+5:FEiVV#WTy4m%F4&$&$s%L(%F^1#P'$4CzSd(QEuOV#hHJ$~1=*_9t#~1{DWT^1oT'$m%JVhH75I$z#QTo**#(E1)K$>7uVO+t8?&&$e(W2oNFCARz#";
+    } else if (index < 100) {
+      foo = "r<q5L:k9AW=7sg-ZXFcKjFX4J5h2YS3=ug(=h5X1j1Z56fX:phgY?WR4{3&&QK$DGWD$^-Y.4-+OKEpW~.-$S2S2[4BHBf3=3WjT%END&CyCLR&D4g<]jgy4T4~Huc^h'cbhe555=:Y)+R5F>4&4;78FoHOC?WFcpEmHZGyfVhL^-CAau5;CTBZHIF&CdH_JK$m(y(C'P4#50KT)T46:4:Rdnht&`@:fuETBJ4~ROWc9IWd$8#%3+3V4yEn&<bu<d+>#O3+5x4Pa+To$5=z4{%E$K$&D2ZH.'='=m5q&&#GR.RgKx4{%x&e+R$zDgHCKv$L$Y+rGvEU6ZX.ZvERKLgw,8#3'FReWtgngBYaN3W.@$Y;KOW%UpFxB%C2DIR6'yEB8L:(:G5P&?5L$tFRT=W2O$#hC7Ulc,FdKrG&VyUlNOGg:b4Y1L6&FoH.@#h'=P4q1dNRTAWe)(Pn5kh-cQc77L4XQaFu&2@mElV`VXQyS0ZrR.@(F>IpWKV&DSKS)KV_QeWbh9]k4;5ZPu5mQ-QNTtVD2_hM:XgXg<`TBuEsO4K])dh;]N^I5[4UB*Rwcu5'=C5?W`NUOLKe+tFh)g(P#)&P7xV(8vE?JI.u$K$^Q^FPYb4%SrR5W%#)5:O9h3W{UXh2`8`#4cJ;KS7G7&4DR3WZB3VBKyECW#+j**#i+p]cKC@6EA@dKJgU1m4Lc9+c+4,c#P4[`R]>Zu5>:q7H6iE?]cJvVLEITlVdNZPa`WG?$t%x#`-O.Gh/(yXlA3WbN*Ri5u5`GkdeKxVxV8R^4U1Z5=Hk(";
+    } else if (index < 150) {
+      foo = "_NYL6@O#pR4=zeW/F>pVh#Cz=%KK-g*c[4J5o8X9(Z6*JFMWeh;<-@=l$#jX7y7?k)1#p(RF>X&@DwM4$[`WKj)/Q5pW,Z9OG&%swwU>][C?H)1#R4xQ]6:KDiDiEY0)%?-1pEf4q?Ei>t[WAZ,Ahj+i[*BgE#A16t$TNEJ5SETh'<Q$wER`>4L3D1St1yER3~@N#%Q@N@F,E[bn4=Gh/IO5JM+1v$e)qMtx~o=:]4->SHH-2,4zDW2FqD,=d]##'#WC<dS.eT1F~k`j'e>4##m6rV[.`0AWm(_)2h$>~yIxGN<M3/I'26o?P>qpLAk+@Z;&r+qh[(8#T0Btqy@wx4T4p'fuYX6&Vh{f'lGy#rPELE2BQhK<5&'zW4[&zDVAe+ph?;;mqJD%U1I4t=Fy*tuFhKK[~H&wp-G%my[y;Js_<:k9pE>8H~$%DVC4:%y06w1hwEE;<RRV?%kh/=V+VskkSBzE=;k[WZz&M4~u~]dA6,eWNTG20?vM-1N4vE>W)QM1Dw9]d*o@<e/$M4ah~]SBk+PThV@7u/si`,Cz=%L:SX{b4CvHm#(ewVl+FGCGm/t5+=eegN5D`qr-X.lIv~b/&5[7KKWh(61F:ga.F4<;'g9^QdoMHW>*h#Fg<.EW0s*Om'P7_FdKI#l@mX=,tF.LsM:n23f+XQTKYq6WE'v$%1(p:5G:tUwEk2':4tH-N44o;rHI>Zs^8#8&^#haV(rh`FT4k'P1>t3WWB%UJ/b05=@i&z)qzBnNGWcHE:*-9(>z{w<V(Bd+N4E7GRb0/1n)jk3lD@R$?IRVN4M:65a?-1qymhRW~U^L14y#(:vi;iB#C'<6@?~urOs(IF2<#rE/:,'zgnJQYPh)jF4Fj2T7hv>0'z^/IV-Q]Oehvg2@I7lh-1ze,:;4s$uKrxtxZ1,HWMP1M4<FAWBXf0/wGw.)`V[S[&$gE#XNwMjn6:=:k4F-(t(1yyl1G$.WWbZErh*:*HLI,&{3I$V+SZhk4NyE75K-`-l-R1T01ylGYQKadhp6dV4sZ&v$s$W-LE]sGWCzL%,s<:%/IWu$R.WbxB-@[q?(@eyS3$xfP#*&w7sH5]txo4ix?Y^*";
+    }
+
+    if (index < 50) {
+      this.size = 4; this.chunk = 12;
+    } else if (index < 100) {
+      this.size = 5; this.chunk = 16;
+    } else if (index < 150) {
+      this.size = 6; this.chunk = 22;
+    }
+    this.raw_puzzle = foo.substring(index % 50 * this.chunk, (index % 50 + 1) * this.chunk);
+    this.puznum = index;
+
+    this.decode_raw_puzzle();
+
+    this.area = this.size * this.size;
+    this.row_regions = new Array(this.size);
+    this.col_regions = new Array(this.size);
+    this.box_regions = new Array(this.size);
+
+    for (var i=0; i<this.size; ++i) {
+      this.row_regions[i] = new sudoku_region(i, this.size);
+      this.col_regions[i] = new sudoku_region(i + this.size, this.size);
+      this.box_regions[i] = new sudoku_region(i + this.size + this.size, this.size);
+    }
+
+    this.cells = new Array(this.area);
+    for (var i=0; i<this.area; ++i) {
+      this.cells[i] = new sudoku_cell(i, this.size);
+      this.cells[i].add_region(this.row_regions[Math.floor(i / this.size)]);
+      this.row_regions[Math.floor(i / this.size)].add_cell(this.cells[i]);
+
+      this.cells[i].add_region(this.col_regions[i % this.size]);
+      this.col_regions[i % this.size].add_cell(this.cells[i]);
+
+      var box_num = this.box_num(i);
+      this.cells[i].add_region(this.box_regions[box_num]);
+      this.box_regions[box_num].add_cell(this.cells[i]);
+    }
+
+    this.palette_count = new Multiset();
+    for (var i=0; i<this.size; ++i) {
+      for (var j=0; j<this.size; ++j) {
+        this.palette_count.add(i);
+      }
+    }
+
+    this.affix = function (index, value) {
+      this.cells[index].set_value(value, true);
+      this.palette_count.remove(value);
+    }
+
+    for (var i=this.area; i+2<this.decoded.length; i += 3) {
+      var pos = this.decoded[i] * this.size + this.decoded[i+1];
+      this.affix(pos, this.decoded[i+2]);
+    }
+
+    var callback_this = this;
+    callback_this.cell_changed_callback = function (index) {
+      callback_this.cell_changed(index);
+    }
+    callback_this.value_changed_callback = function (index) {
+      callback_this.value_changed(index);
+    }
+    for (var i=0; i<this.area; ++i) {
+      this.cells[i].changed = this.cell_changed_callback;
+      this.cells[i].value_changed = this.value_changed_callback;
+    }
+    callback_this.region_changed_callback = function (index) {
+      if (index == -1) return;
+      var pos = index % this.size;
+      if (index < this.size) {
+        callback_this._IGG_refreshCell(2 * this.gridsize * (pos + 1) - 1);
+      } else if (index < this.size * 2) {
+        callback_this._IGG_refreshCell(this.gridarea - this.gridsize + pos + 2);
+      } else {
+        callback_this._IGG_refreshCell(this.gridarea + this.gridsize + pos);
+      }
+    }
+    for (var i=0; i<this.size; ++i) {
+      this.row_regions[i].changed = this.region_changed_callback;
+      this.col_regions[i].changed = this.region_changed_callback;
+      this.box_regions[i].changed = this.region_changed_callback;
+    }
+
+    this.gridsize = this.size*2+2;
+    this.gridarea = this.gridsize*this.gridsize;
+    this.colors = new Array("#A9C5EB", "#FFBBBB", "#FFFF88", "#DDF8CC", "#CEA8F4", "#FFBBFF");
+  }
+
+  puzzle_data.prototype.box_num = function (index) {
+    return this.decoded[index];
+  }
+  
+  puzzle_data.prototype.save_progress = function () {
+//    if (!this.game_state.puz_progress) {
+//      this.game_state.puz_progress = new Array();
+//    }
+//    if (!this.game_state.puz_progress[this.game_state.cur_puz]) {
+//      this.game_state.puz_progress[this.game_state.cur_puz] = new Array();
+//    }
+//    for (var i=0; i<this.area; i++) {
+//      this.game_state.puz_progress[this.game_state.cur_puz][i] = this.userGrid[i];
+//    }
+    pref_controller.setPrefs();
+  }
+
+  puzzle_data.prototype.increment_palette = function (index) {
+    if (index == -1) return;
+    this.palette_count.add(index);
+    this.cell_changed(index + this.area);
+  }
+
+  puzzle_data.prototype.decrement_palette = function (index) {
+    if (index == -1) return;
+    this.palette_count.remove(index);
+    this.cell_changed(index + this.area);
+  }
+
+  puzzle_data.prototype.value_changed = function(value) {
+    this._IGG_refreshCell(value + this.gridarea);
+  }
+
+  puzzle_data.prototype.cell_changed = function(index) {
+    if (index >= this.area) {
+      // palette or bulb.
+      this._IGG_refreshCell(index - this.area + this.gridarea);
+    } else {
+      var row = Math.floor(index / this.size); 
+      var col = index % this.size;
+      var box = this.box_num(index);
+      this._IGG_refreshCell((2*row+1)*this.gridsize + (2*col+1)); // cell
+      this._IGG_refreshCell((2*row+2)*this.gridsize - 1); // row
+      this._IGG_refreshCell(this.gridarea - this.gridsize + (2*col+1)); // col
+      this._IGG_refreshCell(this.gridarea + this.size + box); // box
+    }
+  }
+
+  puzzle_data.prototype.isSolved = function() {
+    for (var i = 0; i < this.size; ++i) {
+      if (!this.row_regions[i].completed()) return false;
+      if (!this.col_regions[i].completed()) return false;
+      if (!this.box_regions[i].completed()) return false;
+    }
+    return true;
+  }
+
+  puzzle_data.prototype.blank = function() {
+    if (pcborder == "#FFFFFF") return '';
+    return '<img src="' + this.prefix + 'blank.gif" alt="-">';
+  }
+
+  puzzle_data.prototype.black = function() {
+    return '<img src="' + this.prefix + 'black.gif" alt="-">';
+  }
+
+  puzzle_data.prototype.get_background_color = function(index) {
+    if (index >= this.gridarea + this.size) {
+      // box light
+      return this.colors[index - this.gridarea - this.size];
+    } else if (index >= this.gridarea) {
+      return "#FFFFFF";
+    } else {
+      var g_row = Math.floor(index / this.gridsize);
+      var g_col = index % this.gridsize;
+      if (g_row == this.gridsize-1 || g_col == this.gridsize-1) {
+        return "#FFFFFF";
+      } else if (g_row == 0 || g_col == 0 || g_row == this.gridsize-2 || g_col == this.gridsize-2) {
+        return pcborder;
+      } else if (g_row % 2 == 0 && g_col % 2 == 0) {
+        var row = g_row / 2 - 1;
+        var col = g_col / 2 - 1;
+        var reg1 = this.box_num(row * this.size + col);
+        if (reg1 != this.box_num(row * this.size + col+1)) return pcborder;
+        if (reg1 != this.box_num((row+1) * this.size + col)) return pcborder;
+        if (reg1 != this.box_num((row+1) * this.size + col+1)) return pcborder;
+        return this.colors[reg1];
+      } else if (g_row % 2 == 0) {
+        var row = g_row / 2 - 1;
+        var col = (g_col - 1) / 2;
+        var reg1 = this.box_num(row * this.size + col);
+        if (reg1 != this.box_num((row+1) * this.size + col)) return pcborder;
+        return this.colors[reg1];
+      } else if (g_col % 2 == 0) {
+        var row = (g_row - 1)/ 2;
+        var col = g_col / 2 - 1;
+        var reg1 = this.box_num(row * this.size + col);
+        if (reg1 != this.box_num(row * this.size + col+1)) return pcborder;
+        return this.colors[reg1];
+      } else {
+        var row = (g_row - 1) / 2;
+        var col = (g_col - 1) / 2;
+        var reg1 = this.box_num(row * this.size + col);
+        return this.colors[reg1];
+      }
+    }
+  }
+
+  puzzle_data.prototype.set_background_colors = function() {
+    for (var i=0; i<this.gridarea; ++i) {
+      _gel(grid.getCellTDID(i)).style.backgroundColor = this.get_background_color(i);
+    }
+  }
+
+  puzzle_data.prototype.get_src = function (reg) {
+    if (reg.completed()) {
+      return this.prefix + "green.png";
+    } else if (reg.has_dupes()) {
+      return this.prefix + "red.png";
+    } else {
+      return this.prefix + "white.png";
+    }
+  }
+
+  puzzle_data.prototype.get_title = function (reg) {
+    if (reg.completed()) {
+      return "Completed";
+    } else if (reg.has_dupes()) {
+      return "Error: Duplicate letter";
+    } else {
+      return "Letters left: " + reg.allowed_letters();
+    }
+  }
+
+  puzzle_data.prototype.get_row_info = function(index) {
+    var answer = '';
+    answer += '<td align="middle" valign="center">';
+    answer += '<img src="' + this.get_src(this.row_regions[index]) + '"';
+    answer += ' title="' + this.get_title(this.row_regions[index]) + '"';
+    answer += ' width="24px" height="24px">';
+    answer += '</img>';
+    answer += '</td>';
+    return answer;
+  }
+
+  puzzle_data.prototype.get_col_info = function(index) {
+    var answer = '';
+    answer += '<td align="middle" valign="center">';
+    answer += '<img src="' + this.get_src(this.col_regions[index]) + '"';
+    answer += ' title="' + this.get_title(this.col_regions[index]) + '"';
+    answer += ' width="24px" height="24px">';
+    answer += '</img>';
+    answer += '</td>';
+    return answer;
+  }
+
+  puzzle_data.prototype.get_box_info = function(index) {
+    var answer = '';
+    answer += '<td align="middle" valign="center">';
+    answer += '<img src="' + this.get_src(this.box_regions[index]) + '"';
+    answer += ' title="' + this.get_title(this.box_regions[index]) + '"';
+    answer += ' width="24px" height="24px">';
+    answer += '</img>';
+    answer += '</td>';
+    return answer;
+  }
+
+  puzzle_data.prototype.palette_html = function(value, count) {
+    var answer = '';
+    var letter = letters[value];
+    if (count == 0) {
+      color = "#C0C0C0";
+      answer += '<span style="cursor:default;font-size:16pt;color:' + color + '" title="' + letter + ' (gone)">';
+      answer += letter;
+      if (this.tiny) {
+        answer += '<br><div style="align:center;font-size:7pt">(0)</div>';
+      } else {
+        answer += '<br><div style="align:center;font-size:7pt">(gone)</div>';
+      }
+      answer += '</span>';
+    } else {
+      answer += '<span style="font-size:16pt" title="' + letter + ' (' + count + ' left)">'
+      answer += letter;
+      if (this.tiny) {
+        answer += '<br><div style="align:center;font-size:7pt">(' + count + ')</div>';
+      } else {
+        answer += '<br><div style="align:center;font-size:7pt">(' + count + ' left)</div>';
+      }
+      answer += '</span>';
+    }
+    return answer;
+  }
+
+  puzzle_data.prototype._IGG_getNormalView = function(index) {
+    if (index >= this.gridarea + this.size) {
+      return this.get_box_info(index - this.gridarea - this.size);
+    } else if (index >= this.gridarea) {
+      var number = index - this.gridarea;
+      return this.palette_html(number, this.palette_count.count(number));
+    } else {
+      var g_row = Math.floor(index / this.gridsize);
+      var g_col = index % this.gridsize;
+      if (g_row == this.gridsize-1 && g_col == this.gridsize-1) {
+        return "&nbsp;";
+      } else if (g_row == this.gridsize-1 && g_col % 2 == 0) {
+        return "";
+      } else if (g_row == this.gridsize-1) {
+        return this.get_col_info((g_col - 1)/2);
+      } else if (g_col == this.gridsize-1 && g_row % 2 == 0) {
+        return "";
+      } else if (g_col == this.gridsize-1) {
+        return this.get_row_info((g_row - 1)/2);
+      } else if (g_row % 2 == 0 || g_col % 2 == 0) {
+        return this.blank();
+      } else {
+        var row = (g_row - 1) / 2;
+        var col = (g_col - 1) / 2;
+        return this.get_cell_html(row * this.size + col);
+      }
+    }
+  }
+
+  puzzle_data.prototype._IGG_getSourceView = function(g_index) {
+    var pos = g_index - this.gridarea;
+    if (pos >= 0 && pos < this.size) {
+      return this.palette_html(pos, this.palette_count.count(pos) - 1);
+    }
+    var index = this.gtoi(g_index);
+    if (index < 0) return;
+    return this.get_raw_cell_html("", "?", "#FFFFFF", false, !this.cells[index].fixed);
+  }
+
+  puzzle_data.prototype._IGG_getTargetView = function(target, source) {
+    var pos = target - this.gridarea;
+    if (pos >= 0 && pos < this.size) {
+      return this.palette_html(pos, this.palette_count.count(pos) + 1);
+    }
+    var value = source - this.gridarea;
+    if (value < 0 || value >= this.size) {
+      value = this.value_at(source);
+    }
+    return this.get_raw_cell_html("", letters[value], "#D0D0D0", true, true);
+  }
+
+  puzzle_data.prototype.get_raw_cell_html = function(title, value, color, is_bold, is_draggable) {
+    var bold = (is_bold) ? ";font-weight:bold" : "";
+    var cursor = (is_draggable) ? "cursor:pointer;cursor:hand;" : "";
+    return '<span title="' + title + '" style="text-align:center;' + cursor + 'font-size:16pt;color:' + color + bold + '">' + value + '</span>';
+  }
+
+  puzzle_data.prototype.get_cell_html = function(index) {
+    var value = this.cells[index].get_value();
+    var fixed = this.cells[index].fixed;
+    if (value < 0) {
+      var allowed = this.cells[index].allowed_letters();
+      var title = (allowed == "") ? "No letters possible!" : ("Could be: " + allowed);
+      return this.get_raw_cell_html(title, "?", "#FFFFFF", false, false);
+    } 
+    var title = fixed ? "Given at start" : "Placed by you";
+    var color = fixed ? "#008000" : pcborder;
+    return this.get_raw_cell_html(title, letters[value], color, true, !fixed);
+  }
+
+  puzzle_data.prototype.gtoi = function(g_index) {
+    if (g_index < 0) return -1;
+    if (g_index >= this.gridarea + this.size) return -1;
+    if (g_index >= this.gridarea) return -1;
+    if (g_index % 2 == 0) return -1;
+    var g_row = Math.floor(g_index / this.gridsize);
+    if (g_row % 2 == 0) return -1;
+    var g_col = g_index % this.gridsize;
+    if (g_row == this.gridsize-1 || g_col == this.gridsize-1) return -1;
+    var row = (g_row - 1)/2;
+    var col = (g_col - 1)/2;
+    return row * this.size + col;
+  }
+
+  puzzle_data.prototype.value_at = function(g_index) {
+    var index = this.gtoi(g_index);
+    if (index == -1) return -1;
+    return this.cells[index].get_value();
+  }
+
+  puzzle_data.prototype._IGG_getSurrogateView = function(index) {
+    var value = index - this.gridarea;
+    if (value < 0) {
+      value = this.value_at(index);
+    }
+    return '<span style="font-size:18pt">' + letters[value] + '</span>';
+  }
+
+  puzzle_data.prototype._IGG_handleDrag = function(source, target) {
+    if (source == -1) return;
+    if (source == target) {
+      this._IGG_refreshCell(source);
+      return;
+    }
+    if (target == -1) {
+      if (this.value_at(source) == -1) return;
+      target = this.value_at(source) + this.gridarea;
+    }
+    if (source >= this.gridarea) {
+      // palette to grid
+      if (target >= this.gridarea) {
+        this._IGG_refreshCell(source);
+        return;
+      }
+      var digit = source - this.gridarea;
+      this.increment_palette(this.value_at(target));
+      this.decrement_palette(digit);
+      this.cells[this.gtoi(target)].set_value(digit, false);
+    } else if (target >= this.gridarea) {
+      // grid to palette
+      var digit = target - this.gridarea;
+      this.increment_palette(digit);
+      this.cells[this.gtoi(source)].reset_value();
+    } else {
+      // grid to grid
+      var digit = this.value_at(source);
+      this.increment_palette(this.value_at(target));
+      this.cells[this.gtoi(source)].reset_value();
+      this.cells[this.gtoi(target)].set_value(digit, false);
+    }
+    grid.refreshDragSources();
+    if (this.isSolved()) {
+      pref_controller.game_state.puz_solved[this.puznum] = 1;
+      this.save_progress();
+      pref_controller.updatePrefDisplay();
+    }
+  }
+
+  puzzle_data.prototype._IGG_isDragSource = function(g_index) {
+    if (g_index >= this.gridarea && g_index < this.gridarea + this.size) {
+      var digit = g_index - this.gridarea;
+      return (this.palette_count.count(digit) != 0);
+    }
+    var index = this.gtoi(g_index);
+    if (index == -1) return false;
+    if (this.cells[index].fixed) return false;
+    if (this.cells[index].get_value() == -1) return false;
+    return true;
+  }
+
+  puzzle_data.prototype._IGG_isDragTarget = function(g_index, src) {
+    if (g_index >= this.gridarea && g_index < this.gridarea + this.size) {
+      var digit = g_index - this.gridarea;
+      return (digit == this.value_at(src));
+    }
+    var index = this.gtoi(g_index);
+    if (index == -1) return false;
+    if (this.cells[index].fixed) return false;
+    return true;
+  }
+
+  ///////////////////////////////////////
+
+  var puzzle;
+  var grid;
+  var pref_controller;
+  var pcborder = "#000000";
+
+  _IG_RegisterOnloadHandler(start);
+                                                                                                                                                                  
+  function start() {
+    pref_controller = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_20070226', true);
+    pref_controller.num_puzzles = 150;
+    pref_controller.box_height = 3;
+    pref_controller.box_width = 3;
+    pref_controller.rows = 10;
+    pref_controller.cols = 15;
+
+    _gel("game_state_html").innerHTML = pref_controller.getTableHTML();
+    pref_controller.getPrefs();
+                                                                                                                                                                                              
+    puzzle = new puzzle_data();
+    reset(pref_controller.game_state);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  function reset(game_state) {
+    puzzle.resetPuzzle(game_state);
+    grid = new _IG_Grid(puzzle, "mygrid", puzzle.gridsize, puzzle.gridsize);
+    _gel("table_html").innerHTML = "";
+    _gel("table_html").appendChild(grid.getTable());
+    grid.getTable().border = 0;
+    grid.getTable().cellPadding = 0;
+    grid.getTable().cellSpacing = 0;
+    make_palette();
+    make_boxcode();
+    puzzle.set_background_colors();
+                                                                                                                                                                 
+    grid.dragHandler.topMargin = 0;
+    grid.dragHandler.bottomMargin = 30;
+    grid.dragHandler.leftMargin = 10;
+    grid.dragHandler.rightMargin = 10;
+    if (navigator.userAgent.toLowerCase().match("ie")) {
+      grid.dragHandler.surrogateOffsetX = -2;
+      grid.dragHandler.surrogateOffsetY = 0;
+      grid.dragHandler.leftMargin = 10;
+      grid.dragHandler.rightMargin = 10;
+      grid.dragHandler.topMargin = 10;
+      grid.dragHandler.bottomMargin = 10;
+    } else if (navigator.userAgent.toLowerCase().match("safari")) {
+      grid.dragHandler.surrogateOffsetX = -2;
+      grid.dragHandler.surrogateOffsetY = 0;
+      grid.dragHandler.leftMargin = 5;
+      grid.dragHandler.rightMargin = 10;
+      grid.dragHandler.topMargin = 10;
+      grid.dragHandler.bottomMargin = 10;
+    }
+    puzzle._IGG_refreshAll();
+    grid.initDragging();
+  }
+
+  function make_palette() {
+    var palette_table = document.createElement('table');
+    palette_table.border = "1";
+    palette_table.cellPadding = "3px";
+    palette_table.cellSpacing = "0px";
+    palette_table.id = "palette_table";
+    palette_table.width = "40px";
+    var palette = document.createElement('tbody');
+    _gel("palette").innerHTML = "";
+    _gel("palette").appendChild(palette_table);
+    palette_table.appendChild(palette);
+    palette.appendChild(document.createElement('tr'));
+    for (var digit = 1; digit <= puzzle.size; digit++) {
+      var row = document.createElement('tr');
+      palette.appendChild(row);
+      var tabledata = document.createElement('td');
+      row.appendChild(tabledata);
+      tabledata.align = "center";
+      tabledata.appendChild(grid.getCell(digit - 1 + puzzle.gridarea));
+    }
+  }
+
+  function make_boxcode() {
+    var boxcode_table = document.createElement('table');
+    boxcode_table.border = "1";
+    boxcode_table.cellPadding = "3px";
+    boxcode_table.cellSpacing = "0px";
+    boxcode_table.id = "boxcode_table";
+    boxcode_table.width = "40px";
+    var boxcode = document.createElement('tbody');
+    _gel("boxcode").innerHTML = "";
+    _gel("boxcode").appendChild(boxcode_table);
+    boxcode_table.appendChild(boxcode);
+    var row = document.createElement('tr');
+    boxcode.appendChild(row);
+    for (var digit = 1; digit <= puzzle.size; digit++) {
+      var tabledata = document.createElement('td');
+      row.appendChild(tabledata);
+      tabledata.align = "center";
+      tabledata.style.backgroundColor = puzzle.colors[digit-1];
+      tabledata.appendChild(grid.getCell(digit - 1 + puzzle.size + puzzle.gridarea));
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+    this.nav_puz += amount;
+    if (this.nav_puz < 0) this.nav_puz = 0;
+    if (this.nav_puz >= this.game_state.puz_count) this.nav_puz = this.game_state.puz_count - 1;
+    this.update_navbar();
+  }
+
+  _IG_puzzle_pref_controller.prototype.new_puzzle_request = function() {
+    this.game_state.cur_puz = this.nav_puz;
+    reset(this.game_state);
+    this.setPrefs();
+    this.update_navbar();
+  }
+
+  function dprint(s) {
+    _gel("debug1").innerHTML += "DEBUG " + s + "<BR>";
+  }
+
+  function clear_board() {
+    pref_controller.new_puzzle_request();
+  }
+
+  function change_border() {
+    if (pcborder == "#000000") {
+      pcborder = "#FFFFFF";
+    } else {
+      pcborder = "#000000";
+    }
+    pref_controller.new_puzzle_request();
+  }
+
+//////////////////////////
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="pref_controller.change_level(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="pref_controller.change_level(-1)"/>
+<input style="font-size:10" id="levp10" type="button" value="+10" onclick="pref_controller.change_level(10)"/>
+<input style="font-size:10" disabled id="levm10" type="button" value="-10" onclick="pref_controller.change_level(-10)"/>
+<input style="font-size:10" id="levp50" type="button" value="+50" onclick="pref_controller.change_level(50)"/>
+<input style="font-size:10" disabled id="levm50" type="button" value="-50" onclick="pref_controller.change_level(-50)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller.new_puzzle_request()"/>
+</form>
+
+<b><a target="_top" href="http://www.latinsquares.com/LSQ.html">Latin Squares</a></b>:  These Sudoku-like puzzles were invented back in 1999.
+The main differences are that the regions aren't always rectangles, and exactly one of each letter is supplied.  (If you had the precursor
+to this module last year, you might recognize these puzzles.)
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+   Place letters into the grid such that each letter appears no more than once in each row, no more than once in each column,
+   and no more than once in each colored region.  There are 50 puzzles of each size.
+</span>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   Drag letters from the palette into the grid.  The lights will
+   turn <span style="color:#008000">yellow-green</span> or <span style="color:#FF0000">red</span>
+   depending on whether that row, column, or region is satisfied.
+</span>
+<BR>
+
+<table border="0"><tr><td rowspan=2 valign=top>
+<span id="palette"></span>
+</td><td>
+<span id="table_html"></span>
+</td><tr><tr><td>
+<center>
+<table>
+<tr><td>
+  <input id="resetbutton3" style="font-size:10" type="button" value="Clear"
+   onclick="clear_board();">
+</td></tr><tr><td>
+  <input id="border" style="font-size:9" type="button" value="Borders"
+   onclick="change_border();">
+</td></tr>
+</table>
+
+<!-- <BR>
+  <input id="sizechange" style="font-size:10n" type="button" value="Shrink"
+   onclick="puzzle__MODULE_ID__.changeSize();"> --->
+</center>
+</td><td>
+<span id="boxcode"></span>
+</td></tr></table>
+
+<HR>
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <center><span id="game_state_html"></span></center>
+                                                                                                                                                                                              
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td style="font-size:9pt">
+<span style="visibility:hidden">
+  Your points: <span id="points">?</span>
+</span>
+  <input id="resetbutton" style="font-size:10;visibility:hidden" type="button" value="Clear Stats"
+    onclick="pref_controller.resetPrefs();puzzle.resetPuzzle(pref_controller.game_state);"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+                                                                                                                                                                                              
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+<span id="showversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;font-size:x-small"
+   onclick="_gel('version').style.display='inline';_gel('showversion').style.display='none';_gel('hideversion').style.display='inline';_IG_AdjustIFrameHeight()">Version 1.6</span>
+<span id="hideversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none;font-size:x-small"
+   onclick="_gel('version').style.display='none';_gel('showversion').style.display='inline';_gel('hideversion').style.display='none';_IG_AdjustIFrameHeight()">Version 1.6</span>
+<span id="version" style="display:none;font-size:x-small">
+<BR>   v1.6 : fixed bug where clicking on the version number didn't change the height of the gadget.
+<BR>   v1.5 : added ability to hide the borders.
+<BR>   v1.4 : fixed bug where the "clear" button didn't work.
+<BR>   v1.3 : fixed bug where the letter palette wasn't getting updated in certain situations.
+<BR>   v1.2 : fixed bug where you could drag from a spot that a letter had been even if the letter was gone.
+<BR>   v1.1 : fixed bug where puzzle 1 was unreachable after leaving it.
+</span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

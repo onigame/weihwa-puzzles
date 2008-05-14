@@ -1,0 +1,805 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20061215@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="100">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_1215"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20061215@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/igoogle_gridlib.js"></script>
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/igoogle_gridlib.js"></script>
+--->
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json2.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function _IG_game_state() {
+    this.cur_puz = 0;
+    this.puz_count = 30;
+    this.puz_solved = new Array();
+    for (var i=0; i<this.puz_count; ++i) {
+      this.puz_solved[i] = 0;
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
+    if (this.game_state.puz_solved[puznum] == 1) {
+      return "#00FF00";
+    } else {
+      return "#FF0000";
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.score = function() {
+    var answer = 0;
+    for (var i=0; i<this.game_state.puz_count; ++i) {
+      answer += this.game_state.puz_solved[i];
+    }
+    return answer;
+  }
+
+  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+    var num = this.score();
+    if (num == 12) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = this.score();
+  }
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.prefix = 'http://weihwa.images01.googlepages.com/';
+//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/20061215-ornaments/';
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+    this.load_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.clearPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+    this._IGG_refreshAll();
+    this.save_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzleData = function(puznum) {
+    this.puznum = puznum;
+    this.imgsize = 20;
+
+    this.colors = 4;
+
+    if (puznum == 0) {
+      this.height = 4; this.width = 4;
+      this.rawanswer = '3210210202101303';
+      this.rawhorizclues = '1111112021101102';
+      this.rawvertclues = '1111012122002011';
+    } else if (puznum == 1) {
+      this.height = 4; this.width = 4;
+      this.rawanswer = '0101231210310310';
+      this.rawhorizclues = '2200012112012101';
+      this.rawvertclues = '2110110212011210';
+    } else if (puznum == 2) {
+      this.height = 4; this.width = 4;
+      this.rawanswer = '1010032321311313';
+      this.rawhorizclues = '2200101202110202';
+      this.rawvertclues = '1210110202111102';
+    } else if (puznum == 3) {
+      this.height = 4; this.width = 4;
+      this.rawanswer = '0101132002031320';
+      this.rawhorizclues = '220011B12011B111';
+      this.rawvertclues = '220B0BB2B0B0B10B';
+    } else if (puznum == 4) {
+      this.height = 4; this.width = 4;
+      this.rawanswer = '0203102102023131';
+      this.rawhorizclues = 'BB1112102B2002B2';
+      this.rawvertclues = '2101BB2B20BB0B1B';
+    } else if (puznum == 5) {
+      this.height = 4; this.width = 4;
+      this.rawanswer = '1023023210210302';
+      this.rawhorizclues = 'B11B1021B210B01B';
+      this.rawvertclues = '2BB02011B0BB0BB1';
+    } else if (puznum == 6) {
+      this.height = 4; this.width = 4;
+      this.rawanswer = '1312302302121031';
+      this.rawhorizclues = '02B1101BB12012BB';
+      this.rawvertclues = 'BBBBB0B1BBB1B121';
+    } else if (puznum == 7) {
+      this.height = 4; this.width = 4;
+      this.rawanswer = '2321023023033232';
+      this.rawhorizclues = 'BBBB2BBBBB12BB22';
+      this.rawvertclues = 'B0B100B2B01B11B1';
+    } else if (puznum == 8) {
+      this.height = 4; this.width = 4;
+      this.rawanswer = '0121303001232030';
+      this.rawhorizclues = '12BB2BB211BB20BB';
+      this.rawvertclues = '2B1BBBB0B02BBB0B';
+    } else if (puznum == 9) {
+      this.height = 4; this.width = 4;
+      this.rawanswer = '3023030121301301';
+      this.rawhorizclues = '10B22BBB11B11B0B';
+      this.rawvertclues = '111B1B0BB0BB1B01';
+    } else if (puznum == 10) {
+      this.height = 5; this.width = 4;
+      this.rawanswer = '20231212302102102023';
+      this.rawhorizclues = '10210220111121101021';
+      this.rawvertclues = '1121302002301112';
+    } else if (puznum == 11) {
+      this.height = 5; this.width = 4;
+      this.rawanswer = '23011232232012133030';
+      this.rawhorizclues = '11110121102102112002';
+      this.rawvertclues = 'BB21102B11122111';
+    } else if (puznum == 12) {
+      this.height = 5; this.width = 4;
+      this.rawanswer = '12122121030230131201';
+      this.rawhorizclues = '0220B22020B111021210';
+      this.rawvertclues = '1BB11B2122100B2B';
+    } else if (puznum == 13) {
+      this.height = 5; this.width = 4;
+      this.rawanswer = '01311313212102023030';
+      this.rawhorizclues = 'B201B2020220B02BB00B';
+      this.rawvertclues = '2B111B111BB21B1B';
+    } else if (puznum == 14) {
+      this.height = 5; this.width = 4;
+      this.rawanswer = '13230202213113103132';
+      this.rawhorizclues = '0B12B0200211B20B0112';
+      this.rawvertclues = 'B21102BB111BBB21';
+    } else if (puznum == 15) {
+      this.height = 5; this.width = 4;
+      this.rawanswer = '02022313320201211010';
+      this.rawhorizclues = 'B02BBB121B21BB1BBB00';
+      this.rawvertclues = '2B1BB1BB221BB1BB';
+    } else if (puznum == 16) {
+      this.height = 5; this.width = 4;
+      this.rawanswer = '30231210210302122320';
+      this.rawhorizclues = '101BB21B1B111BB01BBB';
+      this.rawvertclues = 'B1B11B21B22020B2';
+    } else if (puznum == 17) {
+      this.height = 5; this.width = 4;
+      this.rawanswer = '03133032132030121301';
+      this.rawhorizclues = '1BB21B12B1BBBB1BBB01';
+      this.rawvertclues = '1B02BBBBB2B11B21';
+    } else if (puznum == 18) {
+      this.height = 5; this.width = 4;
+      this.rawanswer = '30301202302323013123';
+      this.rawhorizclues = '2B0B1B2BBBB211BB01B2';
+      this.rawvertclues = '0B1B2BB1202BBB12';
+    } else if (puznum == 19) {
+      this.height = 5; this.width = 4;
+      this.rawanswer = '31011213213202011032';
+      this.rawhorizclues = '12BBB2BBB1B1B1B0B1B1';
+      this.rawvertclues = '121B1BB02B020BBB';
+    } else if (puznum == 20) {
+      this.height = 5; this.width = 5;
+      this.rawanswer = '1030131212023212321332321';
+      this.rawhorizclues = '22010221112101220122';
+      this.rawvertclues = '11121121002312200311';
+    } else if (puznum == 21) {
+      this.height = 5; this.width = 5;
+      this.rawanswer = '1323130103120202121312032';
+      this.rawhorizclues = '02122102212002211121';
+      this.rawvertclues = '03111121212011121112';
+    } else if (puznum == 22) {
+      this.height = 5; this.width = 5;
+      this.rawanswer = '0130310231313101310132312';
+      this.rawhorizclues = '21021211120213010122';
+      this.rawvertclues = '12B21B1101B3220112B1';
+    } else if (puznum == 23) {
+      this.height = 5; this.width = 5;
+      this.rawanswer = '2313201320131312131330232';
+      this.rawhorizclues = '01B2B1B10B02B212B022';
+      this.rawvertclues = '112112B202120B1B112B';
+    } else if (puznum == 24) {
+      this.height = 5; this.width = 5;
+      this.rawanswer = '0302021302030203123120303';
+      this.rawhorizclues = 'BBB1B1B1BBB102122012';
+      this.rawvertclues = '202BB20B20B220B1211B';
+    } else if (puznum == 25) {
+      this.height = 5; this.width = 5;
+      this.rawanswer = '0230213131320201020102012';
+      this.rawhorizclues = 'B0B1B3BBB0B12B1B212B';
+      this.rawvertclues = '220BB0312B1BBB11122B';
+    } else if (puznum == 26) {
+      this.height = 5; this.width = 5;
+      this.rawanswer = '1323221303131213203023202';
+      this.rawhorizclues = '012B111BBBBB20B2B031';
+      this.rawvertclues = 'B2210BBB1B21BBB2B12B';
+    } else if (puznum == 27) {
+      this.height = 5; this.width = 5;
+      this.rawanswer = '2032301030323232310201010';
+      this.rawhorizclues = 'B0BB31BBBB2B112B32BB';
+      this.rawvertclues = 'BB21BBB1BBBB11B1201B';
+    } else if (puznum == 28) {
+      this.height = 5; this.width = 5;
+      this.rawanswer = '1213120202323211320201020';
+      this.rawhorizclues = '031B2B3BB122BBB1B110';
+      this.rawvertclues = '1B11B1B111BB2BBBBBB0';
+    } else if (puznum == 29) {
+      this.height = 5; this.width = 5;
+      this.rawanswer = '0130112132010213231210121';
+      this.rawhorizclues = 'BB010BB1B2B0BB2BBBB0';
+      this.rawvertclues = 'B2011BBB12B21B210BB0';
+    }
+
+    this.area = this.height * this.width;
+    this.display_height = (this.height + this.colors) * 2 + 2;
+    this.display_width = (this.width + this.colors) * 2 + 2;
+    this.display_area = this.display_height * this.display_width;
+
+    this.answer = new Array(this.height);
+    this.user_answer = new Array(this.height);
+    for (var row=0; row<this.height; row++) {
+      this.answer[row] = new Array(this.width);
+      this.user_answer[row] = new Array(this.width);
+      for (var col=0; col<this.width; col++) {
+        this.answer[row][col] = this.rawanswer.charAt(row*this.width + col);
+        this.user_answer[row][col] = new Array(this.colors);
+        for (var clr=0; clr<this.colors; clr++) {
+          this.user_answer[row][col][clr] = 1;
+        }
+      }
+    }
+
+    this.vertclues = new Array(this.width);
+    this.user_vertclues = new Array(this.width);
+    for (var col=0; col<this.width; col++) {
+      this.vertclues[col] = new Array(this.colors);
+      this.user_vertclues[col] = new Array(this.colors);
+      for (var clr=0; clr<this.colors; clr++) {
+        this.vertclues[col][clr] = this.rawvertclues.charAt(col*this.colors + clr);
+        this.user_vertclues[col][clr] = this.vertclues[col][clr];
+      }
+    }
+  
+    this.horizclues = new Array(this.height);
+    this.user_horizclues = new Array(this.height);
+    for (var row=0; row<this.height; row++) {
+      this.horizclues[row] = new Array(this.colors);
+      this.user_horizclues[row] = new Array(this.colors);
+      for (var clr=0; clr<this.colors; clr++) {
+        this.horizclues[row][clr] = this.rawhorizclues.charAt(row*this.colors + clr);
+        this.user_horizclues[row][clr] = this.horizclues[row][clr];
+      }
+    }
+  
+    _gel("win").innerHTML = "&nbsp;<br>&nbsp;";
+  }
+
+  puzzle_data__MODULE_ID__.prototype.load_progress = function () {
+    if (!this._IGG_refreshCell) {
+      this._IGG_refreshCell = function () {};
+    }
+
+    if (this.isSolved()) {
+      _gel("startoverbutton").value = "Solved!";
+    } else {
+      _gel("startoverbutton").value = "Start Over";
+    }
+    if (this._IGG_refreshAll)
+      this._IGG_refreshAll();
+  }
+                                                                                                                                                                                              
+  puzzle_data__MODULE_ID__.prototype.save_progress = function () {
+    pref_controller__MODULE_ID__.game_state = this.game_state;
+    pref_controller__MODULE_ID__.setPrefs();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.user_answer_at = function(row, col) {
+    var answer = -1;
+    for (var clr=0; clr<this.colors; clr++) {
+      if (this.user_answer[row][col][clr] == 1) {
+        if (answer == -1) {
+          answer = clr;
+        } else {
+          return -1;
+        }
+      }
+    }
+    return answer;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isSolved = function() {
+    for (var row=0; row<this.height; row++) {
+      for (var col=0; col<this.width; col++) {
+        if (this.user_answer_at(row, col) != this.answer[row][col]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isBorder = function(index) {
+    var display_row = Math.floor(index / this.display_width);
+    var display_col = index % this.display_width;
+    if (display_row == 4) return true;
+    if (display_row == this.display_height - 5) return true;
+    if (display_col == 4) return true;
+    if (display_col == this.display_width - 5) return true;
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.getImage = function(color, corner, count) {
+    if (count == -1) count = 'B';
+    if (count == -2) count = 'X';
+    if (count == -3) count = 'X';
+    if (count <= -4) count = 'P';
+    if (count == 'B') color = '';
+    if (count == 'P') color = '';
+    if (count == 'B') corner = '';
+    return '<IMG SRC="' + this.prefix + 'ornament' + color + count + corner + '-' + this.imgsize
+         + '.png" ALT="' + color + count + corner + '"/>';
+  }
+  
+  puzzle_data__MODULE_ID__.prototype._IGG_getNormalView = function(index) {
+    if (this.isBorder(index)) return '<IMG SRC="' + this.prefix + 'black.png" alt="-"/>';
+    var display_row = Math.floor(index / this.display_width);
+    var display_col = index % this.display_width;
+
+    ////////////// corners
+    if (display_row < 4 && display_col < 4) {
+/*
+      var corner = (display_row) % 2 * 2 + (display_col) % 2;
+      var row = Math.floor((display_row) / 2);
+      var col = Math.floor((display_col) / 2);
+      if (row == col) {
+        return this.getImage(row, corner, -3);
+      } else {
+        return this.getImage(row, corner, -1);
+      }
+*/
+      return "";
+    }
+    if (display_row > this.display_height - 5 && display_col > this.display_width - 5) {
+/*
+      var corner = (display_row + this.display_height) % 2 * 2 + (display_col + this.display_width) % 2;
+      var row = Math.floor((display_row - this.display_height + 8) / 2);
+      var col = Math.floor((display_col - this.display_width + 8) / 2);
+      if (row == col) {
+        return this.getImage(row, corner, -3);
+      } else {
+        return this.getImage(row, corner, -1);
+      }
+*/
+      return "";
+    }
+    if (display_row < 4 && display_col > this.display_width - 5) {
+      return "";
+    }
+    if (display_row > this.display_height - 5 && display_col < 5) {
+      return "";
+    }
+
+    ////////////// edges
+    if (display_row < 4) {
+      var corner = (display_row) % 2 * 2 + (display_col+1) % 2;
+      var color = Math.floor((display_row) / 2);
+      var col = Math.floor((display_col - 5) / 2);
+      return this.getImage(color, corner, this.user_vertclues[col][color]);
+    }
+    if (display_col < 4) {
+      var corner = (display_row+1) % 2 * 2 + (display_col) % 2;
+      var row = Math.floor((display_row - 5) / 2);
+      var color = Math.floor((display_col) / 2);
+      return this.getImage(color, corner, this.user_horizclues[row][color]);
+    }
+    if (display_row > this.display_height - 5) {
+      var corner = (display_row) % 2 * 2 + (display_col+1) % 2;
+      var color = Math.floor((display_row - this.display_height + 8) / 2);
+      var col = Math.floor((display_col - 5) / 2);
+      return this.getImage(color, corner, this.user_vertclues[col][color]);
+    }
+    if (display_col > this.display_width - 5) {
+      var corner = (display_row+1) % 2 * 2 + (display_col) % 2;
+      var row = Math.floor((display_row - 5) / 2);
+      var color = Math.floor((display_col - this.display_width + 8) / 2);
+      return this.getImage(color, corner, this.user_horizclues[row][color]);
+    }
+
+    ////////////// center
+    var corner = (display_row+1) % 2 * 2 + (display_col+1) % 2;
+    var row = Math.floor((display_row - 5) / 2);
+    var col = Math.floor((display_col - 5) / 2);
+    var color = this.user_answer_at(row, col);
+    if (color == -1) {
+      if (this.user_answer[row][col][corner] == 0) {
+        return this.getImage(corner, corner, -1);
+      } else {
+        return this.getImage(corner, corner, -2);
+      }
+    } else {
+      return this.getImage(color, corner, -3);
+    }
+
+    return '<span style="font-size:8">' + index + '</span>';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_getSurrogateView = function(index) {
+    return ("");
+  }
+
+  puzzle_data__MODULE_ID__.prototype.changeSize = function() {
+    if (this.imgsize == 20) {
+      this.imgsize = 16;
+      _gel("sizebutton").value = "Even Smaller";
+    } else if (this.imgsize == 16) {
+      this.imgsize = 12;
+      _gel("sizebutton").value = "Bigger";
+    } else if (this.imgsize == 12) {
+      this.imgsize = 20;
+      _gel("sizebutton").value = "Smaller";
+    }
+    this._IGG_refreshAll();
+    _IG_AdjustIFrameHeight();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.decrement_horizclue = function(color, row) {
+    if (this.user_horizclues[row][color] == 'B') return;
+    if (this.user_horizclues[row][color] == 0) {
+      this.user_horizclues[row][color] = -4;
+    } else {
+      this.user_horizclues[row][color] --;
+    }
+    this.refresh_horizclue(color, row);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.increment_horizclue = function(color, row) {
+    if (this.user_horizclues[row][color] == 'B') return;
+    if (this.user_horizclues[row][color] == -4) {
+      this.user_horizclues[row][color] = 0;
+    } else {
+      this.user_horizclues[row][color] ++;
+    }
+    this.refresh_horizclue(color, row);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.refresh_horizclue = function(color, row) {
+    var display_row = (row * 2) + 5;
+    var display_col = (color * 2);
+    if (color >= 2) display_col += this.display_width - 8;
+
+    this._IGG_refreshCell(display_row * this.display_width + display_col);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + 1);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + this.display_width);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + this.display_width + 1);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.decrement_vertclue = function(color, col) {
+    if (this.user_vertclues[col][color] == 'B') return;
+    if (this.user_vertclues[col][color] == 0) {
+      this.user_vertclues[col][color] = -4;
+    } else {
+      this.user_vertclues[col][color] --;
+    }
+    this.refresh_vertclue(color, col);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.increment_vertclue = function(color, col) {
+    if (this.user_vertclues[col][color] == 'B') return;
+    if (this.user_vertclues[col][color] == -4) {
+      this.user_vertclues[col][color] = 0;
+    } else {
+      this.user_vertclues[col][color] ++;
+    }
+    this.refresh_vertclue(color, col);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.refresh_vertclue = function(color, col) {
+    var display_col = (col * 2) + 5;
+    var display_row = (color * 2);
+    if (color >= 2) display_row += this.display_height - 8;
+
+    this._IGG_refreshCell(display_row * this.display_width + display_col);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + 1);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + this.display_width);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + this.display_width + 1);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.refresh_usergrid = function(corner, row, col) {
+    var display_row = (row * 2) + 5;
+    var display_col = (col * 2) + 5;
+
+    if (corner == 0) this._IGG_refreshCell(display_row * this.display_width + display_col);
+    if (corner == 1) this._IGG_refreshCell(display_row * this.display_width + display_col + 1);
+    if (corner == 2) this._IGG_refreshCell(display_row * this.display_width + display_col + this.display_width);
+    if (corner == 3) this._IGG_refreshCell(display_row * this.display_width + display_col + this.display_width + 1);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.refresh_usercell = function(row, col) {
+    var display_row = (row * 2) + 5;
+    var display_col = (col * 2) + 5;
+
+    this._IGG_refreshCell(display_row * this.display_width + display_col);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + 1);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + this.display_width);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + this.display_width + 1);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.handle_selection = function(row, col, color) {
+    // user has made a color that they are sure of.
+
+    this.user_answer[row][col][0] = 0;
+    this.user_answer[row][col][1] = 0;
+    this.user_answer[row][col][2] = 0;
+    this.user_answer[row][col][3] = 0;
+    this.user_answer[row][col][color] = 1;
+    this.decrement_vertclue(color, col);
+    this.decrement_horizclue(color, row);
+    this.refresh_usercell(row, col);
+
+    if (this.isSolved()) {
+      _gel("startoverbutton").value = 'You win!';
+      _gel("win").innerHTML = 'You win!';
+      pref_controller__MODULE_ID__.game_state.puz_solved[pref_controller__MODULE_ID__.game_state.cur_puz] = 1;
+      pref_controller__MODULE_ID__.updatePrefDisplay();
+      this.save_progress();
+    } else {
+      _gel("startoverbutton").value = "Start Over";
+      _gel("win").innerHTML = '';
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.handle_deselection = function(row, col, color) {
+    // user has undone color that they are no longer sure of.
+
+    this.user_answer[row][col][0] = 1;
+    this.user_answer[row][col][1] = 1;
+    this.user_answer[row][col][2] = 1;
+    this.user_answer[row][col][3] = 1;
+    this.increment_vertclue(color, col);
+    this.increment_horizclue(color, row);
+    this.refresh_usercell(row, col);
+
+    _gel("startoverbutton").value = "Start Over";
+    _gel("win").innerHTML = '';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_handleDrag = function(source, target) {
+    var display_row = Math.floor(source / this.display_width);
+    var display_col = source % this.display_width;
+
+    var corner = (display_row+1) % 2 * 2 + (display_col+1) % 2;
+    var row = Math.floor((display_row - 5) / 2);
+    var col = Math.floor((display_col - 5) / 2);
+    var color = this.user_answer_at(row, col);
+    var is_right = game__MODULE_ID__.isRightButton();
+  
+    if (!is_right) {
+      if (color == -1) {
+        this.handle_selection(row, col, corner);
+      } else {
+        this.handle_deselection(row, col, color);
+      }
+    } else if (color == -1) {
+      if (this.user_answer[row][col][corner] == 0) {
+        this.user_answer[row][col][corner] = 1;
+        this.refresh_usergrid(corner, row, col);
+      } else {
+        this.user_answer[row][col][corner] = 0;
+        if (this.user_answer_at(row, col) != -1) {
+          this.handle_selection(row, col, this.user_answer_at(row, col));
+        } else {
+          this.refresh_usergrid(corner, row, col);
+        }
+      }
+    } else {
+      this.handle_deselection(row, col, color);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_isDragSource = function(index) {
+    var display_row = Math.floor(index / this.display_width);
+    var display_col = index % this.display_width;
+    if (display_row <= 4) return false;
+    if (display_col <= 4) return false;
+    if (display_row >= this.display_height - 5) return false;
+    if (display_col >= this.display_width - 5) return false;
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_isDragTarget = function(index, sourceIndex) {
+    return false;
+  }
+
+  ///////////////////////////////////////
+
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  var pref_controller__MODULE_ID__;
+
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+                                                                                                                                                                  
+  function start__MODULE_ID__() {
+    pref_controller__MODULE_ID__ = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_1215', true);
+    pref_controller__MODULE_ID__.num_puzzles = 30;
+    pref_controller__MODULE_ID__.box_height = 4;
+    pref_controller__MODULE_ID__.box_width = 4;
+    pref_controller__MODULE_ID__.rows = 5;
+    pref_controller__MODULE_ID__.cols = 6;
+
+    _gel("game_state_html").innerHTML = pref_controller__MODULE_ID__.getTableHTML();
+    pref_controller__MODULE_ID__.getPrefs();
+
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+    reset__MODULE_ID__(pref_controller__MODULE_ID__.game_state);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  function reset__MODULE_ID__(game_state) {
+    puzzle__MODULE_ID__.resetPuzzle(game_state);
+    game__MODULE_ID__ = new _IG_Grid(puzzle__MODULE_ID__, "mygrid",
+       puzzle__MODULE_ID__.display_height, puzzle__MODULE_ID__.display_width);
+    _gel("table_html").innerHTML = "";
+    game__MODULE_ID__.getTable().cellPadding = 0;
+    game__MODULE_ID__.getTable().cellSpacing = 0;
+    _gel("table_html").appendChild(game__MODULE_ID__.getTable());
+
+    for (var i=0; i<puzzle__MODULE_ID__.display_area; ++i) {
+      if (puzzle__MODULE_ID__.isBorder(i)) {
+        _gel(game__MODULE_ID__.getCellTDID(i)).style.backgroundColor = "#000000";
+      }
+    }
+
+    puzzle__MODULE_ID__._IGG_refreshAll();
+    game__MODULE_ID__.initDragging();
+  }
+
+  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+    this.nav_puz += amount;
+    if (this.nav_puz < 0) this.nav_puz = 0;
+    if (this.nav_puz > this.game_state.puz_count) this.nav_puz = this.game_state.puz_count;
+    this.update_navbar();
+  }
+
+  _IG_puzzle_pref_controller.prototype.new_puzzle_request = function() {
+    this.game_state.cur_puz = this.nav_puz;
+    reset__MODULE_ID__(this.game_state);
+    this.setPrefs();
+    this.update_navbar();
+  }
+
+//////////////////////////
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="pref_controller__MODULE_ID__.change_level(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="pref_controller__MODULE_ID__.change_level(-1)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller__MODULE_ID__.new_puzzle_request()"/>
+</form>
+
+<b>Holiday Ornaments</b>:  
+Create a pleasing grid of ornaments subject to the row and column requirements by clicking on the colored corners
+of the "mixed" ornaments, keeping in mind that ornaments of the same color cannot be adjacent.  Enjoy the holidays, and see you in 2007!
+
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+   Each space in the center rectangle must have one ornament of one color.
+   The numbered ornaments outside the center rectangle tell you how many remaining ornaments to be placed are in that row
+   or column.  (If you turn any of them to an unhappy face, you've used too many ornaments.)
+   Ornaments of the same color cannot be next to each other in the same row or column, but touching diagonally is okay.
+</span>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   If the images are too big, click on "Change Size" for smaller images.
+   Click on a colored-corner of an ornament to select that ornament for that position.  Click on it again to reset to the
+   four-color-corner version.  You can also right-click on a colored-corner to eliminate that corner (this may be helpful
+   in keeping track of what colors go where).
+</span>
+<span id="showannounce" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('announce').style.display='inline';_gel('showannounce').style.display='none';_gel('hideannounce').style.display='inline'">Special Announcement</span>
+<span id="hideannounce" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('announce').style.display='none';_gel('showannounce').style.display='inline';_gel('hideannounce').style.display='none'">Special Announcement</span>
+<span id="announce" style="display:none;font-size:x-small">
+   Starting in 2007, I will only be providing my puzzles every other week (there's only so much I can do with 20% of my time).  However,
+   in the intervening weeks, I will be showcasing the best puzzles and puzzle ideas that my viewers send to me.  So please 
+   <A HREF="mailto:weihwa.feedback+20061215@gmail.com">e-mail me</a> your best ideas (javascript source code even more welcome)
+   so you can share them with your fellow fans -- and do tell your friends about this gadget!
+</span>
+<BR>
+
+<table border=0><tr><td>
+
+<table border=2 cellpadding=3 cellspacing=3><tr><td>
+<span id="table_html"></span>
+</td></tr><tr><td>
+<center>
+  <input id="sizebutton" style="font-size:10;visibility:visible" type="button" value="Smaller"
+    onclick="puzzle__MODULE_ID__.changeSize();"/>
+  <input id="startoverbutton" style="font-size:10;visibility:visible" type="button" value="Start Over"
+    onclick="puzzle__MODULE_ID__.clearPuzzle(pref_controller__MODULE_ID__.game_state);"/>
+</center>
+</td></tr></table>
+
+</td></table>
+
+<HR>
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <center><span id="game_state_html"></span></center>
+                                                                                                                                                                                              
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td style="font-size:9pt">
+<span style="visibility:hidden">
+  Your points: <span id="points">?</span>
+</span>
+  <input id="resetbutton" style="font-size:10;visibility:hidden" type="button" value="Clear Stats"
+    onclick="pref_controller__MODULE_ID__.resetPrefs();puzzle__MODULE_ID__.resetPuzzle(pref_controller__MODULE_ID__.game_state);"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+                                                                                                                                                                                              
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20061208@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="100">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_1208"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20061208@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/igoogle_gridlib.js"></script>
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/igoogle_gridlib.js"></script>
+--->
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json2.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function _IG_game_state() {
+    this.cur_puz = 0;
+    this.puz_count = 20;
+    this.puz_solved = new Array();
+    for (var i=0; i<this.puz_count; ++i) {
+      this.puz_solved[i] = 0;
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
+    if (this.game_state.puz_solved[puznum] == 1) {
+      return "#00FF00";
+    } else {
+      return "#FF0000";
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.score = function() {
+    var answer = 0;
+    for (var i=0; i<this.game_state.puz_count; ++i) {
+      answer += this.game_state.puz_solved[i];
+    }
+    return answer;
+  }
+
+  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+    var num = this.score();
+    if (num == 12) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = this.score();
+  }
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.prefix = 'http://weihwa.images01.googlepages.com/';
+//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/20061208-trilands/';
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+    this.load_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.clearPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+    this._IGG_refreshAll();
+    this.save_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzleData = function(puznum) {
+    this.puznum = puznum;
+
+    if (puznum == 0) {
+      this.answer = 'SCABSTACITARRAYGEESE';
+      this.seed = '24011114203214323334';
+      this.clues = new Array('160 square rods','Eye infection','Have feelings for','Healed-over wounds','Implied','Leaning','Male-only','Marshal','They love to take a gander');
+    } else if (puznum == 1) {
+      this.answer = 'CHIMPLOCALOPERATESTY';
+      this.seed = '14032332432134024111';
+      this.clues = new Array('Easily annoyed','It\'s seen on stage','It\'s still in Pandora\'s box','Italian desserts','Regional','Smallest great ape','Solidified blood','Store','Tommy was one');
+    } else if (puznum == 2) {
+      this.answer = 'SWASHPARKAADMITTESTS';
+      this.seed = '30412432314132012143';
+      this.clues = new Array('Anorak','Fedoras and derbies','Let in','Range','Short performance','Tries out','Walk in water','Wave remnant','Weapons');
+    } else if (puznum == 3) {
+      this.answer = 'SCALEWAXEDAMENDMESSY';
+      this.seed = '34120234331104242311';
+      this.clues = new Array('Approached','Ascend a mountain','Change','In disarray','Loaned money to','Small whirlpool','Talked at length','Travelled through water','Tree-cutters');
+    } else if (puznum == 4) {
+      this.answer = 'EMBEDBEADYBADGESTEED';
+      this.seed = '34112102340124343321';
+      this.clues = new Array('Animal flesh','Border','Flows back','Included within','Ordered','Rider\'s ride','Small and globular','Stained with color','Symbol of rank');
+    } else if (puznum == 5) {
+      this.answer = 'SPAREPIXELATLASTHERE';
+      this.seed = '31124234101432320431';
+      this.clues = new Array('Aftward','Backup','Map omnibus','Otherwise','Quarrel','That location','Type of helmet','Wheel connector','You\'re looking at it');
+    } else if (puznum == 6) {
+      this.answer = 'CROWDRADIOOZONEPERKS';
+      this.seed = '24113124013104243332';
+      this.clues = new Array('An instant','Bad smell','Benefits','Demolish','Female bunnies','Large mob','Triatomic oxygen','Trim a photograph','Wireless telegraphy');
+    } else if (puznum == 7) {
+      this.answer = 'INERTLONERLEVEESLYLY';
+      this.seed = '01324234331241130142';
+      this.clues = new Array('A deadly sin','Barrier in New Orleans','Christmas','Clandestine','Misfortunes','Non-reactive','One who prefers solitude','Three, in cards','Unit of film');
+    } else if (puznum == 8) {
+      this.answer = 'OFFERPOLKATREESSTASH';
+      this.seed = '14213421304130233241';
+      this.clues = new Array('Chooses','Garrison location','Hot-headed','Overture','Scrapes out','Some are deciduous','To put away','Type of circus','Type of dance or dot');
+    } else if (puznum == 9) {
+      this.answer = 'SERFSCREEPAGATENOMAD';
+      this.seed = '02341431121102434233';
+      this.clues = new Array('200 sheets','Greek cheese','Move slowly','Peasants','Pore over','Some marbles, perhaps','Therefore','Wanderer','Went too fast');
+    } else if (puznum == 10) {
+      this.answer = 'SCRAMKOALAIVIEDDENSE';
+      this.seed = '34112432011234041233';
+      this.clues = new Array('British beers','Compact','Created','Cute marsupial','Like some New England colleges','Ocean inlet','Precipitation','Slide sideways','\"Go away!\"');
+    } else if (puznum == 11) {
+      this.answer = 'ZEBRAALOOFPANDASNEER';
+      this.seed = '33142012411421024333';
+      this.clues = new Array('Black-and-white animal','Black-and-white animal','Charges with electricity','Distant','Impetuous ardor','Remote','Ridicule','Sat on a horse','Whitish color');
+    } else if (puznum == 12) {
+      this.answer = 'ERRORLEAVEMAVENSPENT';
+      this.seed = '21104134213243340312';
+      this.clues = new Array('A microwave, for example','Connoisseur','Go away','Lease payment','Like some years','Mistake','Out of stamina','Shade trees','Talk deliriously');
+    } else if (puznum == 13) {
+      this.answer = 'SPIRETODAYALONEBOLTS';
+      this.seed = '11142340230421143332';
+      this.clues = new Array('A try','By oneself','Notices','Runs away','Speak vehemently about','Sport with horses','Steepletop','The day before tomorrow','It could be false');
+    } else if (puznum == 14) {
+      this.answer = 'WHARFEERIEPRIDETOAST';
+      this.seed = '31432143212011403243';
+      this.clues = new Array('A deadly sin','A salutation','A yard has three','Cried','Does away with','Harbor','Hercules, for example','Opera solo','Strange');
+    } else if (puznum == 15) {
+      this.answer = 'SPASMNACHOOTHERTHESE';
+      this.seed = '12401431123104224333';
+      this.clues = new Array('Additionally','Females, slangily','It\'s usually the last choice','The present ones','Throb','Trail','Twitch','Type of cheese','Yellow fluid');
+    } else if (puznum == 16) {
+      this.answer = 'SWANSTIBIAELEGYMYTHS';
+      this.seed = '32341402101314221433';
+      this.clues = new Array('Adult cygnets','Come from','Cunning as a coyote','Helps with','Near, classically','Old stories','Sad poem','Shin bone','Utters');
+    } else if (puznum == 17) {
+      this.answer = 'LISTSUNTIESTONEHOPES';
+      this.seed = '34012041321342141323';
+      this.clues = new Array('Agendas','Cease','Fork prong','Not out of','Passion','Remove a knot, perhaps','Rock','Views','Wishes');
+    } else if (puznum == 18) {
+      this.answer = 'ELIDELADENKNEEDSEARS';
+      this.seed = '40231311424021313342';
+      this.clues = new Array('Attacked the crotch, maybe?','Burdened','Cervines','Cervines','Concept','Finishes','Lose a sound','Toasts with fire','Walkway');
+    } else if (puznum == 19) {
+      this.answer = 'IDEALTIARAERREDMESAS';
+      this.seed = '40112234011132434233';
+      this.clues = new Array('A rabbit has long ones','American plateaus','Dreadful','Jeweled headband','Made a mistake','Perfect','Region','Thing','Young men');
+    }
+
+    this.clueHTML = "";
+    this.clueHTML += '<SPAN>';
+    for (var i=0; i<this.clues.length; i++) {
+      this.clueHTML += '<INPUT TYPE=CHECKBOX>' + this.clues[i] + '<BR>';
+    }
+    this.clueHTML += '</SPAN>';
+
+    this.height = 8;
+    this.width = 9;
+
+    this.current = new Array(72);
+    this.constrain = new Array(72);
+
+    for (var i=0; i<72; i++) {
+      this.current[i] = '';
+      this.constrain[i] = 0;  // 1 = vert, 2 = horiz, 0 = fixed
+    }
+    for (var row=0; row<4; row++) {
+      for (var col=0; col<5; col++) {
+        var i = row * 5 + col;
+        var val = this.seed.charAt(i) * 1;
+        if (val == 0) {
+          this.current[(row+2)*9+col+2] = this.answer.charAt(i);
+          this.constrain[(row+2)*9+col+2] = 0;
+        }
+        if (val == 1) {
+          this.current[0*9+col+2] = this.answer.charAt(i);
+          this.constrain[0*9+col+2] = 1;
+        }
+        if (val == 2) {
+          this.current[(row+2)*9+0] = this.answer.charAt(i);
+          this.constrain[(row+2)*9+0] = 2;
+        }
+        if (val == 3) {
+          this.current[7*9+col+2] = this.answer.charAt(i);
+          this.constrain[7*9+col+2] = 1;
+        }
+        if (val == 4) {
+          this.current[(row+2)*9+8] = this.answer.charAt(i);
+          this.constrain[(row+2)*9+8] = 2;
+        }
+      }
+    }
+    _gel("win").innerHTML = "&nbsp;<br>&nbsp;";
+    this.hideClues();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.load_progress = function () {
+    if (!this._IGG_refreshCell) {
+      this._IGG_refreshCell = function () {};
+    }
+
+    if (this.isSolved()) {
+      _gel("startoverbutton").value = "Solved!";
+    } else {
+      _gel("startoverbutton").value = "Start Over";
+    }
+    if (this._IGG_refreshAll)
+      this._IGG_refreshAll();
+  }
+                                                                                                                                                                                              
+  puzzle_data__MODULE_ID__.prototype.save_progress = function () {
+    pref_controller__MODULE_ID__.game_state = this.game_state;
+    pref_controller__MODULE_ID__.setPrefs();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.showClues = function() {
+    _gel("clues").innerHTML = this.clueHTML;
+    _gel("clues").style.display = 'inline';
+    _gel("showcluebutton").style.display = 'none';
+    _gel("hidecluebutton").style.display = 'inline';
+  }
+
+  puzzle_data__MODULE_ID__.prototype.hideClues = function() {
+    _gel("clues").style.display = 'none';
+    _gel("hidecluebutton").style.display = 'none';
+    _gel("showcluebutton").style.display = 'inline';
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isSolved = function() {
+    for (var row=0; row<4; row++) {
+      for (var col=0; col<5; col++) {
+        var i = row * 5 + col;
+        if (this.answer.charAt(i) != this.current[(row+2)*9 + (col+2)]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isBorder = function(index) {
+    var row = Math.floor(index / 9);
+    var col = index % 9;
+    if ((row == 1) || (row == 6)) {
+      return ((col != 0) && (col != 8));
+    }
+    if ((col == 1) || (col == 7)) {
+      return ((row != 0) && (row != 7));
+    }
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_getNormalView = function(index) {
+    if (index == 0) return '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+    if (this.isBorder(index)) return '<img src="' + this.prefix + 'black.png" alt="-">';
+    if (this.current[index] == '') return '';
+    var color = '#000000';
+    if (this.constrain[index] == 1) color = '#C000C0';
+    if (this.constrain[index] == 2) color = '#00C000';
+    return '<span style="color:' + color + '">&nbsp;' + this.current[index] + '&nbsp;</span>';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_getTargetView = function(target, source) {
+    var color = '#000000';
+    if (this.constrain[source] == 1) color = '#FF00FF';
+    if (this.constrain[source] == 2) color = '#00FF00';
+    return '<span style="color:' + color + '"><b>&nbsp;' + this.current[source] + '&nbsp;</b></span>';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_handleDragStart = function(source) {
+    if (this.constrain[source] == 1) {
+      game__MODULE_ID__.setXMapper(_IG_Drag.prototype.noMoveMapper);
+      game__MODULE_ID__.setYMapper(null);
+    } else if (this.constrain[source] == 2) {
+      game__MODULE_ID__.setXMapper(null);
+      game__MODULE_ID__.setYMapper(_IG_Drag.prototype.noMoveMapper);
+    } else {
+      game__MODULE_ID__.setXMapper(null);
+      game__MODULE_ID__.setYMapper(null);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_handleDrag = function(source, target) {
+    if (target == source) return;
+    if (target == -1) return;
+    var temp_current = this.current[target];
+    var temp_constrain = this.constrain[target];
+    var pos = 0;
+    if (temp_current != '') {
+      if (temp_constrain == 1) {
+        var col = target % 9;
+        if (this.current[col] == '')
+          pos = col;
+        else
+          pos = 63 + col;
+      } else {
+        var row = Math.floor(target / 9);
+        if (this.current[row*9] == '')
+          pos = row*9;
+        else
+          pos = row*9 + 8;
+      }
+    }
+    this.current[target] = this.current[source];
+    this.constrain[target] = this.constrain[source];
+    this.current[source] = '';
+    this.constrain[source] = 0;
+    if (pos != 0) {
+      this.current[pos] = temp_current;
+      this.constrain[pos] = temp_constrain;
+      this._IGG_refreshCell(pos);
+    }
+    this._IGG_refreshCell(source);
+    this._IGG_refreshCell(target);
+
+    if (this.isSolved()) {
+      _gel("win").innerHTML = 'You win!';
+      pref_controller__MODULE_ID__.game_state.puz_solved[pref_controller__MODULE_ID__.game_state.cur_puz] = 1;
+      pref_controller__MODULE_ID__.updatePrefDisplay();
+    } else {
+      _gel("startoverbutton").value = "Start Over";
+    }
+    this.save_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_isDragSource = function(index) {
+    if (this.constrain[index] == 0) return false;
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_isDragTarget = function(index, sourceIndex) {
+    if (this.constrain[index] == 0 && this.current[index] != '') return false;
+    if (this.constrain[sourceIndex] == 1) {
+      if (sourceIndex % 9 != index % 9) return false;
+      var row = Math.floor(index / 9);
+      if (row == 1) return false;
+      if (row == 6) return false;
+      if (row == 0 && Math.floor(sourceIndex / 9) == 7) return false;
+      if (row == 7 && Math.floor(sourceIndex / 9) == 0) return false;
+      return true;
+    } else {
+      if (Math.floor(sourceIndex / 9) != Math.floor(index / 9)) return false;
+      var col = index % 9;
+      if (col == 1) return false;
+      if (col == 7) return false;
+      if (col == 0 && sourceIndex % 9 == 8) return false;
+      if (col == 8 && sourceIndex % 9 == 0) return false;
+      return true;
+    }
+  }
+
+  ///////////////////////////////////////
+
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  var pref_controller__MODULE_ID__;
+
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+                                                                                                                                                                  
+  function start__MODULE_ID__() {
+    pref_controller__MODULE_ID__ = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_1208', true);
+    pref_controller__MODULE_ID__.num_puzzles = 20;
+    pref_controller__MODULE_ID__.box_height = 4;
+    pref_controller__MODULE_ID__.box_width = 4;
+    pref_controller__MODULE_ID__.rows = 4;
+    pref_controller__MODULE_ID__.cols = 5;
+
+    _gel("game_state_html").innerHTML = pref_controller__MODULE_ID__.getTableHTML();
+    pref_controller__MODULE_ID__.getPrefs();
+
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+    reset__MODULE_ID__(pref_controller__MODULE_ID__.game_state);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  function reset__MODULE_ID__(game_state) {
+    puzzle__MODULE_ID__.resetPuzzle(game_state);
+    game__MODULE_ID__ = new _IG_Grid(puzzle__MODULE_ID__, "mygrid", puzzle__MODULE_ID__.height, puzzle__MODULE_ID__.width);
+    _gel("table_html").innerHTML = "";
+    game__MODULE_ID__.getTable().cellPadding = 0;
+    game__MODULE_ID__.getTable().cellSpacing = 0;
+    _gel("table_html").appendChild(game__MODULE_ID__.getTable());
+
+    for (var i=0; i<72; ++i) {
+      if (puzzle__MODULE_ID__.isBorder(i)) {
+        _gel(game__MODULE_ID__.getCellTDID(i)).style.backgroundColor = "#000000";
+      }
+    }
+
+    puzzle__MODULE_ID__._IGG_refreshAll();
+    game__MODULE_ID__.initDragging();
+
+    game__MODULE_ID__.dragHandler.topMargin = 10;
+    game__MODULE_ID__.dragHandler.bottomMargin = 10;
+    game__MODULE_ID__.dragHandler.leftMargin = 10;
+    game__MODULE_ID__.dragHandler.rightMargin = 10;
+    if (navigator.userAgent.toLowerCase().match("ie")) {
+      game__MODULE_ID__.dragHandler.surrogateOffsetX = 0;
+      game__MODULE_ID__.dragHandler.surrogateOffsetY = 0;
+      game__MODULE_ID__.dragHandler.leftMargin = 0;
+      game__MODULE_ID__.dragHandler.rightMargin = 20;
+      game__MODULE_ID__.dragHandler.topMargin = 10;
+      game__MODULE_ID__.dragHandler.bottomMargin = 10;
+    } else if (navigator.userAgent.toLowerCase().match("safari")) {
+      game__MODULE_ID__.dragHandler.surrogateOffsetX = 0;
+      game__MODULE_ID__.dragHandler.surrogateOffsetY = 0;
+      game__MODULE_ID__.dragHandler.leftMargin = 5;
+      game__MODULE_ID__.dragHandler.rightMargin = 10;
+      game__MODULE_ID__.dragHandler.topMargin = 10;
+      game__MODULE_ID__.dragHandler.bottomMargin = 10;
+    }
+
+  }
+
+  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+    this.nav_puz += amount;
+    if (this.nav_puz < 0) this.nav_puz = 0;
+    if (this.nav_puz > this.game_state.puz_count) this.nav_puz = this.game_state.puz_count;
+    this.update_navbar();
+  }
+
+  _IG_puzzle_pref_controller.prototype.new_puzzle_request = function() {
+    this.game_state.cur_puz = this.nav_puz;
+    reset__MODULE_ID__(this.game_state);
+    this.setPrefs();
+    this.update_navbar();
+  }
+
+//////////////////////////
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="pref_controller__MODULE_ID__.change_level(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="pref_controller__MODULE_ID__.change_level(-1)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller__MODULE_ID__.new_puzzle_request()"/>
+</form>
+
+<b>Word Wreck Tangle</b>:  
+Drag the letters into the rectangle so that words read both across and down.
+Crossword-style clues are available if you need them; however, they are in alphabetical order.
+
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   Click and drag a colored letter to move it.  You win if four five-letter English words read left-to-right along the rows
+   and five four-letter words read down along the columns.  The words should be common.
+   To display clues, click on the "Show Clues" button.  The checkboxes are for your convenience only and are not used in scoring.
+</span>
+<BR>
+
+<table border=0><tr><td>
+
+<table border=2 cellpadding=3 cellspacing=3><tr><td>
+<span id="table_html"></span>
+</td></tr><tr><td>
+<center>
+  <input id="startoverbutton" style="font-size:10;visibility:visible" type="button" value="Start Over"
+    onclick="puzzle__MODULE_ID__.clearPuzzle(pref_controller__MODULE_ID__.game_state);"/>
+  <input id="showcluebutton" style="font-size:10;display:inline" type="button" value="Show Clues"
+    onclick="puzzle__MODULE_ID__.showClues();"/>
+  <input id="hidecluebutton" style="font-size:10;display:none" type="button" value="Hide Clues"
+    onclick="puzzle__MODULE_ID__.hideClues();"/>
+</center>
+</td></tr></table>
+
+</td><td>
+
+<span id="clues" style="font-size:10;display:none">
+</span>
+
+</td></table>
+
+<HR>
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <center><span id="game_state_html"></span></center>
+                                                                                                                                                                                              
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td style="font-size:9pt">
+<span style="visibility:hidden">
+  Your points: <span id="points">?</span>
+</span>
+  <input id="resetbutton" style="font-size:10;visibility:hidden" type="button" value="Clear Stats"
+    onclick="pref_controller__MODULE_ID__.resetPrefs();puzzle__MODULE_ID__.resetPuzzle(pref_controller__MODULE_ID__.game_state);"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+                                                                                                                                                                                              
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

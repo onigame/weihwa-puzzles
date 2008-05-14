@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzle Challenges"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20060623@gmail.com"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="400"
+    render_inline="optional"
+  />
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  function _gel(thing) {
+    return document.getElementById(thing);
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "back end".
+  ///  Encodes a maze puzzle.
+
+  function puzzle_data__MODULE_ID__() {
+    this.width = 8;
+    this.height = 8;
+    this.size = 64;
+    var temp = new Array(1,1,1,1,1,1,1,0,0,1,0,0,0,0,1,1,0,1,0,1,1,1,1,1,1,0,0,1,0,0,0,1,1,0,0,0,1,1,1,0,1,1,0,0,0,1,1,1,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1);
+    this.rooms = new Array();
+    for (var i=0; i<this.size; ++i) {
+      this.rooms[i] = (temp[i] == 1);
+    }
+    this.escape = 36;
+
+    this.get_position = puzzle_data_get_position__MODULE_ID__;
+    this.has_exit = puzzle_data_has_exit__MODULE_ID__;
+    this.is_escape = puzzle_data_is_escape__MODULE_ID__;
+  }
+
+  function puzzle_data_get_position__MODULE_ID__(row, col) {
+    if (row < 0) return false; 
+    if (col < 0) return false; 
+    if (row >= this.height) return false;
+    if (col >= this.width) return false;
+    return (this.rooms[row * this.width + col]);
+  }
+
+  function puzzle_data_has_exit__MODULE_ID__(row, col, orientation) {
+    if (orientation%8 == 0) return this.get_position(row-1, col);
+    if (orientation%8 == 1) return this.get_position(row-1, col+1);
+    if (orientation%8 == 2) return this.get_position(row, col+1);
+    if (orientation%8 == 3) return this.get_position(row+1, col+1);
+    if (orientation%8 == 4) return this.get_position(row+1, col);
+    if (orientation%8 == 5) return this.get_position(row+1, col-1);
+    if (orientation%8 == 6) return this.get_position(row, col-1);
+    if (orientation%8 == 7) return this.get_position(row-1, col-1);
+    return false;
+  }
+
+  function puzzle_data_is_escape__MODULE_ID__(row, col) {
+    return (escape == (row * this.width + col));
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "front end".
+  ///  Encodes the user's current "state".
+
+  function state_data__MODULE_ID__() {
+    this.row = 0;
+    this.col = 0;
+    this.steps = 0;
+    this.orientation = 6;
+
+    // accessors
+
+    this.game_over = false;
+    this.game_over_state = 0;  // 0 = time over, 1 = too slow, 2 = victory;
+
+    this.has_exit = has_exit__MODULE_ID__;
+    this.make_game_over = make_game_over__MODULE_ID__;
+    this.move = move__MODULE_ID__;
+
+    this.puzzle = new puzzle_data__MODULE_ID__();
+
+  }
+
+  function has_exit__MODULE_ID__(orientation) {
+    if (this.game_over) return false;
+    return this.puzzle.has_exit(this.row, this.col, this.orientation + orientation);
+  }
+
+  function make_game_over__MODULE_ID__(state) {
+    this.game_over_state = state;
+//    _gel("debug").innerHTML += " game over " + state;
+    this.game_over = true;
+  }
+
+  function move__MODULE_ID__(orientation) {
+    this.steps++;
+//    _gel("debug").innerHTML = this.steps;
+    this.orientation = (this.orientation + orientation) % 8;
+    if (this.orientation == 0) { this.row--; }
+    if (this.orientation == 1) { this.row--; this.col++; }
+    if (this.orientation == 2) {             this.col++; }
+    if (this.orientation == 3) { this.row++; this.col++; }
+    if (this.orientation == 4) { this.row++; }
+    if (this.orientation == 5) { this.row++; this.col--; }
+    if (this.orientation == 6) {             this.col--; }
+    if (this.orientation == 7) { this.row--; this.col--; }
+
+    if (this.row == 4 && this.col == 4) {
+      if (this.steps == 10) {
+        this.make_game_over(2);
+      } else {
+        this.make_game_over(1);
+      }
+    }
+  }
+
+  ///////////////////////////////////////////////
+  // Output UI.
+
+  function game_setup__MODULE_ID__() {
+    this.width = 3;
+    this.height = 3;
+
+    this.raw_cell_id = raw_cell_id__MODULE_ID__;
+    this.cell_num = cell_num__MODULE_ID__;
+    this.get_cell_id = get_cell_id__MODULE_ID__;
+    this.refresh = refresh__MODULE_ID__;
+    this.refresh_cell = refresh_cell__MODULE_ID__;
+
+    this.action_commit = action_commit__MODULE_ID__;
+    this.action_cancel = action_cancel__MODULE_ID__;
+    this.action_show = action_show__MODULE_ID__;
+    this.action_out_of_time = action_out_of_time__MODULE_ID__;
+
+    this.highlighted = -1;
+
+    this.src_image = src_image__MODULE_ID__;
+    this.alt_text = alt_text__MODULE_ID__;
+
+    this.state_data = new state_data__MODULE_ID__;
+  }
+
+  function raw_cell_id__MODULE_ID__(num) {
+    return "cell_" + num + "___MODULE_ID__";
+  }
+
+  function cell_num__MODULE_ID__(row, col) {
+    if (row == 0 && col == 0) return 7;
+    if (row == 0 && col == 1) return 0;
+    if (row == 0 && col == 2) return 1;
+    if (row == 1 && col == 0) return 6;
+    if (row == 1 && col == 1) return 8;
+    if (row == 1 && col == 2) return 2;
+    if (row == 2 && col == 0) return 5;
+    if (row == 2 && col == 1) return 4;
+    if (row == 2 && col == 2) return 3;
+  }
+
+  function get_cell_id__MODULE_ID__(row, col) {
+    return (this.raw_cell_id(this.cell_num(row, col)));
+  }
+
+  function refresh__MODULE_ID__() {
+    var temp = new Array(7,0,1,6,8,2,5,4,3);
+    for (var i=0; i<9; ++i) {
+      var id = this.raw_cell_id(temp[i]);
+      _gel(id).src = this.src_image(temp[i]);
+      _gel(id).alt = this.alt_text(temp[i]);
+      _gel(id).title = this.alt_text(temp[i]);
+    }
+  }
+
+  function refresh_cell__MODULE_ID__(cell) {
+    var id = this.raw_cell_id(cell);
+    _gel(id).src = this.src_image(cell);
+    _gel(id).alt = this.alt_text(cell);
+    _gel(id).title = this.alt_text(cell);
+  }
+
+  function alt_text__MODULE_ID__(orientation) {
+    if (orientation == 8) {
+      if (!this.state_data.game_over) return "no path";
+      if (this.state_data.game_over_state == 0) return "Out of Time!";
+      if (this.state_data.game_over_state == 1) return "Too many steps!";
+      if (this.state_data.game_over_state == 2) return "You win!";
+    } else if (this.state_data.has_exit(orientation)) {
+      return "path";
+    } else {
+      return "no path";
+    }
+  }
+
+  function src_image__MODULE_ID__(orientation) {
+    var pre = "http://weihwa.images02.googlepages.com/";
+    var hl = (this.highlighted == orientation) ? "-highlight" : "";
+    if (orientation == 8) {
+      if (!this.state_data.game_over) return pre + "blank.png";
+      if (this.state_data.game_over_state == 0) return pre + "outoftime" + hl + ".png";
+      if (this.state_data.game_over_state == 1) return pre + "toomanysteps" + hl + ".png";
+      if (this.state_data.game_over_state == 2) return pre + "youwin.png";
+    } else if (this.state_data.has_exit(orientation)) {
+      return pre + "arrow" + orientation + hl + ".png";
+    } else {
+      return pre + "blank.png";
+    }
+  }
+
+  ///////////////////////////////////////////////
+  // Timer code.
+
+  seconds_elapsed__MODULE_ID__ = 0;
+  timer_running__MODULE_ID__ = true;
+
+  function reset_timer__MODULE_ID__() {
+    seconds_elapsed__MODULE_ID__ = 0;
+  }
+
+  function stop_timer__MODULE_ID__() {
+    timer_running__MODULE_ID__ = false;
+  }
+
+  function start_timer__MODULE_ID__() {
+    timer_running__MODULE_ID__ = true;
+  }
+
+  function count_timer_second__MODULE_ID__() {
+    if (timer_running__MODULE_ID__) {
+      ++seconds_elapsed__MODULE_ID__;
+    }
+//    _gel("text_num_seconds__MODULE_ID__").innerHTML = '<font size="-1">Time: ' + seconds_elapsed__MODULE_ID__ + '</font>';
+    if (seconds_elapsed__MODULE_ID__ == 25) {
+      out_of_time__MODULE_ID__();
+    }
+    setTimeout("count_timer_second__MODULE_ID__()", 1000); 
+  }
+
+  ////////////////////////////////////////////////////
+  // UI actions.
+
+  function action_commit__MODULE_ID__(row, col) {
+    var orientation = this.cell_num(row, col);
+    if (orientation == 8) {
+      if (this.state_data.game_over && this.state_data.game_over_state != 2) {
+        this.state_data = new state_data__MODULE_ID__();
+        seconds_elapsed__MODULE_ID__ = 0;
+        this.refresh();
+      }
+    } else {
+      if (this.state_data.has_exit(orientation)) {
+        this.state_data.move(orientation);
+        this.refresh();
+      }
+    }
+  }
+
+  function action_cancel__MODULE_ID__(row, col) {
+    this.highlighted = -1;
+    this.refresh_cell(this.cell_num(row, col));
+  }
+
+  function action_show__MODULE_ID__(row, col) {
+    var old = this.highlighted;
+    this.highlighted = this.cell_num(row, col);
+    if (old != -1) this.refresh_cell(old);
+    this.refresh_cell(this.cell_num(row, col));
+  }
+
+  function action_out_of_time__MODULE_ID__() {
+    this.state_data.make_game_over(0);
+    this.refresh();
+  }
+
+  ////////////////////////////////////////////////////
+  // Mouse event interpretation.
+
+  function on_mouse_down__MODULE_ID__(event, row, col) {
+    game__MODULE_ID__.action_commit(row, col);
+  }
+
+  function on_mouse_out__MODULE_ID__(event, row, col) {
+    game__MODULE_ID__.action_cancel(row, col);
+  }
+
+  function on_mouse_up__MODULE_ID__(event, row, col) {
+    // do nothing.
+  }
+
+  function on_mouse_over__MODULE_ID__(event, row, col) {
+    game__MODULE_ID__.action_show(row, col);
+  }
+
+  function on_mouse_click__MODULE_ID__(event, row, col) {
+    // We don't do anything with MouseClick events yet, but we might in the future.
+  }
+
+  ///////////////////////////////////////
+  // Direct access functions.
+  
+  var game__MODULE_ID__ = new game_setup__MODULE_ID__();
+
+  reset_timer__MODULE_ID__();
+  start_timer__MODULE_ID__();
+
+  function table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="0" cellpadding="0px" cellspacing="0px">';
+    for (var row = 0; row < game__MODULE_ID__.width; ++row) {
+      result += '<tr>';
+      for (var col = 0; col < game__MODULE_ID__.width; ++col) {
+        result += '<td>';
+        result += '<img';
+          result += ' id="' + game__MODULE_ID__.get_cell_id(row, col) + '"';
+          result += ' src="' + game__MODULE_ID__.src_image(row, col) + '"';
+          result += ' alt="' + game__MODULE_ID__.alt_text(row, col) + '"';
+          result += ' title="' + game__MODULE_ID__.alt_text(row, col) + '"';
+          result += ' onMouseDown="on_mouse_down__MODULE_ID__(event, ' + row + ', ' + col + ')"';
+          result += ' onMouseOut="on_mouse_out__MODULE_ID__(event, ' + row + ', ' + col + ')"';
+          result += ' onMouseUp="on_mouse_up__MODULE_ID__(event, ' + row + ', ' + col + ')"';
+          result += ' onMouseOver="on_mouse_over__MODULE_ID__(event, ' + row + ', ' + col + ')"';
+          result += ' onClick="on_mouse_click__MODULE_ID__(event, ' + row + ', ' + col + ')"';
+        result += '>';
+        result += '<td>';
+      }
+      result += '</tr>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+  function out_of_time__MODULE_ID__() {
+    game__MODULE_ID__.action_out_of_time();
+  }
+
+  function cached_images__MODULE_ID__() {
+    var result = "";
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow0.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow1.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow2.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow3.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow4.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow5.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow6.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow7.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/outoftime.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/toomanysteps.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow0-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow1-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow2-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow3-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow4-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow5-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow6-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow7-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/outoftime-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/toomanysteps-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/youwin.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/blank.png">';
+    return result;
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<div style="position:relative;width:93px;float:left;margin-right:2px;margin-top:2px;margin-bottom:0px;">
+<IMG SRC="http://www.google.com/ig/images/weihwa.jpg"
+     WIDTH="90px"
+     ALT="Wei-Hwa Huang: Googler &amp; Four-Time World Puzzle Champion"
+     TITLE="Wei-Hwa Huang: Googler &amp; Four-Time World Puzzle Champion"
+>
+</div>
+                                                                                                                                                                                                                        
+<B>June 23rd, 2006</B>:
+Three weeks ago I was playing in <a target="_top" href="http://en.wikipedia.org/wiki/The_Game_%28treasure_hunt%29">The Game</a>.  One particular challenge
+was a timed maze (written by Stanford students Rachel Weinstein and Frank Losasso) that we had to play on a 
+<a target="_top" href="http://en.wikipedia.org/wiki/Dance_pad">dance pad</a>.
+It took my team surprisingly long, probably because we hadn't slept for 20 hours
+and we had failed to notice an important rule...
+
+<P>
+<div style="position:relative;float:left;margin-right:3px;margin-top:3px" id="grid__MODULE_ID__">
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(table_html__MODULE_ID__());
+  game__MODULE_ID__.refresh();
+  count_timer_second__MODULE_ID__();
+</SCRIPT>
+</div>
+Now, you can share a little bit of that experience.  Start clicking and see if you can figure out the rules and solve
+the maze.  When you win, you won't be able to reset the puzzle any more -- that's deliberate.
+
+<P>
+<FONT size=-2>
+(If the performance on your browser is sluggish, I've heard that <a target="_top" href="http://www.mozilla.com/firefox/">Firefox</a> gives better performance.)
+</FONT>
+
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(cached_images__MODULE_ID__());
+</SCRIPT>
+
+<DIV id="debug"></DIV>
+
+</FONT>
+
+
+  ]]> 
+
+  </Content>
+</Module>
+
+  </div><script><!--
+_IG_TriggerEvent("domload");// -->
+</script></body></html>

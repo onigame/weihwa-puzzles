@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20061004@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="400"
+  />
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="display:none;">
+Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.epl?art_id=958
+<img src='http://weihwa.images01.googlepages.com/black.png'>
+</div>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20061004@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/drag.js"></script>
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils3.js"></script>
+--->
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/drag.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils3.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  var RNG__MODULE_ID__ = new _IG_Random();
+ 
+  ///////////////////////////////////////////////
+
+  function mind_code__MODULE_ID__(length, range) {
+    this.length = length;
+    this.range = range;
+    this.data = new Array();
+    for (var i=0; i<this.length; ++i) {
+      this.data[i] = 0;
+    }
+  }
+
+  mind_code__MODULE_ID__.prototype.value = function() {
+    var answer = "";
+    for (var i=0; i<this.length; ++i) {
+      answer += this.data[i];
+    }
+    return answer;
+  }
+
+  mind_code__MODULE_ID__.prototype.randomize = function() {
+    for (var i=0; i<this.length; ++i) {
+      this.data[i] = RNG__MODULE_ID__.getInt(this.range);
+    }
+  }
+
+  mind_code__MODULE_ID__.prototype.increment = function() {
+    this.data[0] ++;
+    for (var i=0; i<this.length-1; ++i) {
+      if (this.data[i] == this.range) { this.data[i] = 0; this.data[i+1]++; }
+    }
+    if (this.data[this.length-1] == this.range) { this.data[this.length-1] = 0; }
+  }
+
+  mind_code__MODULE_ID__.prototype.equals = function(other) {
+    for (var i=0; i<this.length; ++i) {
+      if (this.data[i] != other.data[i]) return false;
+    }
+    return true;
+  }
+
+  mind_code__MODULE_ID__.prototype.copy_from = function(other) {
+    for (var i=0; i<this.length; ++i) {
+      this.data[i] = other.data[i];
+    }
+  }
+
+  mind_code__MODULE_ID__.prototype.pegs = function(other) {
+    var result = new Multiset();
+
+    var my_white = new Multiset();
+    var oth_white = new Multiset();
+
+    for (var i=0; i<this.length; ++i) {
+      if (this.data[i] == other.data[i]) {
+        result.add(0);
+      } else {
+        my_white.add(this.data[i]);
+        oth_white.add(other.data[i]);
+      }
+    }
+
+    var white_count = 0;
+    for (var i=0; i<this.range; ++i) {
+      white_count += (my_white.count(i) < oth_white.count(i)) ? my_white.count(i) : oth_white.count(i);
+    }
+
+    for (var i=0; i<white_count; ++i) {
+      result.add(1);
+    }
+    return result;
+  }
+
+  ///////////////////////////////////////////////
+
+  function mutate_pegs__MODULE_ID__(pegs, length) {
+    var b_count = length - pegs.count(0) - pegs.count(1);
+    if (RNG__MODULE_ID__.get() < 0.5) {
+      pegs.add(0);
+    } else {
+      pegs.add(1);
+    }
+  }
+
+  function off_by_one_peg__MODULE_ID__(pegs1, pegs2) {
+    var temp = new Multiset();
+    temp.add(pegs1.count(0) - pegs2.count(0));
+    temp.add(pegs1.count(1) - pegs2.count(1));
+    if (temp.count(0) != 1) return false;
+    if (temp.count(1) != 1) return false;
+    return true;
+  }
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.prefix = 'http://weihwa.images02.googlepages.com/';
+//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/20061004-mistermind.xml/';
+    this.resetPuzzleData(1);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(puznum) {
+    this.resetPuzzleData(puznum);
+    this._IGGG_refreshAll();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzleData = function(puznum) {
+    this.puznum = puznum;
+    RNG__MODULE_ID__.randomize(puznum);
+    this.length = 4;
+    this.range = 6;
+
+    this.answer = new mind_code__MODULE_ID__(this.length, this.range);
+    this.answer.randomize();
+
+    this.codes = new Array();
+    this.pegs = new Array();
+
+    this.rows = 0;
+    //////////////
+    var trial = new mind_code__MODULE_ID__(this.length, this.range);
+    trial.randomize();      
+    this.move_to_next_solution(trial);
+    var next_sol = new mind_code__MODULE_ID__(this.length, this.range);
+    next_sol.copy_from(trial);
+    next_sol.increment();
+    this.move_to_next_solution(next_sol);
+    while (!trial.equals(next_sol) && this.rows < 10) {
+
+      if (trial.equals(this.answer)) {
+        trial.copy_from(next_sol);
+      }
+
+      // trial is definitely a bogus solution.  Let's find something that contradicts it.
+
+      var temp = new mind_code__MODULE_ID__(this.length, this.range);
+      temp.randomize();      
+      this.codes[this.rows] = temp;
+      this.pegs[this.rows] = this.answer.pegs(temp);
+      mutate_pegs__MODULE_ID__(this.pegs[this.rows], this.length);
+
+      while (off_by_one_peg__MODULE_ID__(this.pegs[this.rows], trial.pegs(temp))) {
+        temp.increment();      
+        this.codes[this.rows] = temp;
+        this.pegs[this.rows] = this.answer.pegs(temp);
+        mutate_pegs__MODULE_ID__(this.pegs[this.rows], this.length);
+      }
+
+      this.rows++;
+
+      // trial is now invalidated.
+
+      this.move_to_next_solution(trial);
+      next_sol.copy_from(trial);
+      next_sol.increment();
+      this.move_to_next_solution(next_sol);
+
+    }
+    //////////////
+
+    this.sort();
+
+    this.entry = new Array('?', '?', '?', '?');
+    this.cursor = 0;
+
+    this.display_rows = this.rows + 1;
+    if (this.display_rows < 7) this.display_rows = 7;
+
+    this.marks = new Array();
+    for (var i=0; i < this.display_rows * 11; ++i) {
+      this.marks[i] = 0;
+    }
+
+    _gel("win").innerHTML = "&nbsp;";
+  }
+
+  puzzle_data__MODULE_ID__.prototype.swap = function(i, j) {
+    var temp = this.codes[i];
+    this.codes[i] = this.codes[j]; 
+    this.codes[j] = temp;
+    temp = this.pegs[i];
+    this.pegs[i] = this.pegs[j];
+    this.pegs[j] = temp;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.better = function(i, j) {
+    if (this.pegs[i].count(0) + this.pegs[i].count(1) < this.pegs[j].count(0) + this.pegs[j].count(1)) return true;
+    if (this.pegs[i].count(0) + this.pegs[i].count(1) > this.pegs[j].count(0) + this.pegs[j].count(1)) return false;
+    if (this.pegs[i].count(0) < this.pegs[j].count(0)) return true;
+    if (this.pegs[i].count(0) > this.pegs[j].count(0)) return false;
+    for (var k=0; k<this.length; ++k) {
+      if (this.codes[i].data[k] > this.codes[j].data[k]) return true;
+      if (this.codes[i].data[k] < this.codes[j].data[k]) return false;
+    }
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.sort = function() {
+    // stupid bubble sort.
+    for (var i=0; i<this.rows; i++) {
+      for (var j=this.rows-1; j>i; j--) {
+        if (!this.better(j-1, j))
+          this.swap(j-1, j);
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.move_to_next_solution = function(test) {
+    while (!this.is_solution(test)) {
+      test.increment();
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.is_solution = function(test) {
+    for (var i=0; i<this.rows; i++) {
+      var pegs = test.pegs(this.codes[i]);
+      if (!off_by_one_peg__MODULE_ID__(this.pegs[i], pegs))
+        return false;
+    } 
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.handle_entry = function(color) {
+    this.entry[this.cursor] = color;
+    this.cursor++;
+    this._IGGG_refreshCell(this.rows * 12 + this.cursor - 1);
+    if (this.cursor == 4) {
+      var temp = new mind_code__MODULE_ID__(this.length, this.range);
+      for (var i=0; i<4; ++i)
+        temp.data[i] = this.entry[i];
+      if (this.is_solution(temp)) {
+        user_solved__MODULE_ID__();
+      } else {
+        user_failed__MODULE_ID__();
+      }
+    } else {
+      this._IGGG_refreshCell(this.rows * 12 + this.cursor);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.handle_backspace = function() {
+    if (this.cursor != 0) {
+      this.cursor--;
+      this.entry[this.cursor] = '?';
+      this._IGGG_refreshCell(this.rows * 12 + this.cursor + 1);
+      this._IGGG_refreshCell(this.rows * 12 + this.cursor);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.getLabel = function(value) {
+    if (value == "x") return "";
+    if (value == "0") return "red";
+    if (value == "1") return "green";
+    if (value == "2") return "brown";
+    if (value == "3") return "blue";
+    if (value == "4") return "yellow";
+    if (value == "5") return "purple";
+    if (value == "c") return "cursor";
+    if (value == "?") return "unknown";
+    if (value == "<") return "backspace";
+    if (value == "B") return "black peg";
+    if (value == "W") return "white peg";
+    if (value == "-") return "no peg";
+    return "";
+  }
+
+  puzzle_data__MODULE_ID__.prototype.getImageURL = function(value) {
+    if (value == "x") return this.prefix + "";
+    if (value == "0") return this.prefix + "red.gif";
+    if (value == "1") return this.prefix + "green.gif";
+    if (value == "2") return this.prefix + "brown.gif";
+    if (value == "3") return this.prefix + "blue.gif";
+    if (value == "4") return this.prefix + "yellow.gif";
+    if (value == "5") return this.prefix + "purple.gif";
+    if (value == "c") return this.prefix + "cursor.gif";
+    if (value == "?") return this.prefix + "unknown.gif";
+    if (value == "<") return this.prefix + "backspace.gif";
+    if (value == "B") return this.prefix + "blackpeg.gif";
+    if (value == "W") return this.prefix + "whitepeg.gif";
+    if (value == "-") return this.prefix + "nopeg.gif";
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getNormalView = function(index) {
+    var col = index % 12;
+    var row = Math.floor(index / 12);
+
+    if (col == 11 && row == 6) {
+      value = "<";
+    } else if (col == 11 && row < 6) {
+      value = row;
+    } else if (row == this.rows && col == this.cursor) {
+      value = 'c';
+    } else if (row == this.rows && col < this.length) {
+      value = this.entry[col];
+    } else if (row > this.rows) {
+      value = "x";
+    } else if (col == this.length) {
+      value = "x";
+    } else if (col < this.length) {
+      value = this.codes[row].data[col];
+    } else if (col == 10) {
+      value = "x";
+    } else if (col == 11) {
+      value = "x";
+    } else if (row < this.rows) {
+      col -= this.length;
+      if (col <= this.pegs[row].count(0)) {
+        value = "B";
+      } else if (col <= this.pegs[row].count(0) + this.pegs[row].count(1)) {
+        value = "W";
+      } else {
+        value = "-";
+      }
+    } else {
+      value = "x";
+    }
+
+    if (value != "x")
+      value = '<img alt="' + value + '" title="' + this.getLabel(value) + '" src="' + this.getImageURL(value) + '">';
+    else
+      value = "";
+ 
+    var color = '#FFFFFF';
+    if (this.marks[index] == 2) color = '#FFC0FF';
+    if (this.marks[index] == 1) color = '#C0FFFF';
+
+    return '<span style="background-color:' + color + '">&nbsp;' + value + '&nbsp;</span>';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSourceView = function(source, target) {
+    return this._IGGG_getNormalView(source);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getTargetView = function(target, source) {
+    return this._IGGG_getNormalView(source);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getPossibleTargetView = function(target, source) {
+    return this._IGGG_getNormalView(target);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getDragView = function(index) {
+    return this._IGGG_getNormalView(target);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSurrogateView = function(index) {
+    return "";
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleDragStart = function(source) {
+    return;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleDrag = function(source, target) {
+    var col = source % 12;
+    var row = Math.floor(source / 12);
+
+    _gel("win").innerHTML = "&nbsp;";
+    if (col == 11 && row < 6) {
+      this.handle_entry(row);
+    } else if (col == 11 && row == 6) {
+      this.handle_backspace();
+    } else {
+      this.marks[source] = (this.marks[source] + 1) % 3;
+      this._IGGG_refreshCell(source);
+    }
+    return;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleClick = function(source) {
+    // do nothing
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragSource = function(index) {
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragTarget = function(index, sourceIndex) {
+    return false;
+  }
+
+  // only used for objects that can't be handled.
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragStart = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetHit = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetLost = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragEnd = function(s_object, t_object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragClick = function(object) { }
+
+  //   _IGGG_refreshCell(index)
+  //   _IGGG_addDragSource(index)
+  //   _IGGG_removeDragSource(index)
+  //   _IGGG_refreshDragSources()
+  //   _IGGG_refreshDragTargets()
+
+  ///////////////////////////////////////
+
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+
+  function start__MODULE_ID__() {
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", puzzle__MODULE_ID__.display_rows, 12);
+    _gel("table_html").innerHTML = game__MODULE_ID__.getTableHTML();
+    game__MODULE_ID__.initDragging();
+    _gel("level").value = 1;
+  }
+
+  function reset_button__MODULE_ID__() {
+    changeLevel__MODULE_ID__(0);
+    _gel("newp").disabled = true;
+    reset__MODULE_ID__(_gel("level").value);
+  }
+
+  function reset__MODULE_ID__(puznum) {
+    puzzle__MODULE_ID__.resetPuzzle(puznum);
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", puzzle__MODULE_ID__.display_rows, 12);
+    _gel("table_html").innerHTML = game__MODULE_ID__.getTableHTML();
+    game__MODULE_ID__.initDragging();
+  }
+
+  ///////////////////////////////////////////////
+
+  function changeLevel__MODULE_ID__(amount) {
+    var lev = _gel("level").value * 1 + amount;
+    if (lev < 1) lev = 1;
+    _gel("level").value = lev;
+    _gel("levm1").disabled = (lev <= 1);
+    _gel("levm10").disabled = (lev <= 1);
+    _gel("levm10").value = (lev > 10) ? "-10" : ("-" + (lev - 1));
+    _gel("newp").disabled = false;
+  }
+
+  function level_click__MODULE_ID__() {
+    _gel("newp").disabled = false;
+  }
+ 
+  function user_solved__MODULE_ID__() {
+    _gel("win").innerHTML = "Checking...";
+    changeLevel__MODULE_ID__(1);
+    reset_button__MODULE_ID__();
+    _gel("win").innerHTML = "Correct!"
+    _gel("psolved").innerHTML = _gel("psolved").innerHTML * 1 + 1;
+    _gel("percent").innerHTML = Math.floor( _gel("psolved").innerHTML / (_gel("psolved").innerHTML * 1 + _gel("pfailed").innerHTML * 1) * 10000 / 100) + '%';
+    _gel("cstreak").innerHTML = _gel("cstreak").innerHTML * 1 + 1;
+    if (_gel("cstreak").innerHTML * 1 > _gel("lstreak").innerHTML * 1) 
+      _gel("lstreak").innerHTML = _gel("cstreak").innerHTML;
+  }
+ 
+  function user_failed__MODULE_ID__() {
+    _gel("win").innerHTML = "Checking...";
+    changeLevel__MODULE_ID__(1);
+    reset_button__MODULE_ID__();
+    _gel("win").innerHTML = "Incorrect!"
+    _gel("pfailed").innerHTML = _gel("pfailed").innerHTML * 1 + 1;
+    _gel("percent").innerHTML = Math.floor( _gel("psolved").innerHTML / (_gel("psolved").innerHTML * 1 + _gel("pfailed").innerHTML * 1) * 10000 / 100) + '%';
+    _gel("cstreak").innerHTML = "0";
+  }
+
+
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <input style="font-size:10" id="level" type="text" size=1 style="font-size:8pt" value="1" onclick="level_click__MODULE_ID__()"/>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="changeLevel__MODULE_ID__(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="changeLevel__MODULE_ID__(-1)"/>
+<input style="font-size:10" id="levp10" type="button" value="+10" onclick="changeLevel__MODULE_ID__(10)"/>
+<input style="font-size:10" disabled id="levm10" type="button" value="&ndash;0" onclick="changeLevel__MODULE_ID__(-10)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="Get New Puzzle" onclick="reset_button__MODULE_ID__()"/>
+</form>
+
+Today's puzzle: <b>Mister Mind</b>.
+
+<span id="showintro" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('intro').style.display='inline';_gel('showintro').style.display='none';_gel('hideintro').style.display='inline'">Introduction.</span>
+<span id="hideintro" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('intro').style.display='none';_gel('showintro').style.display='inline';_gel('hideintro').style.display='none'">Hide Intro.</span>
+<span id="intro" style="display:none;font-size:x-small">
+<b>Mister Mind</b> has challenged you to guess his secret color code.  For each guess of yours he's given indicator pegs on
+the side; but, the evil Mister Mind always adds an extra peg just to keep things confusing.  You only have one guess left,
+so you better make sure it's correct!
+</span>
+
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+   The rules are similar to <a target="_top" href="http://en.wikipedia.org/wiki/Mastermind_%28board_game%29">Mastermind&reg;</a>; a black peg indicates that a color is in the correct position, while a white peg stands for a color that is correct but in the wrong position.  The only difference is that each row always has an extra peg, which can be white or black.
+   No guesswork is required; there's always enough information for you to be able to deduce the correct code.
+</span>
+
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   You may click on the cells of the rows to "make notes" -- the background can be cycled among three different colors.
+   When you are ready to submit your answer, click on the colored pegs on the right to submit your answer.  You may click the arrow to "backspace";
+however, once you click the fourth color, it will be submitted instantly, so be careful!
+   The stats are for entertainment purposes only, and are pretty easy to cheat -- so you're only cheating yourself.
+</span>
+
+<HR>
+<span id="table_html"></span>
+<HR>
+<table style="font-size:9pt" border=0><tr><td>
+&nbsp;<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+</td><td>
+Puzzles solved: <span style="font-size:9pt; font-weight:bold" id="psolved">0</span><BR>
+</td></tr><tr><td>
+Current Streak: <span style="font-size:9pt; font-weight:bold" id="cstreak">0</span><BR>
+</td><td>
+Puzzles failed: <span style="font-size:9pt; font-weight:bold" id="pfailed">0</span><BR>
+</td></tr><tr><td>
+Longest Streak: <span style="font-size:9pt; font-weight:bold" id="lstreak">0</span><BR>
+</td><td>
+Win Percentage: <span style="font-size:9pt; font-weight:bold" id="percent">N/A</span><BR>
+</td></tr></table>
+
+<span id="debug1" style="font-size:16pt;font-weight:bold"></span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

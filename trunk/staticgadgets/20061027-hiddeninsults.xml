@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20061027@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="100">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+  </ModulePrefs>
+  <UserPref
+      name="hidden_insults"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20061027@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/20061027-hiddeninsults/puzzle-utils3.js"></script>
+--->
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils3.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  //////////////////////////
+
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  var prefs__MODULE_ID__;
+  var gd__MODULE_ID__;
+
+  var nav_puz__MODULE_ID__;
+
+  function getPrefs__MODULE_ID__() {
+    // Get user preferences
+    var data = prefs__MODULE_ID__.getString("hidden_insults");
+    if (data == "") {
+      gd__MODULE_ID__ = new game_data__MODULE_ID__();
+    } else {
+      gd__MODULE_ID__ = data.parseJSON();
+    }
+    nav_puz__MODULE_ID__ = gd__MODULE_ID__.cur_puz;
+    updatePrefTable__MODULE_ID__();
+    update_navbar__MODULE_ID__();
+  }
+
+  function setPrefs__MODULE_ID__() {
+    prefs__MODULE_ID__.set("hidden_insults", gd__MODULE_ID__.toJSONString());
+    updatePrefTable__MODULE_ID__();
+  }
+
+  function resetPrefs__MODULE_ID__() {
+    gd__MODULE_ID__ = new game_data__MODULE_ID__();
+    setPrefs__MODULE_ID__();
+    updatePrefTable__MODULE_ID__();
+    update_navbar__MODULE_ID__();
+  }
+
+  function updatePrefTable__MODULE_ID__() {
+    for (var i=0; i<gd__MODULE_ID__.puz_count; i++) {
+      var hs = gd__MODULE_ID__.hints_shown[i];
+      var sc = gd__MODULE_ID__.score[i];
+      if (sc == 10) {
+        _gel("pv" + i).style.backgroundColor = "#00FF00";
+      } else if (sc == 7) {
+        _gel("pv" + i).style.backgroundColor = "#22FF22";
+      } else if (sc == 4) {
+        _gel("pv" + i).style.backgroundColor = "#66FF66";
+      } else if (sc == 3) {
+        _gel("pv" + i).style.backgroundColor = "#99FF99";
+      } else if (sc == 2) {
+        _gel("pv" + i).style.backgroundColor = "#BBFFBB";
+      } else if (sc == 1) {
+        _gel("pv" + i).style.backgroundColor = "#DDFFDD";
+      } else if (hs == 5) {
+        _gel("pv" + i).style.backgroundColor = "#FF0000";
+      } else if (hs == 4) {
+        _gel("pv" + i).style.backgroundColor = "#FF2222";
+      } else if (hs == 3) {
+        _gel("pv" + i).style.backgroundColor = "#FF4444";
+      } else if (hs == 2) {
+        _gel("pv" + i).style.backgroundColor = "#FF6666";
+      } else if (hs == 1) {
+        _gel("pv" + i).style.backgroundColor = "#FF8888";
+      } else if (hs == 0) {
+        _gel("pv" + i).style.backgroundColor = "#FFAAAA";
+      }
+    }
+    _gel("pv" + gd__MODULE_ID__.cur_puz).style.backgroundColor = "#0000FF";
+    var num = numSolved__MODULE_ID__(); 
+    if (num == 50) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = totalScore__MODULE_ID__();
+    _IG_AdjustIFrameHeight();
+  }
+
+  ///////////////////////////////////////////////
+
+  function game_data__MODULE_ID__() {
+    this.puz_count = 25;
+    this.cur_puz = 0;
+    this.hints_shown = new Array();
+    this.score = new Array();
+    for (var i=0; i<this.puz_count; ++i) {
+      this.hints_shown[i] = 0; // 6 means the puzzle is solved.
+      this.score[i] = 0;
+    }
+  }
+
+  function numSolved__MODULE_ID__() {
+    var answer = 0;
+    for (var i=0; i<gd__MODULE_ID__.puz_count; ++i) {
+      answer += (gd__MODULE_ID__.hints_shown[i] == 6) ? 1 : 0;
+    }
+    return answer;
+  }
+
+  function totalScore__MODULE_ID__() {
+    var answer = 0;
+    for (var i=0; i<gd__MODULE_ID__.puz_count; ++i) {
+      answer += gd__MODULE_ID__.score[i];
+    }
+    return answer;
+  }
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(puzzleNum) {
+    this.puzzleNum = puzzleNum;
+    if (puzzleNum == 0) {
+      this.data = new Array("VPRORET", "Npgerff", "Rkunyr", "Svefg srznyr FAY ubfg", "Obfgba ynjlre", "Zhecul Oebja", "Pnaqvpr+Oretra");
+    } else if (puzzleNum == 1) {
+      this.data = new Array("PNAG", "Fvatre", "Hangubevmrq", "Chregb Evpna", "Fnyfnzbatn", "V Arrq gb Xabj", "Znep+Nagubal");
+    } else if (puzzleNum == 2) {
+      this.data = new Array("QRZBA", "Cnvagre", "Cneyvnzrag", "Jngre Yvyvrf", "Pngnenpgf", "Serapu Vzcerffvbavfg", "Pynhqr+Zbarg");
+    } else if (puzzleNum == 3) {
+      this.data = new Array("EHQRFG", "Jevgre", "Cvpnffb", "Zbirq gb Senapr ng ntr 28", "Nyvpr O. Gbxynf", "Ebfr vf n ebfr vf n ebfr vf n ebfr", "Tregehqr+Fgrva");
+    } else if (puzzleNum == 4) {
+      this.data = new Array("YVNE", "Npgerff", "zbgure bs gjvaf", "Guerr Qnlf bs Enva", "uvturfg-cnvq npgerff va gur jbeyq", "Cerggl Jbzna", "Whyvn+Eboregf");
+    } else if (puzzleNum == 5) {
+      this.data = new Array("ANEL", "Npgerff", "Nyyvfba gur nantenzzre", "fubcyvsgvat", "Zvan Unexre", "Jvab Sberire", "Jvaban+Elqre");
+    } else if (puzzleNum == 6) {
+      this.data = new Array("ENAXF", "Fvatre", "Bprna'f Ryrira", "Ubobxra", "Zl Jnl", "By' Oyhr Rlrf", "Senax+Fvangen");
+    } else if (puzzleNum == 7) {
+      this.data = new Array("RJRF", "Npgerff", "Fbsn", "Yvsr Cerfreire Wnpxrg", "Nalguvat Tbrf", "Qvnzbaq Yvy", "Znr+Jrfg");
+    } else if (puzzleNum == 8) {
+      this.data = new Array("VQYL", "Qverpgbe", "genafpraqragny zrqvgngvba", "Enoovgf", "Qhar", "Renfreurnq", "Qnivq+Ylapu");
+    } else if (puzzleNum == 9) {
+      this.data = new Array("ANL", "Npgbe", "pneevrf n cbyvpr onqtr", "Fbhy Zna", "Tubfgohfgref", "Ryjbbq Oyhrf", "Qna+Nlxeblq");
+    } else if (puzzleNum == 10) {
+      this.data = new Array("FPNZ", "Qverpgbe", "Pnanqvna", "Onggyr Natry Nyvgn", "Grezvangbe", "Gvgnavp", "Wnzrf+Pnzreba");
+    } else if (puzzleNum == 11) {
+      this.data = new Array("FJVYY", "Nguyrgr", "I Fgnee", "Gjb Bylzcvp Tbyq Zrqnyf", "Graavf", "Byqre fvfgre", "Irahf+Jvyyvnzf");
+    } else if (puzzleNum == 12) {
+      this.data = new Array("NPAR", "Fpvragvfg", "punfrq pbhagresrvgref", "pnyphyhf", "guerr ynjf bs zbgvba", "tenivgl", "Vfnnp+Arjgba");
+    } else if (puzzleNum == 13) {
+      this.data = new Array("YVRF", "Npgbe", "2006 qvibepr", "snzvyl bs npgbef", "Ubg Fubg", "Gjb naq n Unys Zra", "Puneyvr+Furra");
+    } else if (puzzleNum == 14) {
+      this.data = new Array("FGNL", "Fvatre", "Thvgnevfg", "Ubhetynff", "zneevrq Pneyl Fvzba", "Lbh'ir Tbg n Sevraq", "Wnzrf+Gnlybe");
+    } else if (puzzleNum == 15) {
+      this.data = new Array("UNFGR", "Ragercerarhe", "Tbbqolr", "VzPybar", "X-Zneg fcbxrfcrefba", "ubzrznxvat nqibpngr", "Znegun+Fgrjneg");
+    } else if (puzzleNum == 16) {
+      this.data = new Array("YBFF", "Zhfvpvna", "jbzra'f fubrf", "Ybghf", "Qrinqvc", "Fhcreangheny", "Pneybf+Fnagnan");
+    } else if (puzzleNum == 17) {
+      this.data = new Array("ZRFF", "Npgbe", "Nyna Fuber", "Cerggl va Cvax", "Fgnetngr", '"frk, yvrf, naq ivqrbgncr"', "Wnzrf+Fcnqre");
+    } else if (puzzleNum == 18) {
+      this.data = new Array("FGVAG", "Fvatre", "Obea va Zrzcuvf", "Chax'q", "jneqebor znyshapgvba", "A Flap", "Whfgva+Gvzoreynxr");
+    } else if (puzzleNum == 19) {
+      this.data = new Array("XRRY", "Pbzcbfre", "Cvnavfg", "Gvzba bs Nguraf", "wnmm onaqyrnqre", "Zbbq Vaqvtb", "Qhxr+Ryyvatgba");
+    } else if (puzzleNum == 20) {
+      this.data = new Array("FYNZ", "Jevgre", "Abiryvfg", "Ubcnybat Pnffvql", "Fnpxrgg Snzvyl", "zber guna 100 jrfgreaf", "Ybhvf+Y'Nzbhe");
+    } else if (puzzleNum == 21) {
+      this.data = new Array("ENFU", "Nguyrgr", "cynlrq sbe HPYN", "qvrq sebz NVQF", "guerr Tenaq Fynzf", "Nsevpna Nzrevpna graavf cynlre", "Neguhe+Nfur");
+    } else if (puzzleNum == 22) {
+      this.data = new Array("FABG", "Npgbe", "Gur Phggvat Ebbz", "gryrivfvba fgne", "Zvxr Ybtna", "Ze. Ovt", "Puevf+Abgu");
+    } else if (puzzleNum == 23) {
+      this.data = new Array("YBPB", "Npgbe", "Arj Lbexre", "fba pbzzvggrq fhvpvqr", "Ovyy Tvyyrfcvr", "Nepuvr Ohaxre", "Pneebyy+B'Pbaabe");
+    } else if (puzzleNum == 24) {
+      this.data = new Array("HFRE", "Nguyrgr", "gjb ergverq wrefrl ahzoref", "Gbznunjx", "Nzrevpna Onfxrgonyy Nffbpvngvba", "Qe. W", "Whyvhf+Reivat");
+    }
+    this.insult = _IG_rot13(this.data[0]);
+    this.hints = new Array();
+    this.hints[0] = _IG_rot13(this.data[1]);
+    this.hints[1] = _IG_rot13(this.data[2]);
+    this.hints[2] = _IG_rot13(this.data[3]);
+    this.hints[3] = _IG_rot13(this.data[4]);
+    this.hints[4] = _IG_rot13(this.data[5]);
+    this.answer = _IG_rot13(this.data[6]);
+    this.displayanswer = this.answer.toUpperCase().replace(/\+/g, " ");
+    this.stripanswer = this.answer.toLowerCase().replace(/[^a-z]/g, "");
+  }
+
+  puzzle_data__MODULE_ID__.prototype.scoreIfCorrect = function(hsn) {
+    if (hsn == 0) return 10;
+    if (hsn == 1) return 7;
+    if (hsn == 2) return 5;
+    if (hsn == 3) return 3;
+    if (hsn == 4) return 2;
+    if (hsn == 5) return 1;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.checkAnswer = function() {
+    var test = _gel("subbox").value.toLowerCase().replace(/[^a-z]/g, "");
+    if (test == this.stripanswer) {
+      gd__MODULE_ID__.score[this.puzzleNum] = this.scoreIfCorrect(gd__MODULE_ID__.hints_shown[this.puzzleNum]);
+      gd__MODULE_ID__.hints_shown[this.puzzleNum] = 6;
+      setPrefs__MODULE_ID__();
+      update_navbar__MODULE_ID__();
+      this._IGGG_refreshAll();
+    }
+    if (test == 'candicebergman') {
+      _gel("subbox").value = "It's spelled BERGEN, dolt.";
+    }
+    if (test == 'pleasepleaseletmestartover') {
+      _gel("resetbutton").style.visibility = "visible";
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.getHint = function() {
+    gd__MODULE_ID__.hints_shown[this.puzzleNum]++;
+    setPrefs__MODULE_ID__();
+    this._IGGG_refreshAll();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.HintButton = function() {
+    var answer = '';
+    answer += '<form>';
+    var hints_shown = gd__MODULE_ID__.hints_shown[this.puzzleNum];
+    if (hints_shown == 6) {
+      // do nothing
+    } else if (hints_shown == 5) {
+      answer += '<input style="font-size:10" type="button" disabled value="No more hints" onclick=""/>';
+    } else {
+      var diff = this.scoreIfCorrect(hints_shown) - this.scoreIfCorrect(hints_shown+1);
+      answer += '<input style="font-size:10" type="button" value="Get Hint (-' + diff + ' points)" onclick="puzzle__MODULE_ID__.getHint()"/>';
+    }
+    answer += '</form>';
+    return answer;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.SubmissionBox = function() {
+    var answer = '';
+    var hints_shown = gd__MODULE_ID__.hints_shown[this.puzzleNum];
+    if (hints_shown == 6) {
+      answer += '<b><a target="_top" href="http://www.google.com/search?q=' + this.answer + '">' + this.displayanswer + '</a></b>';
+    } else {
+//      answer += '<form>';
+      answer += '<input id="subbox" type="text" onkeyup="puzzle__MODULE_ID__.checkAnswer()"/>';
+//      answer += '</form>';
+    }
+    return answer;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.StatusBox = function() {
+    var hints_shown = gd__MODULE_ID__.hints_shown[this.puzzleNum];
+    if (hints_shown == 6) {
+      var score = gd__MODULE_ID__.score[this.puzzleNum]; 
+      return '<font size=-1>Puzzle Solved.  You received ' + score + ' point' + (score == 1 ? '' : 's') + '.</font>';
+    } else {
+      var score = this.scoreIfCorrect(hints_shown);
+      return '<font size=-1>A correct answer is worth ' + score + ' point' + (score == 1 ? '' : 's') + '.</font>';
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getNormalView = function(index) {
+    var hints_shown = gd__MODULE_ID__.hints_shown[this.puzzleNum];
+    if (index == 0) {
+      return '<center><span style="background-color:#00FF00"><B>' + this.insult + '</B></span></center>';
+    } else if (index < 6) {
+      var hintnum = index - 1;
+      if (hints_shown > hintnum) {
+        var bg = "#00FF00";
+        if (hintnum == 0) bg = "#22FF22";
+        if (hintnum == 1) bg = "#66FF66";
+        if (hintnum == 2) bg = "#99FF99";
+        if (hintnum == 3) bg = "#BBFFBB";
+        if (hintnum == 4) bg = "#DDFFDD";
+        return '<center><span style="background-color:' + bg + '">' + this.hints[hintnum] + '</span></center>';
+      } else {
+        var bg = "#FFAAAA";
+        if (hintnum == 0) bg = "#FFEEEE";
+        if (hintnum == 1) bg = "#FFDDDD";
+        if (hintnum == 2) bg = "#FFCCCC";
+        if (hintnum == 3) bg = "#FFBBBB";
+        if (hintnum == 4) bg = "#FFAAAA";
+        var display = this.hints[hintnum].replace(/[^ ]/g, "?");
+        return '<center><span style="color:#6F6F6F;background-color:' + bg + '">' + display + '</span></center>';
+      }
+    } else if (index == 6) {
+      return this.HintButton();
+    } else if (index == 7) {
+      return this.SubmissionBox();
+    } else if (index == 8) {
+      return this.StatusBox();
+    } else {
+      return index;
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSourceView = function(source, target) {
+    return this._IGGG_getNormalView(source);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getTargetView = function(source, target) {
+    return this._IGGG_getNormalView(target);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getDragView = function(index) {
+    return this._IGGG_getNormalView(index);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSurrogateView = function(index) {
+    return ("&nbsp;");
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleDrag = function(source, target) {
+    // do nothing
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleClick = function(source) {
+    // do nothing
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragSource = function(index) {
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragTarget = function(index) {
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragStart = function(object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetHit = function(object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetLost = function(object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragEnd = function(s_object, t_object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragClick = function(object) {
+  }
+
+  //   _IGGG_refreshCell(index)
+  //   _IGGG_addDragSource(index)
+  //   _IGGG_removeDragSource(index)
+  //   _IGGG_refreshDragSources()
+  //   _IGGG_addDragTarget(index)
+  //   _IGGG_removeDragTarget(index)
+  //   _IGGG_refreshDragTargets()
+
+  ///////////////////////////////////////
+
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+                                                                                                                                                                  
+  function start__MODULE_ID__() {
+    prefs__MODULE_ID__ = new _IG_Prefs(__MODULE_ID__);
+    getPrefs__MODULE_ID__();
+
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+
+    reset__MODULE_ID__(gd__MODULE_ID__.cur_puz);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  function table_html__MODULE_ID__() {
+    var result = "";
+    result += '<span id="gameboard__MODULE_ID__">';
+    result += game__MODULE_ID__.getTableHTML();
+    result += '</span>';
+    return result;
+  }
+
+  function reset__MODULE_ID__(puznum) {
+    puzzle__MODULE_ID__.resetPuzzle(puznum);
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", 9, 1);
+    _gel("table_html").innerHTML = game__MODULE_ID__.getTableHTML();
+    game__MODULE_ID__.initDragging();
+  }
+
+
+  //////////////////////////
+
+  function update_navbar__MODULE_ID__() {
+    var cur_puz = gd__MODULE_ID__.cur_puz;
+    var nav_puz = nav_puz__MODULE_ID__;
+    if (cur_puz == nav_puz) {
+      _gel("newp").disabled = true;
+      _gel("newp").value = "On Puzzle " + (cur_puz*1+1) + ((gd__MODULE_ID__.hints_shown[cur_puz] == 6) ? "*" : "");
+    } else {
+      _gel("newp").disabled = false;
+      _gel("newp").value = "Get Puzzle " + (nav_puz*1+1) + ((gd__MODULE_ID__.hints_shown[nav_puz] == 6) ? "*" : "");
+    }
+    _gel("puznum").innerHTML = (cur_puz*1+1) + ((gd__MODULE_ID__.hints_shown[cur_puz] == 6) ? "*" : "");
+    _gel("levp1").disabled = (cur_puz >= gd__MODULE_ID__.puz_count - 1);
+    _gel("levm1").disabled = (cur_puz <= 0);
+    _IG_AdjustIFrameHeight();
+  }
+
+  function changeLevel__MODULE_ID__(amount) {
+    nav_puz__MODULE_ID__ += amount;
+    if (nav_puz__MODULE_ID__ < 0) nav_puz__MODULE_ID__ = 0;
+    if (nav_puz__MODULE_ID__ > 24) nav_puz__MODULE_ID__ = 24;
+    update_navbar__MODULE_ID__();
+  }
+
+  function newPuzzleButton__MODULE_ID__() {
+    gd__MODULE_ID__.cur_puz = nav_puz__MODULE_ID__;
+    reset__MODULE_ID__(gd__MODULE_ID__.cur_puz);
+    setPrefs__MODULE_ID__();
+    update_navbar__MODULE_ID__();
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="changeLevel__MODULE_ID__(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="changeLevel__MODULE_ID__(-1)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="newPuzzleButton__MODULE_ID__()"/>
+</form>
+
+<b>Hidden Insults</b>:  Name the famous person, given a somewhat-insulting word hidden in their name.  For instance, VIEW can be found in "SteVIE Wonder."
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+   The hidden word always spans a space in the original name, but there are no extra letters added or removed.  You'll get 10, 7, 4, 3, 2, or 1 points depending
+   on how many hints you've revealed.  There may be more than one famous person with the hidden insult, but I've tried to pick the most famous one in
+   each case.  The first clue is always the (main) profession of the person.
+</span>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+  Simply type your guess in the box.  Spaces and capitalization don't count, but spelling does!  You can try as much as you want without penalty.
+  You can also switch back-and-forth between puzzles without penalty (assuming that the new Google Gadgets User Preference code holds up).
+</span>
+<BR>
+
+<BR>
+<center><span id="table_html"></span></center>
+
+<HR>
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <table border=0 cellpadding=0 cellspacing=0><tr>
+    <td id="pv0" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv1" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv2" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv3" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv4" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td> 
+  </tr><tr>
+    <td id="pv5" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv6" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv7" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv8" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv9" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+  </tr><tr>
+    <td id="pv10" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv11" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv12" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv13" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv14" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+  </tr><tr>
+    <td id="pv15" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv16" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv17" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv18" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv19" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+  </tr><tr>
+    <td id="pv20" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv21" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv22" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv23" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv24" style="height:5;width:5"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+  </tr></table>
+
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td style="font-size:9pt">
+  Your points: <span id="points">?</span>
+  <input id="resetbutton" style="font-size:10;visibility:hidden" type="button" value="Clear Stats" onclick="resetPrefs__MODULE_ID__()"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzle Challenges" 
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20050608@gmail.com"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    render_inline="optional"
+    height="550"
+  /> 
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  function _gel(thing) {
+    return document.getElementById(thing);
+  }
+
+  cell_contents__MODULE_ID__ = new Array(25);
+  seen_times__MODULE_ID__ = new Array(15);
+  distances__MODULE_ID__ = new Array(14);
+  var palette_selection__MODULE_ID__ = 0;
+
+  initialize_puzzle__MODULE_ID__();
+
+  function palette_select__MODULE_ID__(position) {
+    if (position == 0) {
+      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/symbol-plusminus-selected.png";
+      _gel("palette_" + position + "___MODULE_ID__").alt = "plus or minus (selected)";
+      _gel("palette_" + position + "___MODULE_ID__").title = "plus or minus (selected)";
+    } else {
+      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/number-" + position + "-selected.png";
+      _gel("palette_" + position + "___MODULE_ID__").alt = "button " + position + " (selected)";
+      _gel("palette_" + position + "___MODULE_ID__").title = "button " + position + " (selected)";
+    }
+  }
+
+  function palette_deselect__MODULE_ID__(position) {
+    if (position == 0) {
+      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/symbol-plusminus.png";
+      _gel("palette_" + position + "___MODULE_ID__").alt = "plus or minus";
+      _gel("palette_" + position + "___MODULE_ID__").title = "plus or minus";
+    } else {
+      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/number-" + position + ".png";
+      _gel("palette_" + position + "___MODULE_ID__").alt = "button " + position;
+      _gel("palette_" + position + "___MODULE_ID__").title = "button " + position;
+    }
+  }
+
+  function palette_click__MODULE_ID__(position) {
+    if (palette_selection__MODULE_ID__ == -1) {
+      palette_select__MODULE_ID__(position);
+      palette_selection__MODULE_ID__ = position;
+    } else if (palette_selection__MODULE_ID__ == position) {
+      palette_deselect__MODULE_ID__(palette_selection__MODULE_ID__);
+      palette_selection__MODULE_ID__ = -1;
+    } else {
+      palette_deselect__MODULE_ID__(palette_selection__MODULE_ID__);
+      palette_select__MODULE_ID__(position);
+      palette_selection__MODULE_ID__ = position;
+    }
+  }
+
+  function initialize_puzzle__MODULE_ID__() {
+    palette_selection__MODULE_ID__ = 0;
+    cell_contents__MODULE_ID__[0] = 0;
+    cell_contents__MODULE_ID__[1] = 0;
+    cell_contents__MODULE_ID__[2] = 0;
+    cell_contents__MODULE_ID__[3] = 0;
+    cell_contents__MODULE_ID__[4] = 0;
+    cell_contents__MODULE_ID__[5] = 0;
+    cell_contents__MODULE_ID__[6] = 0;
+    cell_contents__MODULE_ID__[7] = -1;
+    cell_contents__MODULE_ID__[8] = -1;
+    cell_contents__MODULE_ID__[9] = -1;
+    cell_contents__MODULE_ID__[10] = 0;
+    cell_contents__MODULE_ID__[11] = -1;
+    cell_contents__MODULE_ID__[12] = -1;
+    cell_contents__MODULE_ID__[13] = 0;
+    cell_contents__MODULE_ID__[14] = 0;
+    cell_contents__MODULE_ID__[15] = 0;
+    cell_contents__MODULE_ID__[16] = 0;
+    cell_contents__MODULE_ID__[17] = -1;
+    cell_contents__MODULE_ID__[18] = -1;
+    cell_contents__MODULE_ID__[19] = 0;
+    cell_contents__MODULE_ID__[20] = 0;
+    cell_contents__MODULE_ID__[21] = 0;
+    cell_contents__MODULE_ID__[22] = 0;
+    cell_contents__MODULE_ID__[23] = 0;
+    cell_contents__MODULE_ID__[24] = 0;
+    for (var i=1; i<=14; ++i) {
+      seen_times__MODULE_ID__[i] = 0;
+      distances__MODULE_ID__[i-1] = -2;
+    }
+  }
+
+  function restart_puzzle__MODULE_ID__() {
+    initialize_puzzle__MODULE_ID__();
+    refresh_all__MODULE_ID__();
+  }
+
+  function value_at__MODULE_ID__(x, y) {
+    return cell_contents__MODULE_ID__[x * 5 + y];
+  }
+
+  function find_position__MODULE_ID__(start) {
+    for (var i=0; i<25; ++i) {
+      if (cell_contents__MODULE_ID__[i] == start)
+        return i;
+    }
+    return -1;
+  }
+  
+  function calculate_distance__MODULE_ID__(start) {
+    if (start < 1) return;
+    if (start > 13) return;
+    if (seen_times__MODULE_ID__[start] < 1) {
+      distances__MODULE_ID__[start] = -2;
+    } else if (seen_times__MODULE_ID__[start+1] < 1) {
+      distances__MODULE_ID__[start] = -2;
+    } else if (seen_times__MODULE_ID__[start] > 1) {
+      distances__MODULE_ID__[start] = -1;
+    } else if (seen_times__MODULE_ID__[start+1] > 1) {
+      distances__MODULE_ID__[start] = -1;
+    } else {
+      var start_position = find_position__MODULE_ID__(start);
+      var plus_position = find_position__MODULE_ID__(start+1);
+      var xdiff = Math.floor(start_position / 5) - Math.floor(plus_position / 5);
+      var ydiff = (start_position % 5) - (plus_position % 5);
+      distances__MODULE_ID__[start] = xdiff * xdiff + ydiff * ydiff;
+    }
+  }
+
+  function all_correct__MODULE_ID__() {
+    for (i=1; i<=13; ++i) {
+      if (distances__MODULE_ID__[i] < 0) return false;
+      if (distances__MODULE_ID__[i-1] >= distances__MODULE_ID__[i]) return false;
+    }
+    return true;
+  }
+
+  function maybe_display_congratulations__MODULE_ID__() {
+    if (all_correct__MODULE_ID__()) {
+      _gel("result_cell_14___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/distance-result-congratulations.png";
+      _gel("result_cell_14___MODULE_ID__").alt = "Congratulations!  You solved the puzzle!";
+      _gel("result_cell_14___MODULE_ID__").title = "Congratulations!  You solved the puzzle!";
+    } else {
+      _gel("result_cell_14___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/distance-result-blank.png";
+      _gel("result_cell_14___MODULE_ID__").alt = "";
+      _gel("result_cell_14___MODULE_ID__").title = "";
+    }
+  }
+
+  function update_result_image__MODULE_ID__(result) {
+    if (result < 1) return;
+    if (result > 13) return;
+    var srctxt = "";
+    var alttxt = "";
+    if (distances__MODULE_ID__[result] == -2) {
+      srctxt = "http://weihwa.images02.googlepages.com/distance-result-undefined.png";
+      alttxt = "undefined";
+    } else if (distances__MODULE_ID__[result] == -1) {
+      srctxt = "http://weihwa.images02.googlepages.com/distance-result-ambiguous.png";
+      alttxt = "ambiguous";
+    } else if (distances__MODULE_ID__[result-1] < distances__MODULE_ID__[result]) {
+      srctxt = "http://weihwa.images02.googlepages.com/distance-result-good-" + distances__MODULE_ID__[result] + ".png";
+      alttxt = "distance of sqrt(" + distances__MODULE_ID__[result] + "), good";
+    } else {
+      srctxt = "http://weihwa.images02.googlepages.com/distance-result-bad-" + distances__MODULE_ID__[result] + ".png";
+      alttxt = "distance of sqrt(" + distances__MODULE_ID__[result] + "), bad";
+    }
+    _gel("result_cell_" + result + "___MODULE_ID__").src = srctxt;
+    _gel("result_cell_" + result + "___MODULE_ID__").alt = alttxt;
+  }
+
+  function refresh_all__MODULE_ID__() {
+    for (var i=1; i<=14; ++i) {
+      seen_times__MODULE_ID__[i] = 0;
+    }
+
+    for (var x=0; x<5; ++x) {
+      for (var y=0; y<5; ++y) {
+        var value = cell_contents__MODULE_ID__[x * 5 + y];
+        seen_times__MODULE_ID__[value]++;
+        if (value == -1) {
+          _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa.images02.googlepages.com/distance-blank.png";
+        } else {
+          _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa.images02.googlepages.com/distance-" + value + ".png";
+        }
+      }
+    }
+   
+    for (var result = 1; result <= 13; ++result) {
+      calculate_distance__MODULE_ID__(result);
+    }
+
+    for (var result = 1; result <= 13; ++result) {
+      update_result_image__MODULE_ID__(result);
+    }
+
+    for (var i=1; i<=14; ++i) {
+      palette_deselect__MODULE_ID__(i);
+    }
+    palette_select__MODULE_ID__(0);
+
+    maybe_display_congratulations__MODULE_ID__();
+  }
+
+  function refresh__MODULE_ID__(x, y, old_value, new_value) {
+    var value = cell_contents__MODULE_ID__[x * 5 + y];
+    if (value == -1) {
+      _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa.images02.googlepages.com/distance-blank.png";
+    } else {
+      _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa.images02.googlepages.com/distance-" + value + ".png";
+    }
+   
+    calculate_distance__MODULE_ID__(old_value);
+    calculate_distance__MODULE_ID__(new_value);
+    if (old_value - 1 != new_value)
+      calculate_distance__MODULE_ID__(old_value - 1);
+    if (new_value - 1 != old_value)
+      calculate_distance__MODULE_ID__(new_value - 1);
+ 
+    update_result_image__MODULE_ID__(old_value);
+    update_result_image__MODULE_ID__(new_value);
+    if (old_value - 1 != new_value)
+      update_result_image__MODULE_ID__(old_value - 1);
+    if (new_value - 1 != old_value)
+      update_result_image__MODULE_ID__(new_value - 1);
+    if (old_value + 1 != new_value)
+      update_result_image__MODULE_ID__(old_value + 1);
+    if (new_value + 1 != old_value)
+      update_result_image__MODULE_ID__(new_value + 1);
+ 
+    maybe_display_congratulations__MODULE_ID__();
+  }
+
+  function update_data__MODULE_ID__(x, y, old_value, new_value) {
+    seen_times__MODULE_ID__[old_value]--;
+    seen_times__MODULE_ID__[new_value]++;
+    refresh__MODULE_ID__(x, y, old_value, new_value);
+  }
+
+  function table_cell_bottom_click__MODULE_ID__(x, y) {
+    var position = x * 5 + y;
+    if (cell_contents__MODULE_ID__[position] == -1)
+      return;
+
+    var old_value = cell_contents__MODULE_ID__[position];
+    var new_value;
+
+    if (palette_selection__MODULE_ID__ == 0) {
+      new_value = old_value - 1;
+      if (new_value == -1) new_value = 14;
+    } else if (palette_selection__MODULE_ID__ == -1) {
+      new_value = 0;
+    } else {
+      new_value = palette_selection__MODULE_ID__;
+    }
+
+    if (old_value != new_value) {
+      cell_contents__MODULE_ID__[position] = new_value;
+      update_data__MODULE_ID__(x, y, old_value, new_value);
+    }
+  }
+
+  function table_cell_top_click__MODULE_ID__(x, y) {
+    var position = x * 5 + y;
+    if (cell_contents__MODULE_ID__[position] == -1)
+      return;
+
+    var old_value = cell_contents__MODULE_ID__[position];
+    var new_value;
+
+    if (palette_selection__MODULE_ID__ == 0) {
+      new_value = old_value + 1;
+      if (new_value == 15) new_value = 0;
+    } else if (palette_selection__MODULE_ID__ == -1) {
+      new_value = 0;
+    } else {
+      new_value = palette_selection__MODULE_ID__;
+    }
+
+    if (old_value != new_value) {
+      cell_contents__MODULE_ID__[position] = new_value;
+      update_data__MODULE_ID__(x, y, old_value, new_value);
+    }
+  }
+
+  function table_cell_map_name__MODULE_ID__(x, y) {
+    var answer = "table_cell_map_";
+    answer += x;
+    answer += y;
+    answer += "___MODULE_ID__";
+    return answer;
+  }
+
+  function table_cell_image_id__MODULE_ID__(x, y) {
+    var answer = "table_cell_image_id_";
+    answer += x;
+    answer += y;
+    answer += "___MODULE_ID__";
+    return answer;
+  }
+
+  function table_cell_html__MODULE_ID__(x, y) {
+    var answer = '<TD><IMG BORDER="0" SRC="';
+    answer += 'http://weihwa.images02.googlepages.com/distance-'
+    var value = value_at__MODULE_ID__(x, y);
+    if (value == -1) {
+      answer += 'blank';
+    } else {
+      answer += value;
+    }
+    answer += '.png';
+    answer += '" ID="';
+    answer += table_cell_image_id__MODULE_ID__(x,y);
+    answer += '" ALT="';
+    answer += value;
+    answer += '" USEMAP="#';
+    answer += table_cell_map_name__MODULE_ID__(x,y);
+    answer += '"></TD>';
+    // Now add the client-side image map
+    answer += '<MAP NAME="';
+    answer += table_cell_map_name__MODULE_ID__(x,y);
+    answer += '"><AREA SHAPE="RECT" COORDS="0,0,31,15" HREF="javascript:table_cell_top_click__MODULE_ID__(';
+    answer += x;
+    answer += ',';
+    answer += y;
+    answer += ')"><AREA SHAPE="RECT" COORDS="0,16,31,31" HREF="javascript:table_cell_bottom_click__MODULE_ID__(';
+    answer += x;
+    answer += ',';
+    answer += y;
+    answer += ')"></MAP>';
+    return answer;
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<div style="position:relative;width:93px;float:left;margin-right:2px;margin-top:2px;margin-bottom:0px;">
+<IMG SRC="http://www.google.com/ig/images/weihwa.jpg"
+     WIDTH="90px"
+     ALT="Wei-Hwa Huang: Googler &amp; Four-Time World Puzzle Champion"
+     TITLE="Wei-Hwa Huang: Googler &amp; Four-Time World Puzzle Champion"
+>
+</div>
+
+<B>June 9th, 2006</B>:
+The <a target="_top" href="http://wpc.puzzles.com/google/">Google US Puzzle Championship</a> is next Saturday, June 17th.  It's used to select the 
+<a target="_top" href="http://wpc.puzzles.com/">US Puzzle Team</a>, but puzzle-lovers of all sorts should find something interesting in the puzzles.
+Let's have a big "G" (for Google):
+</FONT>
+</P>
+
+
+
+<div style="float:left;margin-right:2px">
+
+<table border="0" cellpadding="0px" cellspacing="0px" width="155px">
+
+<TR>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(0,0));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(0,1));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(0,2));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(0,3));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(0,4));</SCRIPT>
+</TR>
+<TR>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(1,0));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(1,1));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(1,2));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(1,3));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(1,4));</SCRIPT>
+</TR>
+<TR>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(2,0));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(2,1));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(2,2));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(2,3));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(2,4));</SCRIPT>
+</TR>
+<TR>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(3,0));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(3,1));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(3,2));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(3,3));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(3,4));</SCRIPT>
+</TR>
+<TR>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(4,0));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(4,1));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(4,2));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(4,3));</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">document.write(table_cell_html__MODULE_ID__(4,4));</SCRIPT>
+</TR>
+
+</table>
+
+</div>
+
+<div>
+
+
+<table border="0" cellpadding="0px" cellspacing="0px" width="102px">
+
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow1.png"></TD>
+<TD><IMG ID="result_cell_1___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow2.png"></TD>
+<TD><IMG ID="result_cell_2___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow3.png"></TD>
+<TD><IMG ID="result_cell_3___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow4.png"></TD>
+<TD><IMG ID="result_cell_4___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow5.png"></TD>
+<TD><IMG ID="result_cell_5___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow6.png"></TD>
+<TD><IMG ID="result_cell_6___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow7.png"></TD>
+<TD><IMG ID="result_cell_7___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow8.png"></TD>
+<TD><IMG ID="result_cell_8___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow9.png"></TD>
+<TD><IMG ID="result_cell_9___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow10.png"></TD>
+<TD><IMG ID="result_cell_10___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow11.png"></TD>
+<TD><IMG ID="result_cell_11___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow12.png"></TD>
+<TD><IMG ID="result_cell_12___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow13.png"></TD>
+<TD><IMG ID="result_cell_13___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+</TR>
+<TR>
+<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-result-blank.png" ALT="" TITLE=""></TD>
+<TD><IMG ID="result_cell_14___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-blank.png" ALT="" TITLE=""></TD>
+</TR>
+
+</table>
+
+</div>
+
+<table border="0" cellpadding="0px" cellspacing="0px">
+<TR>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(0)"><IMG BORDER="0" ID="palette_0___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/symbol-plusminus-selected.png"
+     ALT="plus or minus (selected)" TITLE="plus or minus (selected)"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(1)"><IMG BORDER="0" ID="palette_1___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-1.png" ALT="button 1" TITLE="button 1"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(2)"><IMG BORDER="0" ID="palette_2___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-2.png" ALT="button 2" TITLE="button 2"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(3)"><IMG BORDER="0" ID="palette_3___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-3.png" ALT="button 3" TITLE="button 3"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(4)"><IMG BORDER="0" ID="palette_4___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-4.png" ALT="button 4" TITLE="button 4"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(5)"><IMG BORDER="0" ID="palette_5___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-5.png" ALT="button 5" TITLE="button 5"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(6)"><IMG BORDER="0" ID="palette_6___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-6.png" ALT="button 6" TITLE="button 6"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(7)"><IMG BORDER="0" ID="palette_7___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-7.png" ALT="button 7" TITLE="button 7"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(8)"><IMG BORDER="0" ID="palette_8___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-8.png" ALT="button 8" TITLE="button 8"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(9)"><IMG BORDER="0" ID="palette_9___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-9.png" ALT="button 9" TITLE="button 9"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(10)"><IMG BORDER="0" ID="palette_10___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-10.png" ALT="button 10" TITLE="button 10"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(11)"><IMG BORDER="0" ID="palette_11___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-11.png" ALT="button 11" TITLE="button 11"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(12)"><IMG BORDER="0" ID="palette_12___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-12.png" ALT="button 12" TITLE="button 12"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(13)"><IMG BORDER="0" ID="palette_13___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-13.png" ALT="button 13" TITLE="button 13"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(14)"><IMG BORDER="0" ID="palette_14___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-14.png" ALT="button 14" TITLE="button 14"></A></TD>
+<TD><A BORDER="0" HREF="javascript:restart_puzzle__MODULE_ID__()"><IMG BORDER="0" SRC="http://weihwa.images02.googlepages.com/distance-result-restart.png"></A></TD>
+</TR>
+</TABLE>
+
+<P>
+<font size=-1>
+Here's a puzzle based on Erich Friedman's "Distance," from the <a target="_top" href="http://wpc.puzzles.com/history/tests/uspc03/summary.htm">2003 Google U.S. Puzzle Championship</a>.
+Label 14 of the circles above with different numbers from 1 to 14, such that the distance between 1 and 2 is less than the distance between 2 and 3, and so on.  Four circles should remain empty.
+</FONT>
+
+<P>
+<font size=-2>
+If the "&plusmn;" sign is selected, you can click on the top part of a circle to increase it and click on the bottom to decrease it.  Or, select a number in the palette
+and click on a circle to fill that number into the circle.  Deselect the active selection to create a blank.  You win if all the "distances" to the right turn green.
+</font>
+
+  ]]> 
+
+  </Content>
+</Module>
