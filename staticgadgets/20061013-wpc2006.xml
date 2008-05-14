@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20061013@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="100">
+    <Require feature='dynamic-height'/>
+  </ModulePrefs>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="display:none;">
+Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.epl?art_id=958
+<img src='http://weihwa.images01.googlepages.com/black.png'>
+</div>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20061013@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript">
+  _IG_RegisterOnloadHandler(_IG_AdjustIFrameHeight);
+</script>
+
+<font size=-1>
+
+No fancy puzzle this week; I just got back from being part of <a target="_top" href="http://wpc.puzzles.com/">Team USA</a>
+at the 15th <a target="_top" href="http://www.wpc2006.puzzle-bg.com/index.html">World Puzzle Championship</a>.
+But here's a rather basic puzzle from the competition I can share:
+
+<HR>
+
+<font size=+1>
+What is next in this sequence?
+<BR>
+15, 16, 17, 21, 23, 30, 33, 120, ?
+</font>
+
+<HR>
+
+<font size=-2>
+By the way, if you enjoyed my "Pipes" puzzle from a few weeks ago, I've created an enhanced version called "Series of Tubes".
+You can <a target="_top" href="http://fusion.google.com/add?moduleurl=http%3A//weihwa.feedback.googlepages.com/series_of_tubes.xml"><img src="http://buttons.googlesyndication.com/fusion/add.gif" width="104" height="17" border="0" alt="Add to Google"></a> to put it on your home page.
+</font>
+
+</font>
+
+  ]]> 
+
+  </Content>
+</Module>
+

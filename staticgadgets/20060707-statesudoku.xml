@@ -1,0 +1,1014 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzle: 2006-07-07"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20060707@gmail.com"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="470"
+    render_inline="optional"
+  />
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  function _gel(thing) {
+    return document.getElementById(thing);
+  }
+ 
+  ///////////////////////////////////////////////
+  //  A basic hashtable and set implementation.
+
+  function Hash__MODULE_ID__() {
+    this.items = new Array();
+    this.length = 0;
+    for (var i = 0; i < arguments.length; i += 2) {
+      this.items[arguments[i]] = arguments[i + 1];
+      this.length++;
+    }
+    this.remove = function(key) {
+      var temp;
+      if (typeof(this.items[key]) != 'undefined') {
+        this.length--;
+        temp = this.items[key];
+        delete (this.items[key]);
+      }
+      return temp;
+    }
+    this.get = function(key) {
+      return this.items[key];
+    }
+    this.set = function(key, value) {
+      if (typeof(this.items[key]) == 'undefined') {
+        this.length++;
+      }
+      this.items[key] = value;
+      return value;
+    }
+    this.has = function(key) {
+      return (typeof(this.items[key]) != 'undefined');
+    }
+  }
+
+  function Set__MODULE_ID__() {
+    this.items = new Array();
+    this.size = 0;
+    for (var i = 0; i < arguments.length; i ++) {
+      this.items[arguments[i]] = 1;
+      this.size++;
+    }
+    this.remove = function(key) {
+      var temp;
+      if (typeof(this.items[key]) != 'undefined') {
+        this.size--;
+        temp = this.items[key];
+        delete (this.items[key]);
+      }
+      return temp;
+    }
+    this.add = function(key) {
+      if (typeof(this.items[key]) == 'undefined') {
+        this.size++;
+      }
+      this.items[key] = 1;
+      return key;
+    }
+    this.has = function(key) {
+      return (typeof(this.items[key]) != 'undefined');
+    }
+  }
+
+  function Multiset__MODULE_ID__() {
+    this.items = new Array();
+    this.size = 0;
+    this.remove = function(key) {
+      var temp;
+      if (typeof(this.items[key]) != 'undefined') {
+        this.size--;
+        this.items[key]--;
+        if (this.items[key] == 0) {
+          temp = 0;
+          delete (this.items[key]);
+        } else {
+          temp = this.items[key];
+        }
+      } else {
+        temp = -1;
+      }
+      return temp;
+    }
+    this.add = function(key) {
+      if (typeof(this.items[key]) == 'undefined') {
+        this.items[key] = 0;
+      }
+      this.items[key]++;
+      this.size++;
+      return this.items[key];
+    }
+    for (var i = 0; i < arguments.length; i ++) {
+      this.add(arguments[i]);
+    }
+    this.has = function(key) {
+      return (typeof(this.items[key]) != 'undefined');
+    }
+    this.count = function(key) {
+      return (this.items[key]);
+    }
+    this.has_dupes = function() {
+      for (var x in this.items) {
+        if (this.items[x] != 1) return true;
+      }
+      return false;
+    }
+  }
+
+  ///////////////////////////////////////////////
+  //  This is the Dragging object.
+
+  // This is a (heavily) modified form of dom-drag.js from
+  // http://youngpup.net/2001/domdrag
+  // The original is written by Aaron Boodman, who works at Google.
+
+  // Modfied such that it uses a "basis" item for dragging instead of
+  // allowing dragging of the actual item.
+
+  // We also keep a list of "drag sources" (items where a drag can start)
+  // and "drag sinks" (items where a drag can end.
+
+  var Drag__MODULE_ID__ = {
+    obj : null,
+    basis : null,
+    is_dragging : false,
+    has_dragged : false,
+    sources : new Set__MODULE_ID__(),
+    sinks : new Array(),
+    sinks_x : new Array(),
+    sinks_y : new Array(),
+
+    dragging_started : function(o) {},
+    hit_sink : function(o) {},
+    lost_sink : function() {},
+    dragging_ended : function(o) {},
+    click_happened : function(o) {},
+
+    xposition : function(o) {
+      var answer = 0;
+      if (o.offsetParent) {
+        while (o.offsetParent) {
+          answer += o.offsetLeft;
+          o = o.offsetParent;
+        }
+      } else if (o.x) {
+        answer = o.x;
+      }
+      return answer;
+    },
+    yposition : function(o) {
+      var answer = 0;
+      if (o.offsetParent) {
+        while (o.offsetParent) {
+          answer += o.offsetTop;
+          o = o.offsetParent;
+        }
+      } else if (o.y) {
+        answer = o.y;
+      }
+      return answer;
+    },
+
+    set_basis : function(o) {
+      Drag__MODULE_ID__.basis = o;
+      Drag__MODULE_ID__.basis.style["position"] = "absolute";
+      Drag__MODULE_ID__.basis.style["cursor"] = "move";
+      Drag__MODULE_ID__.basis.style["left"] = "0px";
+      Drag__MODULE_ID__.basis.style["top"] = "0px";
+    },
+
+    add_source : function(o) {
+      this.sources.add(o);
+      o.onmousedown  = Drag__MODULE_ID__.start;
+    },
+
+    remove_source : function(o) {
+      this.sources.remove(o);
+      o.onmousedown  = null;
+    },
+
+    add_sink : function(o) {
+      Drag__MODULE_ID__.sinks.push(o);
+      Drag__MODULE_ID__.sinks_x.push(Drag__MODULE_ID__.xposition(o));
+      Drag__MODULE_ID__.sinks_y.push(Drag__MODULE_ID__.yposition(o));
+    },
+
+    start : function(e) {
+      Drag__MODULE_ID__.obj = this;
+      e = Drag__MODULE_ID__.fixE(e);
+      Drag__MODULE_ID__.is_dragging = true;
+      Drag__MODULE_ID__.basis.innerHTML = this.innerHTML;
+      Drag__MODULE_ID__.basis.style["left"] = Drag__MODULE_ID__.xposition(this) + "px";
+      Drag__MODULE_ID__.basis.style["top"] = Drag__MODULE_ID__.yposition(this) + "px";
+      Drag__MODULE_ID__.basis.lastMouseX    = e.clientX;
+      Drag__MODULE_ID__.basis.lastMouseY    = e.clientY;
+      document.onmousemove    = Drag__MODULE_ID__.drag;
+      document.onmouseup   = Drag__MODULE_ID__.end;
+      Drag__MODULE_ID__.dragging_started(Drag__MODULE_ID__.obj);
+      Drag__MODULE_ID__.lost_sink();
+      Drag__MODULE_ID__.has_dragged = false;
+      return false;
+    },
+
+    drag : function(e) {
+      Drag__MODULE_ID__.has_dragged = true;
+      e = Drag__MODULE_ID__.fixE(e);
+      if (e.which == 0) return Drag__MODULE_ID__.end();
+      var ey    = e.clientY;
+      var ex    = e.clientX;
+      var y = parseInt(Drag__MODULE_ID__.basis.style.top);
+      var x = parseInt(Drag__MODULE_ID__.basis.style.left);
+      var nx, ny;
+
+      nx = x + (ex - Drag__MODULE_ID__.basis.lastMouseX);
+      ny = y + (ey - Drag__MODULE_ID__.basis.lastMouseY);
+
+      Drag__MODULE_ID__.basis.style["left"] = nx + "px";
+      Drag__MODULE_ID__.basis.style["top"] = ny + "px";
+      Drag__MODULE_ID__.basis.lastMouseX    = ex;
+      Drag__MODULE_ID__.basis.lastMouseY    = ey;
+
+      var over = -1;
+      var min_x = 5;
+      var min_y = 5;
+      var max_x = 10;
+      var max_y = 10;
+      for (var i=0; i<Drag__MODULE_ID__.sinks.length; ++i) {
+        if ((nx >= Drag__MODULE_ID__.sinks_x[i] - min_x) && (ny >= Drag__MODULE_ID__.sinks_y[i] - min_x)
+         && (nx <= Drag__MODULE_ID__.sinks_x[i] + max_x) && (ny <= Drag__MODULE_ID__.sinks_y[i] + max_y))
+          over = i;
+      }
+
+      if (over != -1)
+        Drag__MODULE_ID__.hit_sink(Drag__MODULE_ID__.sinks[over]);
+      else
+        Drag__MODULE_ID__.lost_sink();
+
+      return false;
+    },
+    end : function() {
+      document.onmousemove = null;
+      document.onmouseup  = null;
+      Drag__MODULE_ID__.basis.innerHTML = "";
+      Drag__MODULE_ID__.is_dragging = false;
+      Drag__MODULE_ID__.dragging_ended(Drag__MODULE_ID__.obj);
+      if (!Drag__MODULE_ID__.has_dragged) {
+        Drag__MODULE_ID__.click_happened(Drag__MODULE_ID__.obj);
+      }
+      Drag__MODULE_ID__.obj = null;
+    },
+    fixE : function(e) {
+      if (typeof e == 'undefined') e = window.event;
+      if (typeof e.layerX == 'undefined') e.layerX = e.offsetX;
+      if (typeof e.layerY == 'undefined') e.layerY = e.offsetY;
+      return e;
+    }
+  };
+
+
+  ///////////////////////////////////////////////
+  ///  Primitive Sudoku classes.
+
+  letters__MODULE_ID__ = new Array(
+    'A', 'F', 'K', 'L', 'N', 'T', 'V', 'W', 'Y'
+  );
+
+  function sudoku_cell__MODULE_ID__(id) {
+    this.id = id;
+    this.fixed = false;
+    this.value = -1;
+    this.regions = new Array();
+
+    this.friend_values = new Multiset__MODULE_ID__();
+  }
+
+  sudoku_cell__MODULE_ID__.prototype.add_region = function (region) {
+    this.regions.push(region);
+  }
+
+  sudoku_cell__MODULE_ID__.prototype.get_value = function () {
+    if (this.value == -1) return '';
+    return letters__MODULE_ID__[this.value]; 
+  }
+
+  sudoku_cell__MODULE_ID__.prototype.allows = function (value) {
+    return (!this.friend_values.has(value));
+  }
+
+  sudoku_cell__MODULE_ID__.prototype.allowed_letters = function () {
+    var answer = "";
+    for (var i=0; i<9; ++i) {
+      if (!this.friend_values.has(i)) {
+        answer += letters__MODULE_ID__[i];
+      }
+    }
+    return answer;
+  }
+
+  sudoku_cell__MODULE_ID__.prototype.add_placed = function (value, src_id) {
+    if (src_id == this.id) return;
+    var change_happening = (!this.friend_values.has(value));
+    this.friend_values.add(value);
+    if (change_happening)
+      this.changed(this.id);
+  }
+
+  sudoku_cell__MODULE_ID__.prototype.remove_placed = function (value, src_id) {
+    if (src_id == this.id) return;
+    var change_happening = (this.friend_values.count(value) == 1);
+    this.friend_values.remove(value);
+    if (change_happening)
+      this.changed(this.id);
+  }
+
+  sudoku_cell__MODULE_ID__.prototype.set_value = function (value, fixed) {
+    for (var i = 0; i < this.regions.length; ++i) {
+      this.regions[i].remove_placed(this.value, this.id);
+      this.regions[i].add_placed(value, this.id);
+    }
+    this.fixed = fixed;
+    this.value = value;
+    this.changed(this.id);
+  }
+
+  sudoku_cell__MODULE_ID__.prototype.reset_value = function () {
+    for (var i = 0; i < this.regions.length; ++i) {
+      this.regions[i].remove_placed(this.value, this.id);
+    }
+    this.value = -1;
+    this.changed(this.id);
+  }
+  sudoku_cell__MODULE_ID__.prototype.changed = function (id) {
+    // callback -- indicates cell change.
+  }
+
+  function sudoku_region__MODULE_ID__(id) {
+    this.id = id;
+    this.cells = new Array();
+    this.placed = new Multiset__MODULE_ID__();
+  }
+
+  sudoku_region__MODULE_ID__.prototype.add_cell = function (cell) {
+    this.cells.push(cell);
+  }
+
+  sudoku_region__MODULE_ID__.prototype.add_placed = function (value, src_id) {
+    if (value != -1) {
+      this.placed.add(value);
+      for (var i = 0; i < this.cells.length; ++i) {
+        if (this.cells[i].id != src_id) {  // this check isn't really necessary but it pays to be paranoid.
+          this.cells[i].add_placed(value, src_id);
+        }
+      }
+      this.changed(this.id);
+    }
+  }
+
+  sudoku_region__MODULE_ID__.prototype.has_dupes = function (cell) {
+    return this.placed.has_dupes();
+  }
+
+  sudoku_region__MODULE_ID__.prototype.completed = function (cell) {
+    return ((this.placed.size == 9) && (!this.placed.has_dupes()));
+  }
+
+  sudoku_region__MODULE_ID__.prototype.allowed_letters = function (cell) {
+    var answer = "";
+    for (var i=0; i<9; ++i) {
+      if (!this.placed.has(i)) {
+        answer += letters__MODULE_ID__[i];
+      }
+    }
+    return answer;
+  }
+
+  sudoku_region__MODULE_ID__.prototype.remove_placed = function (value, src_id) {
+    if (value != -1) {
+      this.placed.remove(value);
+      for (var i = 0; i < this.cells.length; ++i) {
+        if (this.cells[i].id != src_id) {  // this check isn't really necessary but it pays to be paranoid.
+          this.cells[i].remove_placed(value, src_id);
+        }
+      }
+      this.changed(this.id);
+    }
+  }
+
+  sudoku_region__MODULE_ID__.prototype.changed = function (id) {
+    // callback -- indicates region change.
+  }
+
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "back end".
+
+  function puzzle_data__MODULE_ID__() {
+
+    this.cells = new Array(81);
+    for (var i=0;i<81;++i) {
+      this.cells[i] = new sudoku_cell__MODULE_ID__(i);
+    }
+
+    this.row_regions = new Array(9);
+    this.col_regions = new Array(9);
+    this.state_regions = new Array(9);
+
+    for (var i=0;i<9;++i) {
+      this.row_regions[i] = new sudoku_region__MODULE_ID__(i);
+      this.col_regions[i] = new sudoku_region__MODULE_ID__(i + 9);
+      this.state_regions[i] = new sudoku_region__MODULE_ID__(i + 18);
+    }
+
+    this.states = new Array(
+      0,0,0,0,1,1,2,2,2,
+      0,0,0,1,1,1,2,2,2,
+      0,0,1,1,1,1,2,2,2,
+      3,3,4,4,4,4,5,5,5,
+      3,3,3,6,6,4,5,5,5,
+      3,3,3,6,6,4,4,5,5,
+      3,6,6,6,6,4,4,7,5,
+      8,8,8,8,8,6,7,7,7,
+      8,8,8,8,7,7,7,7,7
+    );
+
+    for (var i=0;i<81;++i) {
+      this.cells[i].add_region(this.row_regions[Math.floor(i / 9)]);
+      this.cells[i].add_region(this.col_regions[i % 9]);
+      this.cells[i].add_region(this.state_regions[this.states[i]]);
+      this.row_regions[Math.floor(i / 9)].add_cell(this.cells[i]);
+      this.col_regions[i % 9].add_cell(this.cells[i]);
+      this.state_regions[this.states[i]].add_cell(this.cells[i]);
+    }
+
+    this.palette_count = new Multiset__MODULE_ID__(
+      0,1,2,3,4,5,6,7,8,
+      0,1,2,3,4,5,6,7,8,
+      0,1,2,3,4,5,6,7,8,
+      0,1,2,3,4,5,6,7,8,
+      0,1,2,3,4,5,6,7,8,
+      0,1,2,3,4,5,6,7,8,
+      0,1,2,3,4,5,6,7,8,
+      0,1,2,3,4,5,6,7,8,
+      0,1,2,3,4,5,6,7,8
+    );
+
+    this.affix = function (index, value) {
+      this.cells[index].set_value(value, true);
+      this.palette_count.remove(value);
+    }
+
+    this.affix( 0,7); this.affix( 1,6);
+    this.affix(13,2); this.affix(14,8);
+    this.affix(25,7); this.affix(26,8);
+    this.affix(29,1); this.affix(30,3);
+    this.affix(42,4); this.affix(43,6);
+    this.affix(45,0); this.affix(46,3);
+    this.affix(56,4); this.affix(57,8);
+    this.affix(69,6); this.affix(70,0);
+    this.affix(72,5); this.affix(73,4);
+
+    this.yank_value = -1;
+    this.deregister_after_place = -1;
+
+    // define callbacks.
+    var puzzle = this;
+
+    puzzle.cell_changed_callback = function (index) {
+      puzzle.cell_changed(index);
+    }
+    for (var i=0;i<81;++i) {
+      this.cells[i].changed = this.cell_changed_callback;
+    }
+
+    puzzle.region_changed_callback = function (index) {
+      puzzle.region_changed(index);
+    }
+    for (var i=0;i<9;++i) {
+      this.row_regions[i].changed = this.region_changed_callback;
+      this.col_regions[i].changed = this.region_changed_callback;
+      this.state_regions[i].changed = this.region_changed_callback;
+    }
+
+  }
+
+  puzzle_data__MODULE_ID__.prototype.increment_palette = function (id) {
+    if (id == -1) return;
+    this.palette_count.add(id);
+    if (this.palette_count.count(id) == 1) {
+      this.register(id + 81);
+    }
+    this.cell_changed(id + 81);
+  }
+ 
+  puzzle_data__MODULE_ID__.prototype.decrement_palette = function (id) {
+    this.palette_count.remove(id);
+    if (!this.palette_count.has(id)) {
+      this.deregister_after_place = id + 81;
+    }
+    this.cell_changed(id + 81);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.yank = function (src) {
+    this.last_pos = src;
+    if (src >= 81) {
+      var true_val = src - 81;
+      this.yank_value = true_val;
+      this.decrement_palette(src - 81); 
+    } else {
+      this.yank_value = this.cells[src].value;
+      this.deregister_after_place = src;
+      this.cells[src].reset_value();
+      this.cell_changed(src);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.place = function (dest) {
+    if (dest == -1) {
+      // dropped to nowhere (palette)
+      this.increment_palette(this.yank_value);
+    } else {
+      this.increment_palette(this.cells[dest].value);
+      this.cells[dest].set_value(this.yank_value, false);
+      this.register(dest);
+    }
+    if (this.deregister_after_place != -1) {
+      if (this.deregister_after_place != dest)
+        this.deregister(this.deregister_after_place);
+      this.deregister_after_place = -1;
+    }
+    this.yank_value = -1;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.deregister = function(index) {
+    // callback -- deregisters a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.register = function(index) {
+    // callback -- registers a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.cell_changed = function(index) {
+    // callback -- modifies a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.region_changed = function(index) {
+    // callback -- modifies a region indicator.
+  }
+
+  // actions.
+  puzzle_data__MODULE_ID__.prototype.get_highlight_text = function (index) {
+    if (index < 0) return '';
+    if (index >= 81) {
+      var true_val = index - 81;
+      if (!this.palette_count.has(true_val)) {
+        return '<span style="cursor:default;font-size:12pt;color:#FFFFFF" title="' + letters__MODULE_ID__[true_val] + ' (0 left)">' + letters__MODULE_ID__[true_val] + '</span>'
+      }
+      return '<span style="cursor:pointer;cursor:hand;font-size:12pt;font-weight:bold" title="' + letters__MODULE_ID__[true_val] + ' (' + this.palette_count.count(true_val) + ' left)">' + letters__MODULE_ID__[true_val] + '</span>'
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_text = function (index) {
+    if (index < 0) return '';
+    if (index >= 81) {
+      var true_val = index - 81;
+      if (!this.palette_count.has(true_val)) {
+        return '<span style="cursor:default;font-size:12pt;color:#FFFFFF" title="' + letters__MODULE_ID__[true_val] + ' (0 left)">' + letters__MODULE_ID__[true_val] + '</span>'
+      }
+      return '<span style="cursor:pointer;cursor:hand;font-size:12pt" title="' + letters__MODULE_ID__[true_val] + ' (' + this.palette_count.count(true_val) + ' left)">' + letters__MODULE_ID__[true_val] + '</span>'
+    }
+    if (this.cells[index].get_value() == '') {
+      var allowed = this.cells[index].allowed_letters();
+      var title = (allowed == "") ? "No letters possible!" : ("Could be: " + allowed);
+      return '<span title="' + title + '" style="cursor:pointer;cursor:hand;font-size:12pt;color:#FFFFFF">?</span>';
+    }
+    var bold = (this.cells[index].fixed) ? ";font-weight:bold" : "";
+ //   var cursor = (this.cells[index].fixed) ? "cursor:default" : ";cursor:pointer;cursor:hand";
+    var cursor = ";cursor:pointer;cursor:hand";
+    var title = (this.cells[index].fixed) ? "Given at start" : "Placed by you";
+    return '<span title="' + title + '" style="text-align:center' + cursor + ';font-size:12pt' + bold + '">' + this.cells[index].get_value() + '</span>';
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_shadow_text = function () {
+    return '<span title="" style="text-align:center;cursor:pointer;cursor:hand;font-size:12pt;font-weight:bold;color:#C0C0C0">' + letters__MODULE_ID__[this.yank_value] + '</span>';
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_red_shadow_text = function () {
+    return '<span title="" style="text-align:center;cursor:pointer;cursor:hand;font-size:12pt;font-weight:bold;color:#C00000">' + letters__MODULE_ID__[this.yank_value] + '</span>';
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "front end".
+  ///  Encodes the user's current "state".
+
+  function game_setup__MODULE_ID__() {
+    var game_setup = this;
+
+    game_setup.height = 9;
+    game_setup.width = 9;
+
+    game_setup.source = 0;
+    game_setup.sink = 0;
+
+    game_setup.highlight = -1;
+
+    game_setup.puzzle = new puzzle_data__MODULE_ID__();
+
+    // define callbacks.
+    game_setup.refresh = function (index) {
+      if (index != -1)
+        _gel(game_setup.get_cell_id(index)).innerHTML = game_setup.get_value_at(index);
+    }
+    game_setup.puzzle.cell_changed = this.refresh;
+
+    game_setup.refresh_region = function (index) {
+      if (index == -1) return;
+      if (index < 9) {
+        _gel(game_setup.get_row_id(index)).title = game_setup.get_row_title(index);
+        _gel(game_setup.get_row_id(index)).src = game_setup.get_row_src(index);
+      } else if (index < 18) {
+        _gel(game_setup.get_col_id(index-9)).title = game_setup.get_col_title(index-9);
+        _gel(game_setup.get_col_id(index-9)).src = game_setup.get_col_src(index-9);
+      } else if (index < 27) {
+        _gel(game_setup.get_state_id(index-18)).title = game_setup.get_state_title(index-18);
+        _gel(game_setup.get_state_id(index-18)).src = game_setup.get_state_src(index-18);
+      }
+    }
+    game_setup.puzzle.region_changed = this.refresh_region;
+
+    game_setup.deregister = function (index) {
+      Drag__MODULE_ID__.remove_source(_gel(game_setup.get_cell_id(index)));
+    }
+    game_setup.puzzle.deregister = this.deregister;
+
+    game_setup.register = function (index) {
+      Drag__MODULE_ID__.add_source(_gel(game_setup.get_cell_id(index)));
+    }
+    game_setup.puzzle.register = this.register;
+  }
+
+  game_setup__MODULE_ID__.prototype.refresh_all = function (index) {
+    for (var i=0; i<90; i++) {
+      this.refresh(i);
+    }
+    for (var i=0; i<27; i++) {
+      this.refresh_region(i);
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.get_cell_id = function (index) {
+    return ('cell_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.get_row_id = function (index) {
+    return ('row_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.get_col_id = function (index) {
+    return ('col_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.get_state_id = function (index) {
+    return ('state_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.value_from_id = function (id) {
+    var regexp = /cell_(.*)___MODULE_ID__/;
+    var matches = regexp.exec(id);
+    return matches[1];
+  }
+
+  game_setup__MODULE_ID__.prototype.get_value_at = function (index) {
+    if (Drag__MODULE_ID__.is_dragging && this.sink == index) {
+      if (this.puzzle.cells[index].allows(this.puzzle.yank_value)) {
+        return this.puzzle.get_shadow_text();
+      } else {
+        return this.puzzle.get_red_shadow_text();
+      }
+    } else {
+      if (this.highlight == index) {
+        return this.puzzle.get_highlight_text(index);
+      } else {
+        return this.puzzle.get_text(index);
+      }
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.get_row_title = function (index) {
+    if (this.puzzle.row_regions[index].completed()) {
+      return "Row Completed";
+    } else if (this.puzzle.row_regions[index].has_dupes()) {
+      return "Error: Duplicate symbol in row";
+    } else {
+      return "Letters to add to row: " + this.puzzle.row_regions[index].allowed_letters();
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.get_col_title = function (index) {
+    if (this.puzzle.col_regions[index].completed()) {
+      return "Column Completed";
+    } else if (this.puzzle.col_regions[index].has_dupes()) {
+      return "Error: Duplicate symbol in column";
+    } else {
+      return "Letters to add to column: " + this.puzzle.col_regions[index].allowed_letters();
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.get_state_title = function (index) {
+    if (this.puzzle.state_regions[index].completed()) {
+      return "State Completed";
+    } else if (this.puzzle.state_regions[index].has_dupes()) {
+      return "Error: Duplicate symbol in state";
+    } else {
+      return "Letters to add to state: " + this.puzzle.state_regions[index].allowed_letters();
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.get_row_src = function (index) {
+    if (this.puzzle.row_regions[index].completed()) {
+      return "http://weihwa.images02.googlepages.com/green.png";
+    } else if (this.puzzle.row_regions[index].has_dupes()) {
+      return "http://weihwa.images02.googlepages.com/red.png";
+    } else {
+      return "http://weihwa.images02.googlepages.com/white.png";
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.get_col_src = function (index) {
+    if (this.puzzle.col_regions[index].completed()) {
+      return "http://weihwa.images02.googlepages.com/green.png";
+    } else if (this.puzzle.col_regions[index].has_dupes()) {
+      return "http://weihwa.images02.googlepages.com/red.png";
+    } else {
+      return "http://weihwa.images02.googlepages.com/white.png";
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.get_state_src = function (index) {
+    if (this.puzzle.state_regions[index].completed()) {
+      return "http://weihwa.images02.googlepages.com/green.png";
+    } else if (this.puzzle.state_regions[index].has_dupes()) {
+      return "http://weihwa.images02.googlepages.com/red.png";
+    } else {
+      return "http://weihwa.images02.googlepages.com/white.png";
+    }
+  }
+
+  ////////////////////////////////////////////////////
+  // UI actions.
+
+  game_setup__MODULE_ID__.prototype.action_dragging_started = function (index) {
+    this.puzzle.yank(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_hit_sink = function (index) {
+    var last_sink = this.sink;
+    this.sink = index;
+    this.refresh(last_sink);
+    this.refresh(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_lost_sink = function () {
+    var last_sink = this.sink;
+    this.sink = -1;
+    this.refresh(last_sink);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_dragging_ended = function (index) {
+    var last_sink = this.sink;
+    this.puzzle.place(this.sink);
+    this.sink = -1;
+    this.refresh(last_sink);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_handle_click = function (index) {
+    if (this.highlight == -1) {
+      if (index >= 81) {
+        this.highlight = index;
+        this.refresh(index);
+      }
+    } else {
+      if (index == this.highlight) {
+        this.highlight = -1;
+        this.refresh(index);
+      } else if (index >= 81) {
+        var old_high = this.highlight;
+        this.highlight = index;
+        this.refresh(old_high);
+        this.refresh(index);
+      } else {
+        this.puzzle.yank(this.highlight);
+        this.puzzle.place(index);
+        this.refresh(index);
+      }
+    }
+  }
+
+  ////////////////////////////////////////////////////
+  // Dragging callback overrides.
+
+  Drag__MODULE_ID__.dragging_started = function (object) {
+    game__MODULE_ID__.action_dragging_started(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag__MODULE_ID__.hit_sink = function (object) {
+    game__MODULE_ID__.action_hit_sink(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag__MODULE_ID__.lost_sink = function () {
+    game__MODULE_ID__.action_lost_sink();
+  }
+
+  Drag__MODULE_ID__.dragging_ended = function (object) {
+    game__MODULE_ID__.action_dragging_ended(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag__MODULE_ID__.click_happened = function (object) {
+    game__MODULE_ID__.action_handle_click(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+
+  ///////////////////////////////////////
+  // Direct access functions.
+  
+  var game__MODULE_ID__ = new game_setup__MODULE_ID__();
+  var using_numbers__MODULE_ID__ = false;
+
+  function toggle_number__MODULE_ID__() {
+    if (using_numbers__MODULE_ID__) {
+      letters__MODULE_ID__ = new Array(
+        'A', 'F', 'K', 'L', 'N', 'T', 'V', 'W', 'Y'
+      );
+      _gel("toggle_button__MODULE_ID__").title = "Click here to use numbers instead of letters";
+      _gel("toggle_button__MODULE_ID__").value = "#";
+    } else {
+      letters__MODULE_ID__ = new Array(
+        '1', '2', '3', '4', '5', '6', '7', '8', '9'
+      );
+      _gel("toggle_button__MODULE_ID__").title = "Click here to use letters instead of numbers";
+      _gel("toggle_button__MODULE_ID__").value = "A";
+    }
+    game__MODULE_ID__.refresh_all();
+    using_numbers__MODULE_ID__ = !using_numbers__MODULE_ID__;
+  }
+
+  function table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="0"><tr><td>';
+
+    result += '<table border="1" cellpadding="0px" cellspacing="0px" width="16px">';
+    for (var row = 0; row < game__MODULE_ID__.height; ++row) {
+      result += '<tr><td align="center"><span id="' + game__MODULE_ID__.get_cell_id(row + 81) + '">';
+      result += game__MODULE_ID__.get_value_at(row + 81);
+      result += '</span></td></tr>'; 
+    }
+    result += '<tr><td><form><input id="toggle_button__MODULE_ID__" title="Click here to use numbers instead of letters" type="button" value="#" onclick="toggle_number__MODULE_ID__()"></form></td></tr>';
+    result += '</table> ';
+
+    result += '</td><td>';
+
+    result += '<table border="1" frame="box" rules="none" cellpadding="1px" cellspacing="0px" width="220px" height="220px" background="http://weihwa.images02.googlepages.com/background.png">';
+    for (var row = 0; row < game__MODULE_ID__.height; ++row) {
+      result += '<tr style="height:22px">';
+      for (var col = 0; col < game__MODULE_ID__.width; ++col) {
+        result += '<td align="center">';
+        result += '<span id="' + game__MODULE_ID__.get_cell_id(row * game__MODULE_ID__.width + col);
+        result += '" onclick="game__MODULE_ID__.action_handle_click(' + (row * game__MODULE_ID__.width + col) + ')">';
+        result += game__MODULE_ID__.get_value_at(row * game__MODULE_ID__.width + col);
+        result += '</span>';
+        result += '</td>';
+      }
+      result += '<td align="middle" valign="center">';
+      result += '<img id="' + game__MODULE_ID__.get_row_id(row) + '"';
+      result += ' src="' + game__MODULE_ID__.get_row_src(row) + '"';
+      result += ' title="' + game__MODULE_ID__.get_row_title(row) + '"';
+      result += ' width="16px" height="16px">';
+      result += '</img>';
+      result += '</td>';
+      result += '</tr>';
+    }
+  
+    result += '<tr>';
+    for (var col = 0; col < game__MODULE_ID__.width; ++col) {
+      result += '<td align="middle" valign="center">';
+      result += '<img id="' + game__MODULE_ID__.get_col_id(col) + '"';
+      result += ' src="' + game__MODULE_ID__.get_col_src(col) + '"';
+      result += ' title="' + game__MODULE_ID__.get_col_title(col) + '"';
+      result += ' width="16px" height="16px">';
+      result += '</img>';
+      result += '</td>';
+    }
+    result += '</tr>';
+
+    result += '</table>';
+
+    result += '</td><tr>';
+
+    result += '<tr><td colspan=2>';
+
+    result += '<table border="1">';
+   
+    result += '<tr>';
+    for (var state = 0; state < game__MODULE_ID__.width; ++state) {
+      result += '<td align="middle" valign="center">';
+      result += '<img id="' + game__MODULE_ID__.get_state_id(state) + '"';
+      result += ' src="' + game__MODULE_ID__.get_state_src(state) + '"';
+      result += ' title="' + game__MODULE_ID__.get_state_title(state) + '"';
+      result += ' width="16px" height="16px">';
+      result += '</img>';
+      result += '</td>';
+    }
+    result += '</tr>';
+    result += '<tr>';
+    result += '<td align="middle" valign="center" style="font-size:10pt">WV</td>';
+    result += '<td align="middle" valign="center" style="font-size:10pt">KY</td>';
+    result += '<td align="middle" valign="center" style="font-size:10pt">WY</td>';
+    result += '<td align="middle" valign="center" style="font-size:10pt">AL</td>';
+    result += '<td align="middle" valign="center" style="font-size:10pt">FL</td>';
+    result += '<td align="middle" valign="center" style="font-size:10pt">NV</td>';
+    result += '<td align="middle" valign="center" style="font-size:10pt">NY</td>';
+    result += '<td align="middle" valign="center" style="font-size:10pt">VA</td>';
+    result += '<td align="middle" valign="center" style="font-size:10pt">TN</td>';
+    result += '</tr>';
+    result += '</table>';
+
+
+    result += '</td></tr>';
+
+
+    result += '</table>';
+
+
+    return result;
+  }
+
+  function init_dragging__MODULE_ID__() {
+    Drag__MODULE_ID__.set_basis(_gel("dummy"));
+    for (var i = 0; i < 9; ++i) {
+      Drag__MODULE_ID__.add_source(_gel(game__MODULE_ID__.get_cell_id(i + 81)));
+    }
+    for (var row = 0; row < game__MODULE_ID__.height; ++row) {
+      for (var col = 0; col < game__MODULE_ID__.width; ++col) {
+        if (!game__MODULE_ID__.puzzle.cells[row * game__MODULE_ID__.width + col].fixed)
+          Drag__MODULE_ID__.add_sink(_gel(game__MODULE_ID__.get_cell_id(row * game__MODULE_ID__.width + col)));
+      }
+    }
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+<span id="debug" style="font-size:12pt;font-weight:bold"></span>
+
+<b>US States Jigsaw <a target="_top" href="http://en.wikipedia.org/wiki/Sudoku">Sudoku</a></b>:
+My friend and current <a target="_top" href="http://wpc.puzzles.com/">U. S. Puzzle Champion</a> Thomas Snyder
+sent along this amazing variant where the region shapes might seem familiar to American cartographers.
+(Note to Sudoku researchers: This puzzle is not Sledgehammer-complete!)
+<BR>
+
+<div style="position:relative;margin-right:3px;margin-top:3px" id="grid__MODULE_ID__">
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(table_html__MODULE_ID__());
+</SCRIPT>
+</div>
+
+<font size=-2>
+Drag symbols from the palette on the left into the grid to place them.  You'll be warned (in <span style="color:#FF0000">red</span>) if
+you're trying to place the same letter in the same row, column, or region.  You'll know you've solved it when all the lights turn <span style="color:#008000">green</span>.
+</font>
+
+<span id="dummy" style="cursor:pointer;cursor:hand;font-size:12pt;position:absolute;left:0px;top:0px"></span>
+<SCRIPT LANGUAGE="JavaScript">
+  init_dragging__MODULE_ID__();
+</SCRIPT>
+
+
+</FONT>
+
+
+  ]]> 
+
+  </Content>
+</Module>
+

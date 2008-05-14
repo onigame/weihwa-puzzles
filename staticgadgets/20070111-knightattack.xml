@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20070110@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="500">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_1215"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20070110@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/igoogle_gridlib.js"></script>
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/igoogle_gridlib.js"></script>
+--->
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json2.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function _IG_game_state() {
+    this.cur_puz = 0;
+    this.puz_count = 30;
+    this.puz_solved = new Array();
+    for (var i=0; i<this.puz_count; ++i) {
+      this.puz_solved[i] = 0;
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
+    if (this.game_state.puz_solved[puznum] == 1) {
+      return "#00FF00";
+    } else {
+      return "#FF0000";
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.score = function() {
+    var answer = 0;
+    for (var i=0; i<this.game_state.puz_count; ++i) {
+      answer += this.game_state.puz_solved[i];
+    }
+    return answer;
+  }
+
+  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+    var num = this.score();
+    if (num == 12) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = this.score();
+  }
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.prefix = 'http://weihwa.images03.googlepages.com/';
+//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/20070110-ornaments/';
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.clearPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+    this._IGG_refreshAll();
+    this.save_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzleData = function(puznum) {
+    this.puznum = puznum;
+    this.imgsize = 20;
+
+    if (puznum == 0) {
+      this.height = 4; this.width = 4; this.rawanswer = '0X1.0..2...X0.X.';
+    } else if (puznum == 1) {
+      this.height = 4; this.width = 4; this.rawanswer = '.X00.12.X021XX..';
+    } else if (puznum == 2) {
+      this.height = 4; this.width = 4; this.rawanswer = '.1.2.X...0X.X0X.';
+    } else if (puznum == 3) {
+      this.height = 4; this.width = 4; this.rawanswer = 'XX.123322.XXXXXX';
+    } else if (puznum == 4) {
+      this.height = 4; this.width = 4; this.rawanswer = '1.X..XX.2.03.XX.';
+    } else if (puznum == 5) {
+      this.height = 4; this.width = 4; this.rawanswer = '112XX.121XX01.XX';
+    } else if (puznum == 6) {
+      this.height = 4; this.width = 4; this.rawanswer = '0..1.X2....2.X1X';
+    } else if (puznum == 7) {
+      this.height = 5; this.width = 5; this.rawanswer = '10..0010.0.X...10X..2.X..';
+    } else if (puznum == 8) {
+      this.height = 5; this.width = 5; this.rawanswer = 'XX.XXXX5X1237XXXX4XX0X.XX';
+    } else if (puznum == 9) {
+      this.height = 5; this.width = 5; this.rawanswer = 'X2130.X4X.2XX3XXXXXX.X33X';
+    } else if (puznum == 10) {
+      this.height = 5; this.width = 5; this.rawanswer = '.10XX0X30.X2...2.2X.02XX.';
+    } else if (puznum == 11) {
+      this.height = 5; this.width = 5; this.rawanswer = '..X0.11131XX....0X1X.12..';
+    } else if (puznum == 12) {
+      this.height = 5; this.width = 5; this.rawanswer = '21.XX13X3.XX2X30XXXX22.1X';
+    } else if (puznum == 13) {
+      this.height = 5; this.width = 5; this.rawanswer = '..XX.3X2130.XX.XX1XX02XX1';
+    } else if (puznum == 14) {
+      this.height = 5; this.width = 5; this.rawanswer = '.1.2.2X1...1X2.XXX0XX12X1';
+    } else if (puznum == 15) {
+      this.height = 5; this.width = 5; this.rawanswer = 'X1.01022XX133X.0.XXX...X.';
+    } else if (puznum == 16) {
+      this.height = 5; this.width = 5; this.rawanswer = '.X0.X.031.1.X4X2X3.2X.X.X';
+    } else if (puznum == 17) {
+      this.height = 6; this.width = 6; this.rawanswer = '2X1.201.X4...X22.X.X04XX...2.0101.X.';
+    } else if (puznum == 18) {
+      this.height = 6; this.width = 6; this.rawanswer = 'XXXXX.XX5XX1.X55XX.X5X3X2X1523.XXX.X';
+    } else if (puznum == 19) {
+      this.height = 6; this.width = 6; this.rawanswer = '..XX.0XX.21.0.3X1X1.22X.X.302..01.X.';
+    } else if (puznum == 20) {
+      this.height = 6; this.width = 6; this.rawanswer = 'X2....0X2X10X2.21111X1.X2.0..101XX.X';
+    } else if (puznum == 21) {
+      this.height = 6; this.width = 6; this.rawanswer = '..1..1X0XX1X.21...13332XX0021X.XX1.0';
+    } else if (puznum == 22) {
+      this.height = 6; this.width = 6; this.rawanswer = 'X0..X...321.12121XX1XX.0112.X.XX2110';
+    } else if (puznum == 23) {
+      this.height = 7; this.width = 7; this.rawanswer = 'X.10X0...3...11X33..11X02X1.1XXX1...212.3011.X..0';
+    } else if (puznum == 24) {
+      this.height = 7; this.width = 7; this.rawanswer = '.XXXXXX..2XXX2.34.X.313X4.3XX.3XXX1XXX3X22XXX2X1X';
+    } else if (puznum == 25) {
+      this.height = 7; this.width = 7; this.rawanswer = '0.2131...12XXXX..X.XX1.X4.412XX05XX.20.2.X1X.X.1.';
+    } else if (puznum == 26) {
+      this.height = 7; this.width = 7; this.rawanswer = 'X.2..X0XXX31X..X32.0X.325X0..X..1X..XX.010XX112..';
+    } else if (puznum == 27) {
+      this.height = 7; this.width = 7; this.rawanswer = 'X0XX..X.41.X...2.X32.X3X11X2..3XX..X31.2X2.022.XX';
+    } else if (puznum == 28) {
+      this.height = 7; this.width = 7; this.rawanswer = '.0..3..0XX.XXX.X.33X2..X5XX2.1.23.4X..3XX.X.21.X1';
+    } else if (puznum == 29) {
+      this.height = 7; this.width = 7; this.rawanswer = '0XX.1X1X2..X.X22.241.X2X.22X21X0..X1.X.2..X.0X1X.';
+    }
+
+    this.area = this.height * this.width;
+    this.display_height = this.height * 2;
+    this.display_width = this.width * 2;
+    this.display_area = this.display_height * this.display_width;
+
+    this.answer = new Array(this.height);
+    this.user_answer = new Array(this.height);
+    this.user_marks = new Array(this.height);
+    this.kcount = 0;
+    for (var row=0; row<this.height; row++) {
+      this.answer[row] = new Array(this.width);
+      this.user_answer[row] = new Array(this.width);
+      this.user_marks[row] = new Array(this.width);
+      for (var col=0; col<this.width; col++) {
+        this.user_marks[row][col] = false;
+        this.answer[row][col] = this.rawanswer.charAt(row*this.width + col);
+        this.user_answer[row][col] = this.rawanswer.charAt(row*this.width + col);
+        if (this.user_answer[row][col] == 'X') {
+          this.user_answer[row][col] = '.';
+          this.kcount++;
+        }
+        if (this.user_answer[row][col] != '.') {
+          this.user_answer[row][col] = 0;
+        }
+      }
+    }
+
+    _gel("kcount").innerHTML = this.kcount;
+    _gel("win").innerHTML = "&nbsp;<br>&nbsp;";
+
+    if (this.isSolved()) {
+      _gel("startoverbutton").value = "Solved!";
+    } else {
+      _gel("startoverbutton").value = "Start Over";
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.load_progress = function () {
+    if (!this._IGG_refreshCell) {
+      this._IGG_refreshCell = function () {};
+    }
+
+    if (this.isSolved()) {
+      _gel("startoverbutton").value = "Solved!";
+    } else {
+      _gel("startoverbutton").value = "Start Over";
+    }
+    if (this._IGG_refreshAll)
+      this._IGG_refreshAll();
+  }
+                                                                                                                                                                                              
+  puzzle_data__MODULE_ID__.prototype.save_progress = function () {
+    pref_controller__MODULE_ID__.game_state = this.game_state;
+    pref_controller__MODULE_ID__.setPrefs();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isSolved = function() {
+    for (var row=0; row<this.height; row++) {
+      for (var col=0; col<this.width; col++) {
+        if (this.user_answer[row][col] != this.answer[row][col]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.getImage = function(corner, row, col) {
+ //   if (this.user_marks[row][col]) return "M";
+    var bg = "";
+    if ((row + col) % 2 == 1) {
+      bg = (this.user_marks[row][col]) ? "FFC0C0" : "C0C040";
+    } else {
+      bg = (this.user_marks[row][col]) ? "FFE0C0" : "C0E040";
+    }
+    var value = 'w';
+    var count = '';
+    var color = '';
+    if (this.user_answer[row][col] == '.') {
+      value = 'v';
+      corner = '';
+    } else if (this.user_answer[row][col] == 'X') {
+      value = 'b';
+    } else if (corner == 3) {
+      count = this.answer[row][col];
+      color = (this.answer[row][col] == this.user_answer[row][col]) ? 'g' : 'r';
+    } else if (corner == 2) {
+      color = (this.answer[row][col] == this.user_answer[row][col]) ? 'g' : 'r';
+    } else if (corner == 1) {
+      count = this.user_answer[row][col];
+      color = (this.answer[row][col] == this.user_answer[row][col]) ? 'g' : 'r';
+    }
+    return '<IMG STYLE="background-color:#' + bg + '" SRC="' + this.prefix + 'knight-' 
+         + value + corner + count + color 
+         + '.gif" ALT="' + value + color + count + '"/>';
+  }
+  
+  puzzle_data__MODULE_ID__.prototype._IGG_getNormalView = function(index) {
+    var display_row = Math.floor(index / this.display_width);
+    var display_col = index % this.display_width;
+    var row = Math.floor((display_row) / 2);
+    var col = Math.floor((display_col) / 2);
+    var corner = (display_row) % 2 * 2 + (display_col) % 2;
+    return this.getImage(corner, row, col);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_getSurrogateView = function(index) {
+    return ("");
+  }
+
+  puzzle_data__MODULE_ID__.prototype.valid_pos = function(row, col) {
+    if (row < 0) return false;
+    if (col < 0) return false;
+    if (row >= this.height) return false;
+    if (col >= this.width) return false;
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.change_pos = function(row, col, amount) {
+    if (amount == 0) return;
+    if (!this.valid_pos(row, col)) return;
+    if (this.user_answer[row][col] == 'X') return;
+    if (this.user_answer[row][col] == '.') return;
+    this.user_answer[row][col] += amount;
+    this.refresh_pos(row, col);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.refresh_pos = function(row, col) {
+    var display_row = (row * 2);
+    var display_col = (col * 2);
+    this._IGG_refreshCell(display_row * this.display_width + display_col);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + 1);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + this.display_width);
+    this._IGG_refreshCell(display_row * this.display_width + display_col + this.display_width + 1);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_handleDrag = function(source, target) {
+    var display_row = Math.floor(source / this.display_width);
+    var display_col = source % this.display_width;
+
+    var corner = (display_row) % 2 * 2 + (display_col) % 2;
+    var row = Math.floor((display_row) / 2);
+    var col = Math.floor((display_col) / 2);
+    var amount = 0;
+
+    if (game__MODULE_ID__.isRightButton()) {
+      this.user_marks[row][col] = !(this.user_marks[row][col]);
+      this.refresh_pos(row, col);
+      return;
+    }
+
+    if (this.user_answer[row][col] == '.') {
+      this.user_answer[row][col] = 'X';
+      this.kcount--;
+      _gel("kcount").innerHTML = this.kcount;
+      amount = 1;     
+    } else if (this.user_answer[row][col] == 'X') {
+      this.user_answer[row][col] = '.';
+      this.kcount++;
+      _gel("kcount").innerHTML = this.kcount;
+      amount = -1;     
+    } else {
+      return;
+    }
+    this.change_pos(row-2, col-1, amount);
+    this.change_pos(row-2, col+1, amount);
+    this.change_pos(row+2, col-1, amount);
+    this.change_pos(row+2, col+1, amount);
+    this.change_pos(row-1, col-2, amount);
+    this.change_pos(row-1, col+2, amount);
+    this.change_pos(row+1, col-2, amount);
+    this.change_pos(row+1, col+2, amount);
+
+    this.refresh_pos(row, col);
+ 
+    if (this.isSolved()) {
+      _gel("startoverbutton").value = 'You win!';
+      _gel("win").innerHTML = 'You win!';
+      pref_controller__MODULE_ID__.game_state.puz_solved[pref_controller__MODULE_ID__.game_state.cur_puz] = 1;
+      pref_controller__MODULE_ID__.updatePrefDisplay();
+      this.save_progress();
+    } else {
+      _gel("startoverbutton").value = "Start Over";
+      _gel("win").innerHTML = '';
+    }
+
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_isDragSource = function(index) {
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_isDragTarget = function(index, sourceIndex) {
+    return false;
+  }
+
+  ///////////////////////////////////////
+
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  var pref_controller__MODULE_ID__;
+
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+                                                                                                                                                                  
+  function start__MODULE_ID__() {
+    pref_controller__MODULE_ID__ = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_1215', true);
+    pref_controller__MODULE_ID__.num_puzzles = 30;
+    pref_controller__MODULE_ID__.box_height = 4;
+    pref_controller__MODULE_ID__.box_width = 10;
+    pref_controller__MODULE_ID__.rows = 5;
+    pref_controller__MODULE_ID__.cols = 6;
+
+    _gel("game_state_html").innerHTML = pref_controller__MODULE_ID__.getTableHTML();
+    pref_controller__MODULE_ID__.getPrefs();
+
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+    reset__MODULE_ID__(pref_controller__MODULE_ID__.game_state);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  function reset__MODULE_ID__(game_state) {
+    puzzle__MODULE_ID__.resetPuzzle(game_state);
+    game__MODULE_ID__ = new _IG_Grid(puzzle__MODULE_ID__, "mygrid",
+       puzzle__MODULE_ID__.display_height, puzzle__MODULE_ID__.display_width);
+    _gel("table_html").innerHTML = "";
+    game__MODULE_ID__.getTable().cellPadding = 0;
+    game__MODULE_ID__.getTable().cellSpacing = 0;
+    _gel("table_html").appendChild(game__MODULE_ID__.getTable());
+
+    puzzle__MODULE_ID__._IGG_refreshAll();
+    game__MODULE_ID__.initDragging();
+  }
+
+  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+    this.nav_puz += amount;
+    if (this.nav_puz < 0) this.nav_puz = 0;
+    if (this.nav_puz > this.game_state.puz_count) this.nav_puz = this.game_state.puz_count;
+    this.update_navbar();
+  }
+
+  _IG_puzzle_pref_controller.prototype.new_puzzle_request = function() {
+    this.game_state.cur_puz = this.nav_puz;
+    reset__MODULE_ID__(this.game_state);
+    this.setPrefs();
+    this.update_navbar();
+  }
+
+//////////////////////////
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="pref_controller__MODULE_ID__.change_level(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="pref_controller__MODULE_ID__.change_level(-1)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller__MODULE_ID__.new_puzzle_request()"/>
+</form>
+
+<b>Knight Attack</b>:  
+Place the specified number of Black Knights on the grid so that the given White Knights are
+attacking the correct number of Black Knights.
+
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+   Each White Knight shows a "fraction".  The lower number represents the number of Black Knights that
+   the White Knight should attack; the upper number represents the number of Black Knights that it is
+   actually attacking.  When both numbers match, they turn <span style="color:#80FF80">green</span>.
+   Knights <a target="_top" href="http://en.wikipedia.org/wiki/Knight_%28chess%29">attack just like in chess</a>.
+</span>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   Click on a blank space to place a black knight.  Click again to remove it.
+   Right-click to mark certain spaces.  Marking is for your notation only and will not affect
+   your solution.
+</span>
+<BR>
+
+<table border=0><tr><td>
+
+<table border=2 cellpadding=3 cellspacing=3><tr><td>
+<span id="table_html"></span>
+</td></tr><tr><td>
+<center>
+  <span id="kcount" style="font-size:24">0</span> left
+  <input id="startoverbutton" style="font-size:10;visibility:visible" type="button" value="Start Over"
+    onclick="puzzle__MODULE_ID__.clearPuzzle(pref_controller__MODULE_ID__.game_state);"/>
+</center>
+</td></tr></table>
+
+</td></table>
+
+<HR>
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <center><span id="game_state_html"></span></center>
+                                                                                                                                                                                              
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td style="font-size:9pt">
+<span style="visibility:hidden">
+  Your points: <span id="points">?</span>
+</span>
+  <input id="resetbutton" style="font-size:10;visibility:visible" type="button" value="Clear Stats"
+    onclick="pref_controller__MODULE_ID__.resetPrefs();puzzle__MODULE_ID__.resetPuzzle(pref_controller__MODULE_ID__.game_state);"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+                                                                                                                                                                                              
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

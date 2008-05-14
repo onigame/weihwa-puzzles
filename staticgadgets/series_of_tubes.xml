@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Series of Tubes"
+    description="A networking puzzle from Wei-Hwa Huang"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+tubes@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/seriesoftubes"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/tubes-screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/tubes-thumbnail.png"
+    height="100">
+    <Require feature='dynamic-height'/>
+  </ModulePrefs>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="display:none;">
+Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.epl?art_id=958
+<img src='http://weihwa.images04.googlepages.com/pipeg1.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg2.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg3.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg4.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg5.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg6.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg7.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg8.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg9.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg10.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg11.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg12.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg13.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg14.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipeg15.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe1.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe2.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe3.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe4.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe5.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe6.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe7.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe8.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe9.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe10.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe11.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe12.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe13.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe14.gif'>
+<img src='http://weihwa.images04.googlepages.com/pipe15.gif'>
+</div>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/seriesoftubes"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play this on a big screen!"
+     TITLE="Puzzle Homepage: Play this on a big screen!"
+></A><A HREF="mailto:weihwa.feedback+tubes@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/drag.js"></script>
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils3.js"></script>
+--->
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/drag.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils3.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.prefix = 'http://weihwa.images04.googlepages.com/';
+//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/series_of_tubes/';
+    this.resetPuzzleData(5, 5, false, false);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(height, width, wrapVert, wrapHoriz) {
+    this.resetPuzzleData(height, width, wrapVert, wrapHoriz);
+    this._IGGG_refreshAll();
+    _IG_AdjustIFrameHeight();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.hasNodeSinglet = function(node) {
+    return (this.edges[node].size == 0); 
+  }
+
+  puzzle_data__MODULE_ID__.prototype.hasNode = function(row, col) {
+    if (row < 0) return false;
+    if (col < 0) return false;
+    if (row >= this.height) return false;
+    if (col >= this.width) return false;
+    return this.hasNodeSinglet(row * this.width + col); 
+  }
+
+  puzzle_data__MODULE_ID__.prototype.addEdge = function(fromNode, toNode) {
+    this.edges[fromNode].add(toNode);
+    this.edges[toNode].add(fromNode);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.runKruskal = function() {
+    var temp = new Array();
+    for (var i=0; i<this.height * this.width; ++i) {
+      temp[i] = i;
+    }
+    var num_trees = this.height * this.width;
+    while (num_trees > 1) {
+      var node1, node2;
+      if (Math.random() < 0.5) {
+        if (this.wrapVert) {
+          node1 = Math.floor(Math.random() * this.height) * this.width + Math.floor(Math.random() * this.width);
+          node2 = node1 + this.width;  if (node2 >= this.height * this.width) node2 -= this.height * this.width;
+        } else {
+          node1 = Math.floor(Math.random() * (this.height - 1)) * this.width + Math.floor(Math.random() * this.width);
+          node2 = node1 + this.width;
+        }
+      } else {
+        if (this.wrapHoriz) {
+          node1 = Math.floor(Math.random() * this.height) * this.width + Math.floor(Math.random() * this.width);
+          node2 = node1 + 1;  if (node2 % this.width == 0) node2 -= this.width;
+        } else {
+          node1 = Math.floor(Math.random() * this.height) * this.width + Math.floor(Math.random() * (this.width - 1));
+          node2 = node1 + 1;
+        }
+      }
+      var val1 = node1;  while (val1 != temp[val1]) val1 = temp[val1];
+      var val2 = node2;  while (val2 != temp[val2]) val2 = temp[val2];
+      if (val1 != val2) {
+        this.addEdge(node1, node2);
+        num_trees--;
+        temp[val1] = val2;
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.rotate = function(val) {
+    var t = val * 2;
+    return (t < 16) ? t : (t - 15);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzleData = function(height, width, wrapVert, wrapHoriz) {
+    this.height = height;
+    this.width = width;
+    this.wrapVert = wrapVert;
+    this.wrapHoriz = wrapHoriz;
+
+    this.center = Math.floor(this.height/2) * this.width + Math.floor(this.width/2);
+
+    this.edges = new Array();
+    for (var i=0; i<this.height * this.width; ++i) {
+      this.edges[i] = new Set();
+    }
+
+    this.runKruskal();
+
+    this.marks = new Array();
+    this.nodes = new Array();
+    this.green = new Array();
+    for (var i=0; i<this.height * this.width; ++i) {
+      this.green[i] = 0;
+      this.nodes[i] = 0;
+      this.marks[i] = false;
+      if (this.edges[i].has(i-1)) this.nodes[i] += 8;
+      if (this.edges[i].has(i+this.width)) this.nodes[i] += 4;
+      if (this.edges[i].has(i+1)) this.nodes[i] += 2;
+      if (this.edges[i].has(i-this.width)) this.nodes[i] += 1;
+
+      if (this.edges[i].has(i+this.width-1)) this.nodes[i] += 8;
+      if (this.edges[i].has(i+this.width-this.height*this.width)) this.nodes[i] += 4;
+      if (this.edges[i].has(i-this.width+1)) this.nodes[i] += 2;
+      if (this.edges[i].has(i-this.width+this.height*this.width)) this.nodes[i] += 1;
+      var spin = Math.random() * 4;
+      for (var j=0; j<spin; ++j) {
+        this.nodes[i] = this.rotate(this.nodes[i]);
+      }
+    }
+
+    this.greenNode = Math.floor(Math.random() * this.width * this.height);
+    this.markGreen(false);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.testWest = function(val1, val2) {
+    if ((this.tempGreen[val2] == 0)
+     && (this.nodes[val1] >= 8)
+     && (this.nodes[val2] % 4 >= 2))
+      this.recurseGreen(val2);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.testEast = function(val1, val2) {
+    if ((this.tempGreen[val2] == 0)
+     && (this.nodes[val2] >= 8)
+     && (this.nodes[val1] % 4 >= 2))
+      this.recurseGreen(val2);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.testNorth = function(val1, val2) {
+    if ((this.tempGreen[val2] == 0)
+     && (this.nodes[val2] % 8 >= 4)
+     && (this.nodes[val1] % 2 == 1))
+      this.recurseGreen(val2);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.testSouth = function(val1, val2) {
+    if ((this.tempGreen[val2] == 0)
+     && (this.nodes[val1] % 8 >= 4)
+     && (this.nodes[val2] % 2 == 1))
+      this.recurseGreen(val2);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.recurseGreen = function(val) {
+    this.tempGreen[val] = 1;
+    this.greenCount--;
+    if (val % this.width != 0) {
+      this.testWest(val, val-1);
+    } else if (this.wrapHoriz) {
+      this.testWest(val, val+this.width-1);
+    }
+    if (val % this.width != this.width-1) {
+      this.testEast(val, val+1);
+    } else if (this.wrapHoriz) {
+      this.testEast(val, val-this.width+1);
+    }
+    if (val / this.width >= 1) {
+      this.testNorth(val, val-this.width);
+    } else if (this.wrapVert) {
+      this.testNorth(val, val-this.width+this.width*this.height);
+    }
+    if (val / this.width < this.height-1) {
+      this.testSouth(val, val+this.width);
+    } else if (this.wrapVert) {
+      this.testSouth(val, val+this.width-this.width*this.height);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.markGreen = function(refresh) {
+    this.tempGreen = new Array();
+    this.greenCount = this.height * this.width;
+    for (var i=0; i<this.height * this.width; ++i) {
+      this.tempGreen[i] = 0;
+    }
+    this.recurseGreen(this.greenNode);
+    for (var i=0; i<this.height * this.width; ++i) {
+      if (this.tempGreen[i] != this.green[i]) {
+        this.green[i] = this.tempGreen[i];
+        if (refresh) this._IGGG_refreshCell(i);
+      }
+    }
+    if (this.greenCount == 0) {
+      user_solved__MODULE_ID__();
+      _gel("win").innerHTML = "Congratulations!";
+    } else if (this.greenCount == 1)
+      _gel("win").innerHTML = "1 unhappy tube left!";
+    else
+      _gel("win").innerHTML = this.greenCount + " tubes still unhappy";
+  }
+
+  puzzle_data__MODULE_ID__.prototype.clearAllMarks = function() {
+    for (var i=0; i<this.height * this.width; ++i) {
+      if (this.marks[i]) {
+        this.marks[i] = false;
+        this._IGGG_refreshCell(i);
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getNormalView = function(index) {
+    var bg = (this.marks[index]) ? 'style="background-color:#FFFF00"' : '';
+    if (this.green[index])
+      return '<img ' + bg + ' src="' + this.prefix + 'pipeg' + this.nodes[index] + '.gif" alt="' + this.nodes[index] + '" title="pipe">';
+    else
+      return '<img ' + bg + ' src="' + this.prefix + 'pipe' + this.nodes[index] + '.gif" alt="' + this.nodes[index] + '" title="pipe">';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSourceView = function(source, target) {
+    return this._IGGG_getNormalView(source);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getTargetView = function(source, target) {
+    return this._IGGG_getNormalView(target);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getDragView = function(index) {
+    return this._IGGG_getNormalView(index);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSurrogateView = function(index) {
+    return ("");
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleDrag = function(source, target) {
+    if (game__MODULE_ID__.isRightButton()) {
+      this.marks[source] = !(this.marks[source]);
+      this._IGGG_refreshCell(source);
+    } else {
+      this.nodes[source] = this.rotate(this.nodes[source]);
+      this._IGGG_refreshCell(source);
+      this.markGreen(true);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleClick = function(source) {
+    // do nothing
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragSource = function(index) {
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragTarget = function(index) {
+    return false;
+  }
+
+  // only used for objects that can't be handled.
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragStart = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetHit = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetLost = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragEnd = function(s_object, t_object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragClick = function(object) { }
+
+  //   _IGGG_refreshCell(index)
+  //   _IGGG_addDragSource(index)
+  //   _IGGG_removeDragSource(index)
+  //   _IGGG_refreshDragSources()
+  //   _IGGG_addDragTarget(index)
+  //   _IGGG_removeDragTarget(index)
+  //   _IGGG_refreshDragTargets()
+
+  ///////////////////////////////////////
+
+  var heights__MODULE_ID__ = new Array(
+3,4,5,4,5,7,5,5,9,4,4,7,5,7,5,5,7,3,9,9,12,5,5,7,4,7,9,5,12,15,
+4,7,7,9,12,7,9,5,7,15,7,9,12,19,9,12,15,9,5,7,7,7,9,9,12,19,15,23,12,15,
+7,19,9,9,12,9,12,23,9,12,15,15,19,28,9,12,23,19,7,28,12,15,12,15,9,9,12,15,23,33,
+19,19,9,12,12,15,23,28,33,15,15,39,19,28,19,12,15,19,23,23,9,12,12,33,15,39,28,12,15,19,
+45,19,19,33,23,15,23,28,23,45,39,19,28,33,19,12,15,12,12,15,15,39,23,23,23,19,33,28,45,19,
+28,28,33,39,23,23,45,15,15,19,28,28,12,15,15,39,33,19,19,28,23,23,33,33,45,39,28,28,45,33,
+33,23,19,19,39,15,15,15,33,23,23,28,39,39,28,19,19,45,33,33,45,39,39,23,23,28,39,15,45,45,
+19,19,33,33,28,28,19,23,23,39,45,45,39,19,33,45,28,28,39,23,23,19,39,45,33,33,23,45,19,19,
+28,28,39,23,33,33,45,45,28,28,23,39,39,19,45,23,33,33,28,23,39,39,28,33,33,45,45,28,23,45,
+45,39,39,28,33,28,33,39,39,33,45,45,28,33,39,33,45,45,39,39,33,39,45,39,45,45,45,39,45,45
+  );
+
+  var widths__MODULE_ID__ = new Array(
+3,3,3,4,4,3,3,5,3,4,4,4,3,3,4,4,5,3,4,3,3,5,5,4,3,3,5,3,3,3,
+4,4,7,4,4,5,3,4,5,3,3,5,5,3,4,4,4,7,5,4,7,7,5,3,3,3,4,3,5,5,
+5,4,9,4,4,7,7,3,7,3,3,5,4,3,5,5,4,5,7,3,4,4,7,7,9,9,9,3,4,3,
+5,3,7,7,5,5,5,4,3,4,7,3,4,4,7,9,9,3,5,3,9,9,12,4,5,3,5,7,7,5,
+3,4,7,4,3,9,4,5,7,3,4,9,3,5,5,9,9,12,12,12,7,4,4,5,7,7,5,3,4,9,
+4,7,3,5,9,5,4,9,12,7,4,7,12,12,15,5,3,9,12,5,7,9,4,7,5,3,5,9,5,4,
+7,7,9,12,3,12,15,15,5,9,12,7,4,7,9,12,15,3,5,9,3,4,7,9,12,7,5,15,4,7,
+12,15,9,7,9,12,15,12,15,5,4,7,9,19,7,5,9,12,9,12,15,15,7,5,9,12,15,9,19,19,
+12,15,7,19,9,12,9,7,12,15,15,9,12,19,7,19,12,15,15,19,9,12,19,12,15,9,12,15,19,9,
+12,12,15,19,15,19,19,12,15,15,12,15,19,19,15,19,12,15,19,15,19,19,15,19,19,15,19,19,19,19
+  );
+
+  var wrapVerts__MODULE_ID__ = new Array(
+0,0,0,0,0,0,1,0,0,1,0,0,0,1,1,0,0,1,0,1,0,1,0,1,1,0,0,1,1,0,
+1,0,0,1,0,1,0,1,0,1,1,1,0,0,0,1,0,0,1,1,1,0,0,1,0,1,1,0,1,0,
+1,0,0,1,0,1,0,1,0,1,0,1,1,0,1,0,0,0,1,1,1,0,1,0,1,0,0,1,1,0,
+1,0,1,0,1,0,0,0,1,1,1,0,0,1,0,1,0,1,1,0,1,0,0,0,1,1,0,1,0,0,
+0,1,1,1,1,1,0,1,0,1,0,0,0,0,1,1,0,1,0,0,1,1,1,0,1,0,1,1,0,1,
+0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,1,1,
+1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,1,1,1,1,0,1,0,0,
+1,1,1,0,0,0,0,0,0,1,1,1,0,0,1,0,1,1,1,1,1,1,0,1,0,0,0,0,1,0,
+0,0,1,0,1,1,1,0,1,1,1,0,0,1,1,1,0,0,0,0,1,1,0,1,1,0,0,1,1,1,
+1,0,0,1,0,0,0,1,1,1,0,0,1,1,0,0,1,1,0,1,1,1,0,0,0,1,1,1,0,1
+  );
+  
+  var wrapHorizs__MODULE_ID__ = new Array(
+0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1,0,1,0,0,0,0,1,0,1,1,0,1,0,0,
+1,1,0,0,0,0,1,1,1,0,1,0,0,0,1,0,0,0,1,1,0,1,1,1,1,0,0,0,0,0,
+1,0,0,1,1,0,0,0,1,1,1,0,0,0,1,1,0,0,1,0,1,1,0,0,0,1,0,1,0,0,
+0,1,1,1,1,1,0,0,0,1,0,0,1,0,0,0,0,1,0,1,1,1,0,0,1,0,0,1,1,1,
+0,1,0,0,1,0,1,0,0,0,0,0,1,0,1,1,1,0,1,0,1,0,1,1,0,1,0,1,0,0,
+1,0,1,0,0,1,0,1,0,1,1,0,1,1,0,0,1,1,0,1,1,0,1,0,0,1,1,0,0,1,
+0,1,1,0,1,1,0,1,1,1,0,1,1,0,0,1,0,1,1,0,1,1,0,1,0,1,1,1,1,0,
+1,0,0,1,1,0,1,1,0,1,1,0,0,0,1,1,1,0,0,1,0,1,1,1,1,0,1,0,0,1,
+1,0,1,0,1,0,0,1,1,0,1,1,0,1,1,0,1,0,1,1,1,0,0,1,0,1,0,1,1,1,
+0,1,0,0,1,1,0,1,0,1,1,0,1,0,1,1,1,0,0,1,1,0,1,1,0,1,0,1,1,1
+  );
+  
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+
+  function start__MODULE_ID__() {
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", puzzle__MODULE_ID__.height, puzzle__MODULE_ID__.width);
+    _gel("table_html").innerHTML = game__MODULE_ID__.getTableHTML();
+    game__MODULE_ID__.initDragging();
+    _IG_AdjustIFrameHeight();
+    solved_already__MODULE_ID__ = false;
+  }
+
+  function reset__MODULE_ID__(puznum) {
+    user_reset__MODULE_ID__();
+    _gel("form_width").value = _gel("form_width").value.replace(/[^0-9]/g, "");
+    _gel("form_height").value = _gel("form_height").value.replace(/[^0-9]/g, "");
+    puzzle__MODULE_ID__.resetPuzzle(1 * _gel("form_height").value,
+                                    1 * _gel("form_width").value,
+                                   _gel("form_wrap_vert").checked,
+                                   _gel("form_wrap_horiz").checked);
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", puzzle__MODULE_ID__.height, puzzle__MODULE_ID__.width);
+    _gel("table_html").innerHTML = game__MODULE_ID__.getTableHTML();
+    game__MODULE_ID__.initDragging();
+  }
+
+  function changeWidth__MODULE_ID__(amount) {
+    _gel("form_width").value = _gel("form_width").value.replace(/[^0-9]/g, "") * 1 + amount;
+  }
+
+  function changeHeight__MODULE_ID__(amount) {
+    _gel("form_height").value = _gel("form_height").value.replace(/[^0-9]/g, "") * 1 + amount;
+  }
+
+  function changeLevel__MODULE_ID__(amount) {
+    var lev = _gel("level").innerHTML * 1 + amount;
+    if (lev < 1) lev = 1;
+    if (lev > 300) lev = 300;
+    _gel("level").innerHTML = lev;
+    _gel("levp1").disabled = (lev >= 300);
+    _gel("levp10").disabled = (lev >= 300);
+
+    _gel("levm1").disabled = (lev <= 1);
+    _gel("levm10").disabled = (lev <= 1);
+
+    _gel("levp10").value = (lev < 291) ? "+10" : ("+" + (300 - lev));
+    _gel("levm10").value = (lev > 10) ? "-10" : ("-" + (lev - 1));
+
+    _gel("form_width").value = widths__MODULE_ID__[lev-1];
+    _gel("form_height").value = heights__MODULE_ID__[lev-1];
+    _gel("form_wrap_vert").checked = (wrapVerts__MODULE_ID__[lev-1] == 1);
+    _gel("form_wrap_horiz").checked = (wrapHorizs__MODULE_ID__[lev-1] == 1);
+  }
+
+  function user_solved__MODULE_ID__() {
+    if (!solved_already__MODULE_ID__) {
+      _gel("psolved").innerHTML = _gel("psolved").innerHTML * 1 + 1;
+      _gel("percent").innerHTML = Math.floor( _gel("psolved").innerHTML / (_gel("psolved").innerHTML * 1 + _gel("pfailed").innerHTML * 1) * 10000 / 100) + '%';
+      _gel("cstreak").innerHTML = _gel("cstreak").innerHTML * 1 + 1;
+      if (_gel("cstreak").innerHTML * 1 > _gel("lstreak").innerHTML * 1)
+        _gel("lstreak").innerHTML = _gel("cstreak").innerHTML;
+      solved_already__MODULE_ID__ = true;
+    }
+  }
+                                                                                                                                                                  
+  function user_reset__MODULE_ID__() {
+    if (!solved_already__MODULE_ID__) {
+      _gel("pfailed").innerHTML = _gel("pfailed").innerHTML * 1 + 1;
+      _gel("percent").innerHTML = Math.floor( _gel("psolved").innerHTML / (_gel("psolved").innerHTML * 1 + _gel("pfailed").innerHTML * 1) * 10000 / 100) + '%';
+      _gel("cstreak").innerHTML = "0";
+    }
+    solved_already__MODULE_ID__ = false;
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+Make all the users happy!
+<BR>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline';_IG_AdjustIFrameHeight();">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none';_IG_AdjustIFrameHeight();">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   One tube is a "happy source" (colored <span style="background-color:#ABFF73">green</span>), and anything connected to that
+   tube also becomes happy.  To win, all pipes and all users (denoted by faces) must be happy.  On harder levels, tubes may "wrap around" (connections above
+   reconnect to connections below, and same for left-to-right).
+   The number at the bottom tells you how many tubes
+   are still unhappy.
+   Left-click on a tube to rotate it 90 degrees clockwise.
+   Right-click on a tube to "mark" it.  This is purely for your convenience and has no effect on tube connections.
+</span>
+
+<span id="showfaq" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('faq').style.display='inline';_gel('showfaq').style.display='none';_gel('hidefaq').style.display='inline';_IG_AdjustIFrameHeight();">FAQ.</span>
+<span id="hidefaq" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('faq').style.display='none';_gel('showfaq').style.display='inline';_gel('hidefaq').style.display='none';_IG_AdjustIFrameHeight();">Hide FAQ.</span>
+<span id="faq" style="display:none;font-size:12">
+<dl>
+<dt><b>What's this from?</b></dt>
+<dd>This gadget is an offshoot of <a target="_top" href="http://weihwa.feedback.googlepages.com/home">Wei-Hwa's Puzzle Gadget</a>.  The idea is pretty old; I can't remember when I last saw it, years ago.
+<dt><b>There are annoying red X image placeholders that flash when I click.</b></dt>
+<dd>This is a known bug, with a fix anticipated soon; however, it only appears in Internet Explorer.
+Use another browser, such as <a target="top" href="http://www.mozilla.org/firefox/">Firefox</a>,
+to avoid it.
+<dt><b>The Google Personalized Home Page keeps resetting on me!</b></dt>
+<dd>We're working on a fix for that too.  In the meantime, if you're using Firefox, you can try "Open Frame in New Window."
+</dl>
+<dt><b>Is there a maximum size to the puzzle?</b></dt>
+<dd>Depends on how much memory you let your browser have.  I've played a 80x60 puzzle once!
+</span>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Level: <span id="level">8</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="changeLevel__MODULE_ID__(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="changeLevel__MODULE_ID__(-1)"/>
+<input style="font-size:10" id="levp10" type="button" value="+10" onclick="changeLevel__MODULE_ID__(10)"/>
+<input style="font-size:10" disabled id="levm10" type="button" value="-0" onclick="changeLevel__MODULE_ID__(-10)"/>
+</form>
+
+<span id="showpower" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('power').style.display='inline';_gel('showpower').style.display='none';_gel('hidepower').style.display='inline';_IG_AdjustIFrameHeight();">Customize</span>
+<span id="hidepower" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('power').style.display='none';_gel('showpower').style.display='inline';_gel('hidepower').style.display='none';_IG_AdjustIFrameHeight();">Hide Customize</span>
+
+<span id="power" style="display:none;font-size:10">
+<form style="margin-top:3px;margin-bottom:0px">
+Width: <input style="font-size:10" id="form_width" type="text" size=1 style="font-size:8pt" value="5"/>
+<input style="font-size:10" type="button" value="+" onclick="changeWidth__MODULE_ID__(1)"/>
+<input style="font-size:10" type="button" value="-" onclick="changeWidth__MODULE_ID__(-1)"/>
+Height: <input style="font-size:10" id="form_height" type="text" size=1 style="font-size:8pt" value="5"/>
+<input style="font-size:10" type="button" value="+" onclick="changeHeight__MODULE_ID__(1)"/>
+<input style="font-size:10" type="button" value="-" onclick="changeHeight__MODULE_ID__(-1)"/>
+<BR><input id="form_wrap_vert" type="checkbox"> Wrap top-and-bottom
+<input id="form_wrap_horiz" type="checkbox"> Wrap left and right
+</form>
+</span>
+
+<form style="margin-top:3px;margin-bottom:0px">
+<input type="button" value="Get New Puzzle" onclick="reset__MODULE_ID__()"/>
+<input type="button" value="Clear Marks" onclick="puzzle__MODULE_ID__.clearAllMarks()"/>
+</form>
+
+
+<HR>
+<span id="table_html"></span>
+
+<span id="debug1" style="font-size:16pt;font-weight:bold"></span>
+
+<HR>
+<table style="font-size:9pt" border=0><tr><td>
+&nbsp;<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+</td><td>
+Puzzles solved: <span style="font-size:9pt; font-weight:bold" id="psolved">0</span><BR>
+</td></tr><tr><td>
+Current Streak: <span style="font-size:9pt; font-weight:bold" id="cstreak">0</span><BR>
+</td><td>
+Puzzles failed: <span style="font-size:9pt; font-weight:bold" id="pfailed">0</span><BR>
+</td></tr><tr><td>
+Longest Streak: <span style="font-size:9pt; font-weight:bold" id="lstreak">0</span><BR>
+</td><td>
+Win Percentage: <span style="font-size:9pt; font-weight:bold" id="percent">N/A</span><BR>
+</td></tr></table>
+
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

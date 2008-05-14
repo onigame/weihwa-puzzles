@@ -1,0 +1,17 @@
+application: weihwa-puzzles
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /images
+  static_dir: images
+
+- url: /staticgadgets
+  static_dir: staticgadgets
+
+- url: /current\.xml
+  script: current.py
+
+- url: /.*
+  script: helloworld.py

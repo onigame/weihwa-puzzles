@@ -1,0 +1,933 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20070324@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="500">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+    <Require feature='grid'/>
+    <Require feature='analytics'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_20070324"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20070324@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils5.js"></script>
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
+--->
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json2.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  _IG_Analytics("UA-1247731-1", "/puzzlegadget");
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  // Damerau-Levenshtein distance.
+
+  function min(v1, v2) {
+    return ( (v1 < v2) ? v1 : v2 );
+  }
+                                                                                                                                                                                                                            
+  function dldistance(s1, s2) {
+    var str1 = s1.toLowerCase().replace(/[^a-z]/g,"");
+    var str2 = s2.toLowerCase().replace(/[^a-z]/g,"");
+    var data = new Array((str1.length+1) * (str2.length+1));
+    var w = str1.length + 1;
+    for (var i=0; i<=str1.length; i++) {
+      data[i] = i;
+    }
+    for (var j=0; j<=str2.length; j++) {
+      data[j*w] = j;
+    }
+    for (var i=1; i<=str1.length; i++) {
+      for (var j=1; j<=str2.length; j++) {
+        var cost = (str1.charAt(i-1) == str2.charAt(j-1)) ? 0 : 1;
+        data[j*w+i] = min(min( data[j*w+i-1] + 1,
+                               data[(j-1)*w+i] + 1 ),
+                               data[(j-1)*w+i-1] + cost);
+        if (i>1 && j>1 && str1.charAt(i) == str2.charAt(j-1) &&
+                          str1.charAt(i-1) == str2.charAt(j)) {
+          data[j*w+i] = min(data[j*w+i],  data[(j-2)*w+(i-2)] + cost);
+        }
+      }
+    }
+    return data[str2.length*w + str1.length];
+  }
+  
+  function close_enough(correct, user) {
+    return (dldistance(correct, user) * 4 < correct.length);
+  }
+
+  ////////////////////////////////////////
+
+  function _IG_game_state() {
+    this.cur_puz = 0;
+    this.puz_count = 50;
+    this.puz_solved = new Array(this.puz_count);
+    this.puz_time = new Array(this.puz_count);
+    this.puz_score = new Array(this.puz_count);
+    for (var i=0; i<this.puz_count; ++i) {
+      this.puz_solved[i] = 0;
+      this.puz_time[i] = 1;
+      this.puz_score[i] = 0;
+    }
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
+    if (this.game_state.puz_solved[puznum] == 1) {
+      return "#00FF00";
+    } else {
+      var redness = Math.floor(255 - this.game_state.puz_solved[puznum]*128);
+      var greenness = Math.floor(this.game_state.puz_solved[puznum]*128);
+      var blueness = 0;
+      var color = ((redness * 256) + greenness) * 256 + blueness;
+//dprint(puznum + " " + redness + " " + greenness + " " + blueness + " " + color + " " + color.toString(16));
+      return "#" + color.toString(16);
+    }
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.score = function() {
+    var answer = 0;
+    for (var i=0; i<this.game_state.puz_count; ++i) {
+      if (this.game_state.puz_solved[i] == 1) 
+        answer ++;
+    }
+    return answer;
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+    var num = this.score();
+    if (num == 50) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = this.score();
+  }
+
+  ///////////////////////////////////////////////
+
+  function countdown_timer(source_id) {
+    this.source_id = source_id;
+    this.timeout_period = 490;
+  }
+
+  countdown_timer.prototype.set_timer = function(minutes) {
+    this.minutes = minutes;
+    this.seconds = 0;
+
+    this.update();
+  }
+
+  countdown_timer.prototype.start_timer = function(callback) {
+    this.callback = callback;
+    this.interval = setInterval("timer.decrement()", 1000);
+  }
+
+  countdown_timer.prototype.decrement = function() {
+    if (this.minutes < 0) this.minutes = 0;
+    if (this.seconds < 0) this.seconds = 0;
+    if (this.seconds == 0 && this.minutes == 0) {
+      this.stop_timer();
+      setTimeout(this.callback, 1);
+    } else if (this.seconds == 0) {
+      this.seconds = 59;
+      this.minutes--;
+    } else {
+      this.seconds--;
+    }
+    this.update();
+  }
+
+  countdown_timer.prototype.update = function() {
+    _gel(this.source_id).innerHTML = this.minutes + ":";
+    if (this.seconds < 10) {
+      _gel(this.source_id).innerHTML += "0";
+    }
+    _gel(this.source_id).innerHTML += this.seconds; 
+  }
+
+  countdown_timer.prototype.stop_timer = function() {
+    clearInterval(this.interval);
+  }
+
+  var timer = new countdown_timer("clock");
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data() {
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data.prototype.resetPuzzle = function(game_state) {
+    var index = game_state.cur_puz;
+    this.resetPuzzleData(index);
+  }
+
+  puzzle_data.prototype.resetPuzzleData = function(index) {
+    timer.stop_timer();
+
+    this.show_order = true;
+
+    if (index == 0) {
+      this.topic="Seven Dwarfs";
+      this.subtopic="(according to the Disney movie)";
+      this.minutes = 2;
+      this.show_order = false;
+      this.answers = new Array(
+        "Doc", "Grumpy", "Happy", "Sleepy", "Bashful", "Sneezy", "Dopey"
+      );
+    } else if (index == 1) {
+      this.topic="50 States in the U.S.A.";
+      this.subtopic="(common names only)";
+      this.minutes = 10;
+      this.show_order = false;
+      this.answers = new Array(
+        "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+      );
+    } else if (index == 2) {
+      this.topic="Continents";
+      this.subtopic="(7-continent model)";
+      this.minutes = 2;
+      this.show_order = false;
+      this.answers = new Array(
+        "Antarctica", "South America", "North America", "Europe", "Asia", "Africa", "Australia"
+      );
+    } else if (index == 3) {
+      this.topic="Books of the Old Testament";
+      this.subtopic="(in the King James Bible)";
+      this.minutes = 12;
+      this.answers = new Array(
+        "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "Samuel!1 Samuel", "Samuel!2 Samuel", "Kings!1 Kings", "Kings!2 Kings", "Chronicles!1 Chronicles", "Chronicles!2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"
+      );
+    } else if (index == 4) {
+      this.topic="Feature films from Pixar&reg;";
+      this.subtopic="(as of January 2007)";
+      this.minutes = 4;
+      this.answers = new Array(
+        "Toy Story", "A Bug's Life", "Toy Story 2", "Monsters, Inc.", "Finding Nemo", "The Incredibles", "Cars"
+      );
+    } else if (index == 5) {
+      this.topic="U.S. Presidents elected in the 20th century";
+      this.subtopic="(surnames only)";
+      this.minutes = 5;
+      this.answers = new Array(
+        "Roosevelt!(Theodore) Roosevelt", "Taft", "Wilson", "Harding", "Coolidge", "Hoover", "Roosevelt!(Franklin) Roosevelt", "Truman", "Eisenhower", "Kennedy", "Johnson", "Nixon", "Carter", "Reagan", "Bush", "Clinton"
+      );
+    } else if (index == 6) {
+      this.topic="symbols of the Zodiac";
+      this.subtopic="(in western astrology)";
+      this.minutes = 4;
+      this.show_order = false;
+      this.answers = new Array(
+         "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+      );
+    } else if (index == 7) {
+      this.topic="hands in Poker";
+      this.subtopic="(better than High Card)";
+      this.minutes = 3;
+      this.answers = new Array(
+        "one pair", "two pairs", "three of a kind", "straight", "flush", "full house", "four of a kind", "straight flush", "royal flush"
+      );
+    } else if (index == 8) {
+      this.topic="noble gases";
+      this.subtopic="(only the first six)";
+      this.minutes = 3;
+      this.answers = new Array(
+        "Helium", "Neon", "Argon", "Krypton", "Xenon", "Radon"
+      );
+    } else if (index == 9) {
+      this.topic="five Oceans";
+      this.subtopic="(major oceanic divisions of the World Ocean)";
+      this.minutes = 3;
+      this.show_order = false;
+      this.answers = new Array(
+        "Arctic", "Atlantic", "Indian", "Pacific", "Southern"
+      );
+    } else if (index == 10) {
+      this.topic="nine U.S. Supreme Court Justices";
+      this.subtopic="(as of March 2007, last names only)";
+      this.minutes = 8;
+      this.show_order = false;
+      this.answers = new Array(
+        "Roberts", "Stevens", "Scalia", "Kennedy", "Souter", "Thomas", "Ginsburg", "Breyer", "Alito"
+      );
+    } else if (index == 11) {
+      this.topic="five stages of grief";
+      this.subtopic="(K&uuml;bler-Ross Model)";
+      this.minutes = 3;
+      this.answers = new Array(
+        "Denial", "Anger", "Bargaining", "Depression", "Acceptance"
+      );
+    } else if (index == 12) {
+      this.topic="deed cards in Monopoly";
+      this.subtopic="(omit words 'Avenue' and 'Railroad')";
+      this.minutes = 8;
+      this.answers = new Array(
+        "Mediterranean", "Baltic", "Reading", "Oriental", "Vermont", "Connecticut", "St. Charles", "Electric Company", "States", "Virginia", "Pennsylvania!Pennsylvania (Railroad)", "St. James", "Tennessee", "New York", "Kentucky", "Indiana", "Illinois", "B&O", "Atlantic", "Ventnor", "Water Works", "Marvin Gardens", "Pacific", "North Carolina", "Pennsylvania!Pennsylvania (Avenue)", "Short Line", "Park Place", "Boardwalk"
+      );
+    } else if (index == 13) {
+      this.topic="letters of the Greek alphabet";
+      this.subtopic="(only modern ones)";
+      this.minutes = 6;
+      this.answers = new Array(
+        "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega"
+      );
+    } else if (index == 14) {
+      this.topic="metric prefixes";
+      this.subtopic="(also known as SI prefixes)";
+      this.minutes = 6;
+      this.answers = new Array(
+        "yotta-", "zetta-", "exa-", "peta-", "tera-", "giga-", "mega-", "kilo-", "hecto-", "deka-", "deci-", "centi-", "milli-", "micro-", "nano-", "pico-", "femto-", "atto-", "zepto-", "yocto-"
+      );
+    } else if (index == 15) {
+      this.topic="novels by Jane Austen";
+      this.subtopic="";
+      this.minutes = 4;
+      this.show_order = false;
+      this.answers = new Array(
+        "Sense and Sensibility", "Pride and Prejudice", "Mansfield Park", "Emma", "Persuasion", "Northanger Abbey"
+      );
+    } else if (index == 16) {
+      this.topic="planets in our Solar System";
+      this.subtopic="(not counting dwarf planets such as Pluto)";
+      this.minutes = 3;
+      this.answers = new Array(
+        "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"
+      );
+    } else if (index == 17) {
+      this.topic="Academy Award&reg; (Oscar&reg;) categories";
+      this.subtopic="(as of 2007; omit the word 'Best')";
+      this.minutes = 10;
+      this.show_order = false;
+      this.answers = new Array(
+        "Picture", "Director", "Actor", "Actress", "Supporting Actor", "Supporting Actress", "Original Screenplay", "Adapted Screenplay", "Animated Feature", "Art Direction", "Cinematography", "Costume Design", "Documentary Feature", "Documentary Short Subject", "Film Editing", "Foreign Language Film", "Makeup", "Original Song", "Original Score", "Animated Short Film", "Live Action Short Film", "Sound Mixing", "Sound Editing", "Visual Effects"
+      );
+    } else if (index == 18) {
+      this.topic="Friends&reg;";
+      this.subtopic="(first names of the main characters)";
+      this.minutes = 1;
+      this.show_order = false;
+      this.answers = new Array(
+        "Chandler", "Joey", "Monica", "Phoebe", "Rachel", "Ross"
+      );
+    } else if (index == 19) {
+      this.topic="SI base units";
+      this.subtopic="(American spelling)";
+      this.minutes = 3;
+      this.show_order = false;
+      this.answers = new Array(
+        "meter", "kilogram", "second", "ampere", "kelvin", "mole", "candela"
+      );
+    } else if (index == 20) {
+      this.topic="words in the NATO phonetic (radio) alphabet";
+      this.subtopic="(ANSI spelling, e.g., 'Alpha' instead of 'Alfa')";
+      this.minutes = 5;
+      this.answers = new Array(
+        "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliet", "Kilo", "Lima", "Mike", "November", "Oscar", "Papa", "Quebec", "Romeo", "Sierra", "Tango", "Uniform", "Victor", "Whiskey", "X-ray", "Yankee", "Zulu"
+      );
+    } else if (index == 21) {
+      this.topic="Little Women";
+      this.subtopic="(first names only)";
+      this.minutes = 1;
+      this.show_order = false;
+      this.answers = new Array(
+        "Meg", "Jo", "Beth", "Amy"
+      );
+    } else if (index == 22) {
+      this.topic="symbols of the Chinese Zodiac";
+      this.subtopic="";
+      this.minutes = 3;
+      this.answers = new Array(
+        "rat", "ox", "tiger", "rabbit", "dragon", "snake", "horse", "sheep", "monkey", "rooster", "dog", "pig"
+      );
+    } else if (index == 23) {
+      this.topic="Twelve Olympians in Greek mythology";
+      this.subtopic="(not counting Hestia or Demeter)";
+      this.minutes = 6;
+      this.show_order = false;
+      this.answers = new Array(
+        "Zeus", "Poseidon", "Hera", "Hades", "Artemis", "Apollo", "Athena", "Hephaestus", "Ares", "Aphrodite", "Hermes", "Dionysus"
+      );
+    } else if (index == 24) {
+      this.topic="members of Mystery, Inc.";
+      this.subtopic="(from <i>Scooby-Doo</i>&reg;, nicknames only)";
+      this.minutes = 1;
+      this.show_order = false;
+      this.answers = new Array(
+        "Fred", "Daphne", "Velma", "Shaggy", "Scooby"
+      );
+    } else if (index == 25) {
+      this.topic="objects in rhythmic gymnastics";
+      this.subtopic="(women only)";
+      this.minutes = 3;
+      this.answers = new Array(
+        "ball", "ribbon", "hoop", "clubs", "rope"
+      );
+    } else if (index == 26) {
+      this.topic="rooms in the game of Clue&reg;";
+      this.subtopic="(Cluedo&reg; in Britain)";
+      this.minutes = 10;
+      this.show_order = false;
+      this.answers = new Array(
+        "Hall", "Lounge", "Dining Room", "Kitchen", "Ballroom", "Conservatory", "Billiard Room", "Library", "Study"
+      );
+    } else if (index == 27) {
+      this.topic="Platonic Solids";
+      this.subtopic="(common name for the hexahedron, please)";
+      this.minutes = 3;
+      this.answers = new Array(
+        "tetrahedron", "cube", "octahedron", "dodecahedron", "icosahedron"
+      );
+    } else if (index == 28) {
+      this.topic="winners of the show Survivor&reg;";
+      this.subtopic="(first names only, first 13 seasons)";
+      this.minutes = 8;
+      this.answers = new Array(
+        "Richard!Richard (1:Borneo)", "Tina!Tina (2:Australia)", "Ethan!Ethan (3:Africa)", "Vecepia!Vecepia (4:Marquesas)", "Brian!Brian (5:Thailand)", "Jenna!Jenna (6:Amazon)", "Sandra!Sandra (7:Pearl Islands)", "Amber!Amber (8:All-Stars)", "Chris!Chris (9:Vanuatu)", "Tom!Tom (10:Palau)", "Danni!Danni (11:Guatemala)", "Aras!Aras (12:Panama)", "Yul!Yul (13:Cook Islands)"
+      );
+    } else if (index == 29) {
+      this.topic="Statistic Attributes (Ability scores) in Dungeons & Dragons&reg;";
+      this.subtopic="(full word)";
+      this.minutes = 2;
+      this.show_order = false;
+      this.answers = new Array(
+        "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"
+      );
+    } else if (index == 30) {
+      this.topic="States of Australia";
+      this.subtopic="";
+      this.minutes = 4;
+      this.show_order = false;
+      this.answers = new Array(
+        "New South Wales", "Queensland", "South Australia", "Tasmania", "Victoria", "Western Australia"
+      );
+    } else if (index == 31) {
+      this.topic="Weight classes in boxing";
+      this.subtopic="(as used in the Summer Olympics)";
+      this.minutes = 7;
+      this.answers = new Array(
+        "Super heavyweight", "Heavyweight", "Light Heavyweight", "Middleweight", "Welterweight", "Light welterweight", "Lightweight", "Featherweight", "Bantamweight", "Flyweight", "Light flyweight"
+      );
+    } else if (index == 32) {
+      this.topic="winners of American Idol&reg;";
+      this.subtopic="(full names, first 5 seasons)";
+      this.minutes = 6;
+      this.answers = new Array(
+        "Kelly Clarkson", "Ruben Studdard", "Fantasia Barrino", "Carrie Underwood", "Taylor Hicks"
+      );
+    } else if (index == 33) {
+      this.topic="six known quarks";
+      this.subtopic="(the subatomic particles)";
+      this.minutes = 3;
+      this.answers = new Array(
+        "Up", "Down", "Strange", "Charm", "Bottom", "Top"
+      );
+    } else if (index == 34) {
+      this.topic="members of the Fantastic Four&reg;";
+      this.subtopic="(most common four members, codename only)";
+      this.minutes = 2;
+      this.show_order = false;
+      this.answers = new Array(
+        "Mr. Fantastic", "Invisible Woman", "Human Torch", "The Thing"
+      );
+    } else if (index == 35) {
+      this.topic="NFL team names (city and name)";
+      this.subtopic="(as of 2006)";
+      this.minutes = 10;
+      this.show_order = false;
+      this.answers = new Array(
+        "Buffalo Bills", "Miami Dolphins", "New England Patriots", "New York Jets", "Baltimore Ravens", "Cincinnati Bengals", "Cleveland Browns", "Pittsburgh Steelers", "Houston Texans", "Indianapolis Colts", "Jacksonville Jaguars", "Tennessee Titans", "Denver Broncos", "Kansas City Chiefs", "Oakland Raiders", "San Diego Chargers", "Dallas Cowboys", "New York Giants", "Philadelphia Eagles", "Washington Redskins", "Chicago Bears", "Detroit Lions", "Green Bay Packers", "Minnesota Vikings", "Atlanta Falcons", "Carolina Panthers", "New Orleans Saints", "Tampa Bay Buccaneers", "Arizona Cardinals", "St. Louis Rams", "San Francisco 49ers", "Seattle Seahawks"
+      );
+    } else if (index == 36) {
+      this.topic="U. S. Federal Holidays";
+      this.subtopic="(official name according to U.S. Code 6103)";
+      this.minutes = 7;
+      this.answers = new Array(
+        "New Year's Day", "Birthday of Martin Luther King, Jr.", "Washington's Birthday", "Memorial Day", "Independence Day", "Labor Day", "Columbus Day", "Veterans Day", "Thanksgiving Day", "Christmas Day"
+      );
+    } else if (index == 37) {
+      this.topic="members of The Beatles";
+      this.subtopic="(core members only, full names)";
+      this.minutes = 3;
+      this.show_order = false;
+      this.answers = new Array(
+        "John Lennon", "Paul McCartney", "George Harrison", "Ringo Starr"
+      );
+    } else if (index == 38) {
+      this.topic="Asian territories in the game of Risk&reg;";
+      this.subtopic="";
+      this.minutes = 10;
+      this.show_order = false;
+      this.answers = new Array(
+        "Afghanistan", "China", "India", "Irkutsk", "Japan", "Kamchatka", "Middle East", "Mongolia", "Siam", "Siberia", "Ural", "Yakutsk"
+      );
+    } else if (index == 39) {
+      this.topic="commissioned ranks in the U. S. Army";
+      this.subtopic="(General and below)";
+      this.minutes = 4;
+      this.answers = new Array(
+        "General", "Lieutenant General", "Major General", "Brigadier General", "Colonel", "Lieutenant Colonel", "Major", "Captain", "First Lieutenant", "Second Lieutenant"
+      );
+    } else if (index == 40) {
+      this.topic="wives of Henry VIII";
+      this.subtopic="";
+      this.minutes = 6;
+      this.answers = new Array(
+        "Catherine of Aragon", "Anne Boleyn", "Jane Seymour", "Anne of Cleves", "Catherine Howard", "Catherine Parr"
+      );
+    } else if (index == 41) {
+      this.topic="husbands of Elizabeth Taylor";
+      this.subtopic="(last names only)";
+      this.minutes = 6;
+      this.answers = new Array(
+        "Hilton!Conrad 'Nicky' Hilton", "Wilding!Michael Wilding", "Todd!Michael Todd", "Fisher!Eddie Fisher", "Burton!Richard Burton", "Warner!John Warner", "Fortensky!Larry Fortensky"
+      );
+    } else if (index == 42) {
+      this.topic="fielding positions in baseball";
+      this.subtopic="";
+      this.minutes = 3;
+      this.show_order = false;
+      this.answers = new Array(
+        "pitcher", "catcher", "first base", "second base", "third base", "shortstop", "left field", "center field", "right field"
+      );
+    } else if (index == 43) {
+      this.topic="seven Wonders of the Ancient World";
+      this.subtopic="(give the word or phrase before 'of')";
+      this.minutes = 3;
+      this.show_order = false;
+      this.answers = new Array(
+        "Great Pyramid!Great Pyramid of Giza", "Hanging Gardens!Hanging Gardens of Babylon", "Temple!Temple of Artemis at Ephesus", "Statue!Statue of Zeus at Olympia", "Mausoleum!Mausoleum of Maussollos at Halicarnassus", "Colossus!Colossus of Rhodes", "Lighthouse!Lighthouse of Alexandria"
+      );
+    } else if (index == 44) {
+      this.topic="Track names on <i>Sgt. Pepper's Lonely Hearts Club Band</i>";
+      this.subtopic="";
+      this.minutes = 7;
+      this.answers = new Array(
+        "Sgt. Pepper's Lonely Hearts Club Band", "With a Little Help from My Friends", "Lucy in the Sky with Diamonds", "Getting Better", "Fixing a Hole", "She's Leaving Home", "Being for the Benefit of Mr. Kite", "Within You Without You", "When I'm Sixty-Four", "Lovely Rita", "Good Morning Good Morning", "Sgt. Pepper's Lonely Hearts Club Band (Reprise)", "A Day in the Life"
+      );
+    } else if (index == 45) {
+      this.topic="three men in a tub";
+      this.subtopic="(in the nursery rhyme)";
+      this.minutes = 1;
+      this.show_order = false;
+      this.answers = new Array(
+        "butcher", "baker", "candlestick-maker"
+      );
+    } else if (index == 46) {
+      this.topic="Peerage ranks in the United Kingdom";
+      this.subtopic="(male titles only)";
+      this.minutes = 3;
+      this.answers = new Array(
+        "Duke", "Marquess", "Earl", "Viscount", "Baron"
+      );
+    } else if (index == 47) {
+      this.topic="the Mohs scale of mineral hardness";
+      this.subtopic="(representative minerals)";
+      this.minutes = 8;
+      this.answers = new Array(
+        "talc", "gypsum", "calcite", "fluorite", "apatite", "orthoclase", "quartz", "topaz", "corundum", "diamond"
+      );
+    } else if (index == 48) {
+      this.topic="countries in South America";
+      this.subtopic="(not counting Panama or Trinidad and Tobago)";
+      this.minutes = 8;
+      this.show_order = false;
+      this.answers = new Array(
+        "Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Ecuador", "Guyana", "Paraguay", "Peru", "Suriname", "Uruguay", "Venezuela"
+      );
+    } else if (index == 49) {
+      this.topic="gifts my true love gave to me over the twelve days of Christmas";
+      this.subtopic="(and their actions)";
+      this.minutes = 5;
+      this.answers = new Array(
+        "partridges in a pear tree", "turtle doves", "french hens", "calling birds", "golden rings", "geese a-laying", "swans a-swimming", "maids a-milking", "ladies dancing", "lords a-leaping", "pipers piping", "drummers drumming"
+      );
+    }
+
+    this.display_answers = new Array();
+    for (var i=0; i<this.answers.length; ++i) {
+      this.display_answers.push(this.answers[i]);
+    }
+    for (var i=0; i<this.answers.length; ++i) {
+      this.answers[i] = this.answers[i].replace(/\!.*/g,"");
+      this.display_answers[i] = this.display_answers[i].replace(/.*\!/g,"");
+    }
+    this.puznum = index;
+
+    _gel("topic").innerHTML = this.topic; 
+    _gel("subtopic").innerHTML = this.subtopic; 
+
+    _gel("textbox").disabled = true;
+    _gel("textbox").onkeyup = this.keypress;
+    _gel("textbox").value = "Click the Start Button to begin";
+    _gel("button").disabled = false;
+    _gel("button").value = "Start";
+    _gel("recent").innerHTML = "";
+    _gel("overall").innerHTML = "";
+
+    timer.set_timer(this.minutes);
+
+    this.update_best_score();
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  puzzle_data.prototype.update_best_score = function() {
+    if (pref_controller.game_state.puz_solved[this.puznum] == 1) {
+      var min = Math.floor(pref_controller.game_state.puz_time[this.puznum]/60);
+      var sec = pref_controller.game_state.puz_time[this.puznum] % 60;
+      if (min == 0) {
+        _gel("best").innerHTML = "Your best time was with " + sec + " second" + ((sec==1)?"":"s") + " remaining.";
+      } else {
+        _gel("best").innerHTML = "Your best time was with " + min + " minute" + ((min==1)?"":"s") + ", "
+                                                            + sec + " second" + ((sec==1)?"":"s") + " remaining.";
+      }
+    } else if (pref_controller.game_state.puz_time[this.puznum] == 1) {
+      _gel("best").innerHTML = "You haven't played this one yet.";
+    } else {
+      _gel("best").innerHTML = "Your best score was " + pref_controller.game_state.puz_score[this.puznum] + " items remembered.";
+    }
+    pref_controller.updatePrefDisplay();
+  }
+
+  puzzle_data.prototype.button_clicked = function() {
+    timer.start_timer("puzzle.handle_loss()");
+    _gel("textbox").disabled = false;
+    _gel("textbox").value = "Type your answer here and hit enter";
+    _gel("textbox").focus();
+    _gel("textbox").select();
+    _gel("button").disabled = true;
+    _gel("button").value = "Go!";
+    _gel("recent").innerHTML = "Type your answer in the box above and hit enter after each one.";
+
+    this.score = 0;
+    this.guessed = new Array(this.answers.length);
+    for (var i=0; i<this.answers.length; ++i) {
+      this.guessed[i] = false;
+    }
+    this.update_list();
+    timer.set_timer(this.minutes);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  puzzle_data.prototype.keypress = function(e) {
+    var e = e ? e : ((window.event) ? event : null);
+    if (e.keyCode == 13) {
+      puzzle.checkans(_gel("textbox").value);
+      _gel("textbox").value = "";
+    }
+  }
+
+  puzzle_data.prototype.matches_ans = function(answer) {
+    for (var i=0; i<this.answers.length; ++i) {
+      if (!this.guessed[i] && close_enough(this.answers[i], answer)) {
+        return i;
+        break;
+      }
+    }
+    return -1;
+  }
+
+  puzzle_data.prototype.checkans = function(answer) {
+    var matches = new Array();
+    var match = this.matches_ans(answer);
+    while (match != -1) {
+      this.score++;
+      this.guessed[match] = true;
+      matches.push(this.display_answers[match]);
+      match = this.matches_ans(answer);
+    }
+    var remaining = this.answers.length - this.score;
+
+    if (matches.length == 0) {
+      if (remaining != 1) {
+        _gel("recent").innerHTML = "Sorry, <b>" + answer + "</b> doesn't seem to match any of the remaining " + remaining + " items."
+      } else {
+        _gel("recent").innerHTML = "Sorry, <b>" + answer + "</b> doesn't seem to match the last item."
+      }
+    } else {
+      var string = "<b>" + matches.shift() + "</b>";
+      while (matches.length > 0) {
+        string += " and <b>" + matches.shift() + "</b>";
+      }
+      if (remaining == 0) {
+        _gel("recent").innerHTML = string + " -- correct!  Well done!";
+        timer.stop_timer();
+        this.handle_win();
+      } else {
+        _gel("recent").innerHTML = string + " -- correct! " + remaining + " to go.";
+      }
+      this.update_list();
+
+      if (this.score > pref_controller.game_state.puz_score[this.puznum]) {
+        this.better_score();
+      }
+    }
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  puzzle_data.prototype.update_list = function() {
+    var is_first = true;
+    for (var i=0; i<this.answers.length; ++i) {
+      if (this.guessed[i]) {
+        if (is_first) {
+          _gel("overall").innerHTML = this.display_answers[i];
+          is_first = false;
+        } else {
+          _gel("overall").innerHTML += ", " + this.display_answers[i];
+        }
+      } else if (this.show_order) {
+        if (is_first) {
+          _gel("overall").innerHTML = "???";
+          is_first = false;
+        } else {
+          _gel("overall").innerHTML += ", ???";
+        }
+      }
+    }
+  }
+
+  puzzle_data.prototype.better_score = function() {
+    pref_controller.game_state.puz_solved[this.puznum] = this.score / this.answers.length;
+    pref_controller.game_state.puz_time[this.puznum] = timer.minutes * 60 + timer.seconds;
+    pref_controller.game_state.puz_score[this.puznum] = this.score;
+    pref_controller.setPrefs();
+    this.update_best_score();
+  }
+
+  puzzle_data.prototype.handle_win = function() {
+    _gel("textbox").value = "All done!";
+    _gel("textbox").disabled = true;
+    _gel("button").disabled = false;
+    _gel("button").value = "Restart";
+
+    if (pref_controller.game_state.puz_solved[this.puznum] != 1) {
+      this.better_score();
+    } else if (pref_controller.game_state.puz_time[this.puznum] < timer.minutes * 60 + timer.seconds) {
+      this.better_score();
+    } 
+  }
+
+  puzzle_data.prototype.handle_loss = function() {
+    _gel("textbox").disabled = true;
+    _gel("textbox").value = "Time is up!";
+    _gel("button").disabled = false;
+    _gel("button").value = "Restart";
+    _gel("recent").innerHTML = "Time is up!  You remembered " + this.score + " items.";
+
+    if (pref_controller.game_state.puz_solved[this.puznum] == 1) {
+      return;
+    } else if (pref_controller.game_state.puz_score[this.puznum] > this.score && pref_controller.game_state.puz_time[this.puznum] != 1) {
+      return;
+    } 
+    this.better_score();
+  }
+
+  ///////////////////////////////////////
+
+  var puzzle;
+  var grid;
+  var pref_controller;
+  var pcborder = "#000000";
+
+  _IG_RegisterOnloadHandler(start);
+                                                                                                                                                                  
+  function start() {
+    pref_controller = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_20070324', true);
+
+    pref_controller.num_puzzles = 50;
+    pref_controller.box_height = 4;
+    pref_controller.box_width = 4;
+    pref_controller.rows = 5;
+    pref_controller.cols = 10;
+
+    _gel("game_state_html").innerHTML = pref_controller.getTableHTML();
+    pref_controller.getPrefs();
+                                                                                                                                                                                              
+    puzzle = new puzzle_data();
+    reset(pref_controller.game_state);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  function reset(game_state) {
+    puzzle.resetPuzzle(game_state);
+  }
+
+  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+    this.nav_puz += amount;
+    if (this.nav_puz < 0) this.nav_puz = 0;
+    if (this.nav_puz >= this.game_state.puz_count) this.nav_puz = this.game_state.puz_count - 1;
+    this.update_navbar();
+  }
+
+  _IG_puzzle_pref_controller.prototype.new_puzzle_request = function() {
+    this.game_state.cur_puz = this.nav_puz;
+    reset(this.game_state);
+    this.setPrefs();
+    this.update_navbar();
+  }
+
+  function dprint(s) {
+    _gel("debug1").innerHTML += "DEBUG " + s + "<BR>";
+  }
+
+  function clear_board() {
+    pref_controller.new_puzzle_request();
+  }
+
+//////////////////////////
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<span id="shownotice"
+style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('notice').style.display='inline';_gel('shownotice').style.display='none';_gel('hidenotice').style.display='inline'">(notice)</span>
+<span id="hidenotice"
+style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('notice').style.display='none';_gel('shownotice').style.display='inline';_gel('hidenotice').style.display='none'">(hide
+notice)</span>
+<span id="notice" style="display:none;font-size:x-small">
+   Sorry for the lack of updates -- all my puzzle-generation power is being
+sucked up by <a href="http://www.gooooogol.com/">The Gooooogol
+Conglomerate</a>.  I'm working on a new Sudoku variant by Tom Snyder
+for this spot; I hope to get it up in a week or two.  By the way, if
+anyone would like to submit puzzle for this slot, I'd love to put
+them up!
+</span>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="pref_controller.change_level(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="pref_controller.change_level(-1)"/>
+<input style="font-size:10" id="levp10" type="button" value="+10" onclick="pref_controller.change_level(10)"/>
+<input style="font-size:10" disabled id="levm10" type="button" value="-10" onclick="pref_controller.change_level(-10)"/>
+<!---
+<input style="font-size:10" id="levp50" type="button" value="+50" onclick="pref_controller.change_level(50)"/>
+<input style="font-size:10" disabled id="levm50" type="button" value="-50" onclick="pref_controller.change_level(-50)"/>
+--->
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller.new_puzzle_request()"/>
+</form>
+
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">(Rules.)</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">(Hide Rules.)</span>
+<span id="rules" style="display:none;font-size:x-small">
+   Read the category and get yourself psyched.  Then click on the start button to start the timer.  Click in the box and start typing!
+   You can cheat by preparing beforehand if you want; it's not like you're getting compared against anything.
+   Apologies if the questions aren't part of your shared culture.
+</span>
+<b>Memory Lists</b>:  In the given amount of time, can you name the ...
+<BR>
+
+<table border="0" style='width:100%' align=center>
+<tr><td align=center>
+<span id="topic" style="font-size:20;bold"></span>
+</td></tr><tr><td align=center>
+<span id="subtopic" style="font-size:12"></span>
+</td></tr><tr><td align=center>
+<input type=text style='width:100%' value="" id="textbox">
+</td></tr><tr><td align=center>
+<input type=submit value="Start" onClick="puzzle.button_clicked()" id="button">
+</td></tr><tr><td align=center>
+<span id="recent" style="font-size:12"></span>
+</td></tr><tr><td align=center>
+<span id="overall" style="font-size:10;bold"></span>
+</td></tr><tr><td align=center>
+Time: <span id="clock" style="font-size:20;bold"></span>
+</td></tr><tr><td align=center>
+<span id="best" style="font-size:12"></span>
+</td></tr>
+</table>
+
+<!-- <BR>
+  <input id="sizechange" style="font-size:10n" type="button" value="Shrink"
+   onclick="puzzle__MODULE_ID__.changeSize();"> --->
+</center>
+</td><td>
+<span id="boxcode"></span>
+</td></tr></table>
+
+<HR>
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <center><span id="game_state_html"></span></center>
+                                                                                                                                                                                              
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td style="font-size:9pt">
+<span style="visibility:hidden">
+  Your points: <span id="points">?</span>
+</span>
+  <input id="resetbutton" style="font-size:10;visibility:visible" type="button" value="Clear Stats"
+    onclick="pref_controller.resetPrefs();puzzle.resetPuzzle(pref_controller.game_state);pref_controller.setPrefs();"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+                                                                                                                                                                                              
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+<span id="showversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;font-size:x-small"
+   onclick="_gel('version').style.display='inline';_gel('showversion').style.display='none';_gel('hideversion').style.display='inline';_IG_AdjustIFrameHeight()">Version 1.3</span>
+<span id="hideversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none;font-size:x-small"
+   onclick="_gel('version').style.display='none';_gel('showversion').style.display='inline';_gel('hideversion').style.display='none';_IG_AdjustIFrameHeight()">Version 1.3</span>
+<span id="version" style="display:none;font-size:x-small">
+<BR>   v1.4 : added notice.
+<BR>   v1.3 : fixed typo with Rhoebe, and changed the correct "collie birds" to the more common (but incorrect) "calling birds".
+<BR>   v1.2 : fixed some errors in the trivia questions, courtesy Matt Mason.  Gerald Ford was never elected!
+<BR>   v1.1 : changed dimensions of the red/green puzzle grid.
+<BR>   v1.0 : initial release.
+</span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

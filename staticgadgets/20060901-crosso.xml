@@ -1,0 +1,716 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20060901@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="400"
+    render_inline="optional"
+  />
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20060817@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils2.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  Drag.surrogate_offset_y = -1;
+
+  // build a rot13 map.
+  var alphabet_rot13__MODULE_ID__ = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMabcdefghijklmnopqrstuvwxyzabcdefghijklm";
+  var map_rot13__MODULE_ID__ = new Array();
+  for (i = 0; i < 26; ++i)
+    map_rot13__MODULE_ID__[alphabet_rot13__MODULE_ID__.charAt(i)] = alphabet_rot13__MODULE_ID__.charAt(i+13);
+  for (i = 39; i < 65; ++i)
+    map_rot13__MODULE_ID__[alphabet_rot13__MODULE_ID__.charAt(i)] = alphabet_rot13__MODULE_ID__.charAt(i+13);
+                                                                                                                                                                                                        
+  function rot13__MODULE_ID__(text) {
+    var result = "";
+    for (i = 0; i < text.length; ++i) {
+      if (typeof(map_rot13__MODULE_ID__[text.charAt(i)]) == 'undefined') {
+        result += text.charAt(i);
+      } else {
+        result += map_rot13__MODULE_ID__[text.charAt(i)];
+      }
+    }
+    return result;
+  }
+
+  function puzzle_data__MODULE_ID__() {
+    this.reset_puzzle(0);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.reset_puzzle = function(index) {
+    if (index == 0) {
+      var rot13_chunks = new Array(
+"PN", "EP", "BZ", "CN", "AV", "RF",
+"TR", "AR", "ENY", "ZB", "GB", "EF",
+"QNV", "ZY", "RE", "PU", "ELF", "YRE",
+"IBY", "XF", "JNT", "RA", "TEB", "HC",
+"FH", "MH", "XV", "ZN", "EH", "GV",
+"UL", "H", "AQ", "NV", "XV", "N"
+      );
+      var rot13_lookup = new Array(
+"Pne pbzcnavrf",
+"Trareny Zbgbef",
+"Qnvzyre-Puelfyre",
+"Ibyxfjntra Tebhc",
+"Fhmhxv-Znehgv",
+"Ulhaqnv-Xvn"
+      );
+    } else if (index == 3) {
+      var rot13_chunks = new Array(
+"FG", "NG", "RP", "NC", "VG", "NY",
+"GN", "YY", "NU", "NF", "F", "RR",
+"F", "CE", "VA", "TS", "VR", "YQ",
+"BX", "YN", "UB", "ZN", "PV", "GL",
+"CE", "B", "IV", "Q", "RA", "PR",
+"FN", "PE", "N", "ZR", "A", "GB"
+      );
+      var rot13_lookup = new Array(
+"Fgngr pncvgny",
+"Gnyynunffrr",
+"Fcevatsvryq",
+"Bxynubzn Pvgl",
+"Cebivqrapr",
+"Fnpenzragb"
+      );
+    } else if (index == 1) {
+      var rot13_chunks = new Array(
+"PN", "EVO", "OR", "NAA", "NG", "VBA",
+"PNL", "ZN", "AV", "FY", "NA", "QF",
+"QBZ", "VA", "VPN", "AER", "CHO", "YVP",
+"GEV", "AVQ", "NQN", "AQG", "BO", "NTB",
+"FNV", "AGX", "VGG", "FNAQ", "AR", "IVF",
+"NAG", "VT", "HNN", "AQO", "NEO", "HQN"
+      );
+      var rot13_lookup = new Array(
+"Pnevoorna angvba",
+"Pnlzna Vfynaqf",
+"Qbzvavpna Erchoyvp",
+"Gevavqnq naq Gbontb",
+"Fnvag Xvgg naq Arivf",
+"Nagvthn naq Oneohqn"
+      );
+    } else if (index == 2) {
+      var rot13_chunks = new Array(
+"TN", "ZR", "QR", "FV", "TA", "RE",
+"FUV", "TR", "EHZ", "VL", "NZB", "GB",
+"F", "GR", "IRE", "VG", "PUV", "R",
+"EV", "PU", "NEQ", "TNE", "SV", "RYQ",
+"ER", "VA", "RE", "XA", "VM", "VN",
+"JV", "YY", "J", "EV", "TU", "G"
+      );
+      var rot13_lookup = new Array(
+"Tnzr qrfvtare",
+"Fuvtreh Zvlnzbgb",
+"Fgrir Evgpuvr",
+"Evpuneq Tnesvryq",
+"Ervare Xavmvn",
+"Jvyy Jevtug"
+      );
+    } else if (index == 4) {
+      var rot13_chunks = new Array(
+"ON", "FR", "ON", "YY", "GR", "NZ",
+"OB", "FG", "BA", "ER", "QF", "BK",
+"GR", "KN", "FE", "NA", "TR", "EF",
+"PBY", "BE", "NQ", "BE", "BPX", "VRF",
+"BEV", "KO", "HS", "SN", "YB", "RF",
+"IN", "DH", "REB", "FYN", "TH", "AN"
+      );
+      var rot13_lookup = new Array(
+"Onfronyy grnz",
+"Obfgba Erq Fbk",
+"Grknf Enatref",
+"Pbybenqb Ebpxvrf",
+"Bevk Ohssnybrf",
+"Indhrebf Ynthan"
+      );
+    } else if (index == 5) {
+      var rot13_chunks = new Array(
+"CH", "YV", "GM", "RE", "CB", "RG",
+"CU", "VY", "VC", "YR", "IV", "AR",
+"PN", "EY", "FN", "AQ", "OH", "ET",
+"EB", "OR", "EG", "YB", "JR", "YY",
+"WB", "UA", "OR", "EE", "LZ", "NA",
+"NA", "GU", "BA", "LU", "RP", "UG"
+      );
+      var rot13_lookup = new Array(
+"Chyvgmre cbrg",
+"Cuvyvc Yrivar",
+"Pney Fnaqohet",
+"Eboreg Ybjryy",
+"Wbua Oreelzna",
+"Nagubal Urpug"
+      );
+    }
+    this.chunks = new Array();
+    for (var i=0; i<36; ++i) {
+      this.chunks[i] = rot13__MODULE_ID__(rot13_chunks[i]);
+    }
+    this.lookup = new Array();
+    for (var i=0; i<6; ++i) {
+      this.lookup[i] = rot13__MODULE_ID__(rot13_lookup[i]);
+    }
+
+    this.column_order = new Array(0, 1, 2, 3, 4, 5);
+    for (var i=1; i<6; ++i) {
+      var swap = Math.floor(Math.random() * (i+1));
+      var temp = this.column_order[swap];
+      this.column_order[swap] = this.column_order[i];
+      this.column_order[i] = temp;
+    }
+
+    this.chunk_order = new Array();
+    for (var j=0; j<6; ++j) {
+      var row_order = new Array(0, 1, 2, 3, 4, 5);
+      for (var i=1; i<6; ++i) {
+        var swap = Math.floor(Math.random() * (i+1));
+        var temp = row_order[swap];
+        row_order[swap] = row_order[i];
+        row_order[i] = temp;
+      }
+      for (var i=0; i<6; ++i) {
+         this.chunk_order.push(row_order[i]);
+      }
+    } 
+    this.yanked = -1;
+    this.column_yanked = -1;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.cell_changed = function(index) {
+    // callback -- modifies a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.column_changed = function(index) {
+    // callback -- column modified.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.swap = function(pos1, pos2) {
+    if (pos1 % 6 != pos2 % 6) return;
+    var column = pos1 % 6;
+    var pos1_real = this.find_chunk_order_index(pos1);
+    var pos2_real = this.find_chunk_order_index(pos2);
+    var temp = this.chunk_order[pos1_real];
+    this.chunk_order[pos1_real] = this.chunk_order[pos2_real];
+    this.chunk_order[pos2_real] = temp;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.column_swap = function(pos1, pos2) {
+    var temp = this.column_order[pos1];
+    this.column_order[pos1] = this.column_order[pos2];
+    this.column_order[pos2] = temp;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.column_yank = function (index) {
+    this.column_yanked = index;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.column_place = function (dest) {
+    if (dest != -1) {
+      this.column_swap(this.column_yanked, dest);
+      var old_yanked = this.column_yanked;
+      this.column_yanked = -1;
+      this.column_changed(dest);
+      this.column_changed(old_yanked);
+    } else {
+      var old_yanked = this.column_yanked;
+      this.column_yanked = -1;
+      this.column_changed(dest);
+      this.column_changed(old_yanked);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.yank = function (index) {
+    this.yanked = index;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.place = function (dest) {
+    if (dest != -1) {
+      this.swap(this.yanked, dest);
+      var old_yanked = this.yanked;
+      this.yanked = -1;
+      this.cell_changed(dest);
+      this.cell_changed(old_yanked);
+    } else {
+      var old_yanked = this.yanked;
+      this.yanked = -1;
+      this.cell_changed(old_yanked);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.mix_click = function (column) {
+    var real_column = this.column_order[column];
+    for (var i=1; i<6; ++i) {
+      var swap = Math.floor(Math.random() * (i+1));
+      var temp = this.chunk_order[real_column * 6 + swap];
+      this.chunk_order[real_column * 6 + swap] = this.chunk_order[real_column * 6 + i];
+      this.chunk_order[real_column * 6 + i] = temp;
+    }
+    for (var i=0; i<6; ++i) {
+      this.cell_changed(i * 6 + column);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.find_chunk_order_index = function (index) {
+    var column = this.column_order[index % 6];
+    return(column * 6 + Math.floor(index / 6));
+  }
+
+  puzzle_data__MODULE_ID__.prototype.chunk_text = function (index) {
+    var column = this.column_order[index % 6];
+    var row = this.chunk_order[this.find_chunk_order_index(index)];
+    return(this.chunks[row * 6 + column]);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_text = function (index, cur_sink) {
+    if (index < 0) return '';
+
+    if (this.yanked != -1) { 
+      if (index == cur_sink) {
+        return '<span style="cursor:pointer;cursor:hand;font-size:10pt">' + this.chunk_text(this.yanked) + '</span>';
+      }
+      if (cur_sink != -1 && index == this.yanked) {
+        return '<span style="cursor:default;font-size:10pt;font-weight:bold;color:#C0C0C0">' + this.chunk_text(cur_sink) + '</span>';
+      }
+    }
+    return '<span style="cursor:pointer;cursor:hand;font-size:10pt">' + this.chunk_text(index) + '</span>';
+  }
+
+  puzzle_data__MODULE_ID__.prototype.row_correct = function (row_num) {
+    for (var i=0; i<6; ++i) {
+      if (this.column_order[i] != i) return -1;
+    }
+    for (var i=0; i<5; ++i) {
+      if (this.chunk_order[i*6+row_num] != this.chunk_order[i*6+6+row_num]) return -1;
+    }
+    return this.chunk_order[row_num];
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_bonus_column_text = function () {
+    var result = "";
+    result += '<table border="1" frame="void" rules="none" cellpadding="1px" cellspacing="0px">';
+    result += '<tr>';
+    result += '<td style="font-size:7pt;background-color:#FFFFFF;color:#FFFFFF" align="center"';
+    result += '>column</td>';
+    result += '<td align="center">';
+    var score = 0;
+    for (var row = 0; row < 6; ++row) {
+      result += '<tr><td align="center">';
+      result += '<span style="font-size:10pt">';
+      var rin = this.row_correct(row);
+      if (rin != -1) {
+        result += '<a target="_blank" href="http://www.google.com/search?q=' + this.lookup[rin] + '">link</a>';
+        score++;
+      } else {
+        result += '&nbsp;';
+      }
+      result += '</span>';
+      result += '</td></tr>';
+    }
+    result += '<tr><td align="center">';
+    if (score >= 6) {
+      result += 'Win!';
+    } else {
+      result += score + ' pts';
+    }
+    result += '</td></tr>';
+    result += '</table>';
+    return result;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_column_text = function (col_index, cur_column_sink) {
+    if (col_index < 0) return '';
+
+    var col = col_index;
+    var color = "0000FF";
+
+    if (col_index == 6) {
+      return this.get_bonus_column_text();
+    }
+
+    if (this.column_yanked != -1) { 
+      if (col_index == cur_column_sink || (cur_column_sink == -1 && col_index == this.column_yanked)) {
+        var result = "";
+        result += '<table border="1" rules="none" cellpadding="1px" cellspacing="0px">';
+        result += '<tr>';
+        result += '<td style="font-size:7pt;background-color:#FFFFFF;color:#FFFFFF;cursor:pointer;cursor:hand" align="center"';
+        result += '>column</td>';
+        result += '<td align="center">';
+        for (var row = 0; row < 6; ++row) {
+          var value = row * 6 + col;
+          result += '<tr><td align="center">';
+          result += '<span style="font-size:10pt">&nbsp;</span>';
+          result += '</td></tr>';
+        }
+        result += '<tr><td align="center">';
+        result += '<input style="font-size:9pt" type="button" value="Mix"';
+        result += '>';
+        result += '</td></tr>';
+        result += '</table>';
+        return result;
+      }
+      if (cur_column_sink != -1 && col_index == this.column_yanked) {
+        col = cur_column_sink;
+        color = "CCCCFF";
+      }
+    }
+
+    var result = "";
+    result += '<table id="' + game__MODULE_ID__.get_column_content_id(col) + '" border="1" rules="none" cellpadding="1px" cellspacing="0px">';
+    result += '<tr>';
+    result += '<td style="font-size:7pt;background-color:#' + color + ';color:#FFFFFF;cursor:pointer;cursor:hand" align="center"';
+    result += ' id="' + game__MODULE_ID__.get_column_id(col) + '">column</td>';
+    result += '<td align="center">';
+    for (var row = 0; row < 6; ++row) {
+      var value = row * 6 + col;
+      result += '<tr><td align="center">';
+      result += '<span id="' + game__MODULE_ID__.get_cell_id(value) + '">';
+      result += game__MODULE_ID__.get_value_at(value);
+      result += '</span>';
+      result += '</td></tr>';
+    }
+    result += '<tr><td align="center">';
+    result += '<input style="font-size:9pt" type="button" value="Mix"';
+    result += '" onclick="game__MODULE_ID__.action_handle_mix_click(' + col + ')">';
+    result += '</td></tr>';
+    result += '</table>';
+    return result;
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "front end".
+
+  function game_setup__MODULE_ID__() {
+    var game_setup = this;
+
+    game_setup.yanked = -1;
+    game_setup.sink = -1;
+
+    game_setup.puzzle = new puzzle_data__MODULE_ID__();
+
+    // define callbacks.
+    game_setup.refresh = function (index) {
+      if (index >= 0) {
+        if (index < 36) {
+          _gel(game_setup.get_cell_id(index)).innerHTML = game_setup.get_value_at(index);
+        } else {
+          if (this.sink == -1) {
+            _gel(game_setup.get_column_view_id(index - 36)).innerHTML = game_setup.puzzle.get_column_text(index - 36, -1);
+          } else {
+            _gel(game_setup.get_column_view_id(index - 36)).innerHTML = game_setup.puzzle.get_column_text(index - 36, this.sink - 36);
+          }
+        }
+      }
+      game_setup.refresh_views();
+      game_setup.reregister_all();
+    }
+    game_setup.puzzle.cell_changed = this.refresh;
+
+    game_setup.column_refresh = function (index) {
+      game_setup.refresh(index + 36);
+    }
+    game_setup.puzzle.column_changed = this.column_refresh;
+  }
+
+  game_setup__MODULE_ID__.prototype.get_value_at = function (index) {
+    return this.puzzle.get_text(index, this.sink);
+  }
+
+  game_setup__MODULE_ID__.prototype.refresh_all = function (index) {
+    _gel("gameboard__MODULE_ID__").innerHTML = this.table_html();
+  }
+
+  game_setup__MODULE_ID__.prototype.get_cell_id = function (index) {
+    return ('cell_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.get_column_id = function (index) {
+    return ('column_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.get_column_view_id = function (index) {
+    return ('column_view_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.get_column_content_id = function (index) {
+    return ('column_content_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.value_from_id = function (id) {
+    var regexp = /cell_(.*)___MODULE_ID__/;
+    var matches = regexp.exec(id);
+    if (matches != null && matches.length > 0) return matches[1];
+    regexp = /column_view_(.*)___MODULE_ID__/;
+    matches = regexp.exec(id);
+    if (matches != null && matches.length > 0) return matches[1] * 1 + 36;
+    regexp = /column_content_(.*)___MODULE_ID__/;
+    matches = regexp.exec(id);
+    if (matches != null && matches.length > 0) return matches[1] * 1 + 36;
+    regexp = /column_(.*)___MODULE_ID__/;
+    matches = regexp.exec(id);
+    return matches[1] * 1 + 36;
+  }
+
+  game_setup__MODULE_ID__.prototype.refresh_views = function() {
+    _gel(this.get_column_view_id(6)).innerHTML = this.puzzle.get_column_text(6, -1);
+  }
+
+  game_setup__MODULE_ID__.prototype.reregister_all = function() {
+    Drag.remove_all_sinks();
+    for (var i=0; i<6; ++i) {
+      Drag.add_sink(this.get_column_id(i),
+                      _gel(this.get_column_content_id(i)));
+    }
+    for (var i=0; i<36; ++i) {
+      Drag.add_sink(i, _gel(this.get_cell_id(i)));
+    }
+    Drag.remove_all_sources();
+    for (var i=0; i<36; ++i) {
+      if (typeof(_gel(game__MODULE_ID__.get_cell_id(i))) != 'undefined' && _gel(game__MODULE_ID__.get_cell_id(i)) != null) {
+        Drag.add_source(i, _gel(game__MODULE_ID__.get_cell_id(i)));
+      }
+    }
+    for (var i=0; i<6; ++i) {
+      if (typeof(_gel(game__MODULE_ID__.get_column_id(i))) != 'undefined' && _gel(game__MODULE_ID__.get_column_id(i)) != null) {
+        Drag.remove_source(this.get_column_id(i));
+        Drag.add_source(this.get_column_id(i),
+                        _gel(this.get_column_id(i)));
+        _gel(this.get_column_id(i)).Drag_surrogate_view = _gel(this.get_column_view_id(i)).innerHTML;
+      }
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.table_html = function() {
+    var result = "";
+    result += '<table border="0" rules="none" cellpadding="1px" cellspacing="0px">';
+    result += '<tr>';
+    for (var col = 0; col < 7; ++col) {
+      result += '<td>';
+      result += '<span id="' + game__MODULE_ID__.get_column_view_id(col) + '">';
+      result += game__MODULE_ID__.puzzle.get_column_text(col, -1);
+      result += '</span>';
+      result += '</td>';
+    }
+    result += '</tr>';
+    result += '</table>';
+    return result;
+  }
+
+
+  ////////////////////////////////////////////////////
+  // UI actions.
+
+  game_setup__MODULE_ID__.prototype.action_dragging_started = function (index) {
+    if (index >= 36) {
+      Drag.y_mapper = Drag.no_move_mapper;
+      this.puzzle.column_yank(index - 36);
+      this.yanked = index;
+    } else {
+      Drag.x_mapper = Drag.no_move_mapper;
+      this.puzzle.yank(index);
+      this.yanked = index;
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.action_hit_sink = function (index) {
+    if (this.yanked >= 36 && index < 36) return;
+    if (this.yanked < 36 && index >= 36) return;
+    var last_sink = this.sink;
+    this.sink = index;
+    this.refresh(last_sink);
+    this.refresh(this.yanked);
+    this.refresh(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_lost_sink = function () {
+    var last_sink = this.sink;
+    this.sink = -1;
+    this.refresh(this.yanked);
+    this.refresh(last_sink);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_dragging_ended = function (source_id, sink_id) {
+    Drag.x_mapper = null;
+    Drag.y_mapper = null;
+    var last_sink = this.sink;
+    if (this.yanked >= 36) {
+      if (this.sink == -1) {
+        this.puzzle.column_place(this.sink);
+      } else {
+        this.puzzle.column_place(this.sink - 36);
+      }
+    } else {
+      this.puzzle.place(this.sink);
+    }
+    this.sink = -1;
+    this.refresh(last_sink);
+    this.refresh(this.yanked);
+    this.yanked = -1;
+  }
+
+  game_setup__MODULE_ID__.prototype.action_handle_click = function (index) {
+    if (Math.floor(index / this.puzzle.num_words) == 1) {
+      this.puzzle.sign_change(index % this.puzzle.num_words);
+    }
+    if (Math.floor(index / this.puzzle.num_words) >= 4) {
+      this.puzzle.handle_click(index);
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.action_handle_mix_click = function (index) {
+    this.puzzle.mix_click(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_reset_puzzle = function(puznum) {
+    this.puzzle.reset_puzzle(puznum);
+    _gel("gameboard__MODULE_ID__").innerHTML = this.table_html();
+    this.refresh_all();
+    this.reregister_all();
+  }
+
+  ////////////////////////////////////////////////////
+  // Dragging callback overrides.
+
+  Drag.dragging_started = function (object) {
+    game__MODULE_ID__.action_dragging_started(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag.hit_sink = function (object) {
+    game__MODULE_ID__.action_hit_sink(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag.lost_sink = function () {
+    game__MODULE_ID__.action_lost_sink();
+  }
+
+  Drag.dragging_ended = function (object, sink) {
+    if (sink == null) {
+      game__MODULE_ID__.action_dragging_ended(game__MODULE_ID__.value_from_id(object.id));
+    } else {
+      game__MODULE_ID__.action_dragging_ended(game__MODULE_ID__.value_from_id(object.id), game__MODULE_ID__.value_from_id(sink.id));
+    }
+  }
+
+  Drag.click_happened = function (object) {
+  }
+
+
+  ///////////////////////////////////////
+  // Direct access functions.
+  
+  var game__MODULE_ID__ = new game_setup__MODULE_ID__();
+
+  function table_html__MODULE_ID__() {
+    var result = "";
+
+    result += '<span id="gameboard__MODULE_ID__">';
+    result += game__MODULE_ID__.table_html();
+    result += '</span>';
+
+    return result;
+  }
+
+  function init_dragging__MODULE_ID__() {
+    Drag.set_surrogate(_gel("dummy"));
+    game__MODULE_ID__.reregister_all();
+  }
+
+  function selection_table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="0" cellpadding="0px" cellspacing="0px">';
+    for (var puznum = 0; puznum < 6; ++puznum) {
+      result += '<td align="middle" align="center">';
+      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa.images02.googlepages.com/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="game__MODULE_ID__.action_reset_puzzle(' + puznum + ')"></img>';
+      result += '</td>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<span id="debug0" style="font-size:12pt;font-weight:bold"></span>
+
+<div style="position:relative;float:left;margin-right:3px;margin-top:0px;margin-bottom:0px;">
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(selection_table_html__MODULE_ID__());
+</SCRIPT>
+</div>
+
+<b>Cross-O Change-O</b>:  I started with one category name and five items in the category, and I
+wrote their names across six columns.  Then I mixed each group of letters in each column,
+and I also rearranged the columns.  See if you can rearrange everything back.
+<BR>
+<BR>
+<!---
+<form>
+<select name="puzzlenum__MODULE_ID__" onChange="game__MODULE_ID__.action_reset_puzzle(_gel('puzzlenum__MODULE_ID__').options[_gel('puzzlenum__MODULE_ID__').selectedIndex].value)">
+<option value="0" selected="selected" onClick="game__MODULE_ID__.action_reset_puzzle(0)">Puzzle 1</option>
+<option value="1" onClick="game__MODULE_ID__.action_reset_puzzle(1)">Puzzle 2</option>
+<option value="2" onClick="game__MODULE_ID__.action_reset_puzzle(2)">Puzzle 3</option>
+<option value="3" onClick="game__MODULE_ID__.action_reset_puzzle(3)">Puzzle 4</option>
+<option value="4" onClick="game__MODULE_ID__.action_reset_puzzle(4)">Puzzle 5</option>
+<option value="5" onClick="game__MODULE_ID__.action_reset_puzzle(5)">Puzzle 6</option>
+</select>
+</form>
+-->
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(table_html__MODULE_ID__());
+</SCRIPT>
+<HR>
+
+<font size=-2>
+Based on Cross-O, a puzzle type invented by Will Shortz in the 1980s.
+Drag on the blue column headers to rearrange them.
+</font>
+
+<span id="debug" style="font-size:12pt;font-weight:bold"></span>
+
+<span id="dummy" style="cursor:pointer;cursor:hand;font-size:12pt;position:absolute;left:0px;top:0px"></span>
+<SCRIPT LANGUAGE="JavaScript">
+  init_dragging__MODULE_ID__();
+</SCRIPT>
+
+
+</FONT>
+
+
+  ]]> 
+
+  </Content>
+</Module>
+

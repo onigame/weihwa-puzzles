@@ -1,0 +1,866 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzle: 2006-07-14"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20060714@gmail.com"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="420"
+    render_inline="optional"
+  />
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  function _gel(thing) {
+    return document.getElementById(thing);
+  }
+ 
+  ///////////////////////////////////////////////
+  //  A basic hashtable and set implementation.
+
+  function Hash__MODULE_ID__() {
+    this._items = new Array();
+    this._keys = new Array();
+
+    for (var i = 0; i < arguments.length; i += 2) {
+      this._items[arguments[i]] = arguments[i + 1];
+      this._keys.push(arguments[i]);
+    }
+
+    this.remove = function(key) {
+      for (var i=0; i<this._keys.length; ++i) {
+        var temp = null;
+        if (key == this._keys[i]) {
+          temp = this._items[key];
+          delete (this._items[key]);
+          this._keys.splice(i, 1);
+        }
+        return temp;
+      }
+      return null;
+    }
+    this.length = function(key) {
+      return this._keys.length;
+    }
+    this.size = this.length;
+    this.get = function(key) {
+      return this._items[key];
+    }
+    this.set = function(key, value) {
+      if (this._items[key] == null) {
+        this._keys.push(key);
+      }
+      this._items[key] = value;
+      return value;
+    }
+    this.has = function(key) {
+      return (this._items[key] != null);
+    }
+    this.keys = function() {
+      return this._keys;
+    }
+  }
+
+  function Set__MODULE_ID__() {
+    this.items = new Array();
+    this.size = 0;
+    for (var i = 0; i < arguments.length; i ++) {
+      this.items[arguments[i]] = 1;
+      this.size++;
+    }
+    this.remove = function(key) {
+      var temp;
+      if (typeof(this.items[key]) != 'undefined') {
+        this.size--;
+        temp = this.items[key];
+        delete (this.items[key]);
+      }
+      return temp;
+    }
+    this.add = function(key) {
+      if (typeof(this.items[key]) == 'undefined') {
+        this.size++;
+      }
+      this.items[key] = 1;
+      return key;
+    }
+    this.has = function(key) {
+      return (typeof(this.items[key]) != 'undefined');
+    }
+  }
+
+  function Multiset__MODULE_ID__() {
+    this.items = new Array();
+    this.size = 0;
+    this.remove = function(key) {
+      var temp;
+      if (typeof(this.items[key]) != 'undefined') {
+        this.size--;
+        this.items[key]--;
+        if (this.items[key] == 0) {
+          temp = 0;
+          delete (this.items[key]);
+        } else {
+          temp = this.items[key];
+        }
+      } else {
+        temp = -1;
+      }
+      return temp;
+    }
+    this.add = function(key) {
+      if (typeof(this.items[key]) == 'undefined') {
+        this.items[key] = 0;
+      }
+      this.items[key]++;
+      this.size++;
+      return this.items[key];
+    }
+    for (var i = 0; i < arguments.length; i ++) {
+      this.add(arguments[i]);
+    }
+    this.has = function(key) {
+      return (typeof(this.items[key]) != 'undefined');
+    }
+    this.count = function(key) {
+      return (this.items[key]);
+    }
+    this.has_dupes = function() {
+      for (var x in this.items) {
+        if (this.items[x] != 1) return true;
+      }
+      return false;
+    }
+  }
+
+  ///////////////////////////////////////////////
+  //  This is the Dragging object.
+
+  // This is a (heavily) modified form of dom-drag.js from
+  // http://youngpup.net/2001/domdrag
+  // The original is written by Aaron Boodman, who works at Google.
+
+  // Modfied such that it uses a "basis" item for dragging instead of
+  // allowing dragging of the actual item.
+
+  // We also keep a list of "drag sources" (items where a drag can start)
+  // and "drag sinks" (items where a drag can end.
+
+  var Drag__MODULE_ID__ = {
+    obj : null,
+    basis : null,
+    is_dragging : false,
+    has_dragged : false,
+    sources : new Hash__MODULE_ID__(),
+    sinks : new Hash__MODULE_ID__(),
+    sinks_x : new Hash__MODULE_ID__(),
+    sinks_y : new Hash__MODULE_ID__(),
+
+    dragging_started : function(o) {},
+    hit_sink : function(o) {},
+    lost_sink : function() {},
+    dragging_ended : function(o) {},
+    click_happened : function(o) {},
+
+    xposition : function(o) {
+      var answer = 0;
+      if (o.offsetParent) {
+        while (o.offsetParent) {
+          answer += o.offsetLeft;
+          o = o.offsetParent;
+        }
+      } else if (o.x) {
+        answer = o.x;
+      }
+      return answer;
+    },
+    yposition : function(o) {
+      var answer = 0;
+      if (o.offsetParent) {
+        while (o.offsetParent) {
+          answer += o.offsetTop;
+          o = o.offsetParent;
+        }
+      } else if (o.y) {
+        answer = o.y;
+      }
+      return answer;
+    },
+
+    set_basis : function(o) {
+      Drag__MODULE_ID__.basis = o;
+      Drag__MODULE_ID__.basis.style["position"] = "absolute";
+      Drag__MODULE_ID__.basis.style["cursor"] = "move";
+      Drag__MODULE_ID__.basis.style["left"] = "0px";
+      Drag__MODULE_ID__.basis.style["top"] = "0px";
+    },
+
+    add_source : function(id,o) {
+      this.sources.set(id, o);
+      o.onmousedown  = Drag__MODULE_ID__.start;
+    },
+
+    remove_source : function(id) {
+      if (this.sources.has(id))
+        this.sources.get(id).onmousedown  = null;
+      this.sources.remove(id);
+    },
+
+    add_sink : function(id, o) {
+      Drag__MODULE_ID__.sinks.set(id, o);
+      Drag__MODULE_ID__.sinks_x.set(id, Drag__MODULE_ID__.xposition(o));
+      Drag__MODULE_ID__.sinks_y.set(id, Drag__MODULE_ID__.yposition(o));
+    },
+
+    remove_sink : function(id) {
+      Drag__MODULE_ID__.sinks.remove(id);
+      Drag__MODULE_ID__.sinks_x.remove(id);
+      Drag__MODULE_ID__.sinks_y.remove(id);
+    },
+
+    clear_sinks : function(o) {
+      Drag__MODULE_ID__.sinks = new Hash__MODULE_ID__();
+      Drag__MODULE_ID__.sinks_x = new Hash__MODULE_ID__();
+      Drag__MODULE_ID__.sinks_y = new Hash__MODULE_ID__();
+    },
+
+    start : function(e) {
+      Drag__MODULE_ID__.obj = this;
+      e = Drag__MODULE_ID__.fixE(e);
+      Drag__MODULE_ID__.is_dragging = true;
+      Drag__MODULE_ID__.basis.innerHTML = this.innerHTML;
+      Drag__MODULE_ID__.basis.style["left"] = Drag__MODULE_ID__.xposition(this) + "px";
+      Drag__MODULE_ID__.basis.style["top"] = Drag__MODULE_ID__.yposition(this) - 20 + "px";
+      Drag__MODULE_ID__.basis.lastMouseX    = e.clientX;
+      Drag__MODULE_ID__.basis.lastMouseY    = e.clientY;
+      document.onmousemove    = Drag__MODULE_ID__.drag;
+      document.onmouseup   = Drag__MODULE_ID__.end;
+      Drag__MODULE_ID__.dragging_started(Drag__MODULE_ID__.obj);
+      Drag__MODULE_ID__.lost_sink();
+      Drag__MODULE_ID__.has_dragged = false;
+      return false;
+    },
+
+    drag : function(e) {
+      Drag__MODULE_ID__.has_dragged = true;
+      e = Drag__MODULE_ID__.fixE(e);
+      if (e.which == 0) return Drag__MODULE_ID__.end();
+      var ey    = e.clientY;
+      var ex    = e.clientX;
+      var y = parseInt(Drag__MODULE_ID__.basis.style.top);
+      var x = parseInt(Drag__MODULE_ID__.basis.style.left);
+      var nx, ny;
+
+      nx = x + (ex - Drag__MODULE_ID__.basis.lastMouseX);
+      ny = y + (ey - Drag__MODULE_ID__.basis.lastMouseY);
+
+      Drag__MODULE_ID__.basis.style["left"] = nx + "px";
+      Drag__MODULE_ID__.basis.style["top"] = ny + "px";
+      Drag__MODULE_ID__.basis.lastMouseX    = ex;
+      Drag__MODULE_ID__.basis.lastMouseY    = ey;
+
+      var over = null;
+      var min_x = 15;
+      var min_y = 35;
+      var max_x = 20;
+      var max_y = 0;
+      for (var i = 0; i < Drag__MODULE_ID__.sinks.size(); ++i) {
+        var id = Drag__MODULE_ID__.sinks.keys()[i];
+        if ((nx >= Drag__MODULE_ID__.sinks_x.get(id) - min_x) && (ny >= Drag__MODULE_ID__.sinks_y.get(id) - min_y)
+         && (nx <= Drag__MODULE_ID__.sinks_x.get(id) + max_x) && (ny <= Drag__MODULE_ID__.sinks_y.get(id) + max_y))
+          over = Drag__MODULE_ID__.sinks.get(id);
+      }
+
+      if (over != null)
+        Drag__MODULE_ID__.hit_sink(over);
+      else
+        Drag__MODULE_ID__.lost_sink();
+
+      return false;
+    },
+    end : function() {
+      document.onmousemove = null;
+      document.onmouseup  = null;
+      Drag__MODULE_ID__.basis.innerHTML = "";
+      Drag__MODULE_ID__.is_dragging = false;
+      Drag__MODULE_ID__.dragging_ended(Drag__MODULE_ID__.obj);
+      if (!Drag__MODULE_ID__.has_dragged) {
+        Drag__MODULE_ID__.click_happened(Drag__MODULE_ID__.obj);
+      }
+      Drag__MODULE_ID__.obj = null;
+    },
+    fixE : function(e) {
+      if (typeof e == 'undefined') e = window.event;
+      if (typeof e.layerX == 'undefined') e.layerX = e.offsetX;
+      if (typeof e.layerY == 'undefined') e.layerY = e.offsetY;
+      return e;
+    }
+  };
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.reset_puzzle(1);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.reset_puzzle = function(index) {
+    if (index == 0) {
+      this.board = new Array(0,1,1,1, 1,0,0,0, 1,0,1,1, 1,0,0,1, 0,1,1,0);
+      this.knights = new Array(0,1,1,1, 1,0,0,0, 0,0,0,0, 2,0,0,2, 0,2,2,0);
+      this.width = 4;
+      this.height = 5;
+      this.best = 22;
+    } else if (index == 1) {
+      this.board = new Array(0,1,1,0, 1,0,0,1, 1,0,0,1, 0,1,1,0);
+      this.knights = new Array(0,1,1,0, 0,0,0,0, 0,0,0,0, 0,2,2,0);
+      this.width = 4;
+      this.height = 4;
+      this.best = 8;
+    } else if (index == 2) {
+      this.board = new Array(1,1,1, 1,0,1, 1,1,1);
+      this.knights = new Array(1,1,1, 0,0,0, 2,2,2);
+      this.width = 3;
+      this.height = 3;
+      this.best = 8;
+    } else if (index == 3) {
+      this.board = new Array(0,1,1, 1,0,1, 1,1,1, 0,0,1, 1,1,0);
+      this.knights = new Array(0,1,1, 0,0,1, 0,0,0, 0,0,2, 2,2,0);
+      this.width = 3;
+      this.height = 5;
+      this.best = 16;
+    } else if (index == 4) {
+      this.board = new Array(1,1,1,0,0, 0,1,1,0,0, 0,1,1,0,0, 0,1,1,0,0, 1,1,1,1,1);
+      this.knights = new Array(0,1,1,0,0, 0,1,1,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,2,2,2,2);
+      this.width = 5;
+      this.height = 5;
+      this.best = 34;
+    } else if (index == 5) {
+      this.board = new Array(0,1,1,0, 1,0,0,1, 1,1,1,1, 1,0,0,0, 0,1,1,0);
+      this.knights = new Array(0,1,1,0, 0,0,0,1, 2,0,0,1, 2,0,0,0, 0,2,2,0);
+      this.width = 4;
+      this.height = 5;
+      this.best = 20;
+    }
+    this.dest_list = new Set__MODULE_ID__();
+    this.yanked = -1;
+    this.move_from = new Array();
+    this.move_to = new Array();
+    this.move_count = 0;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.reregister = function() {
+    for (var i=0; i<(this.width*this.height); ++i) {
+      if (this.knights[i] != 0) {
+        this.register(i);
+      } else {
+        this.deregister(i);
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.move_count_change = function() {
+    // callback -- updates move_count display
+  }
+
+  puzzle_data__MODULE_ID__.prototype.deregister = function(index) {
+    // callback -- deregisters a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.register = function(index) {
+    // callback -- registers a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.cell_changed = function(index) {
+    // callback -- modifies a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.clear_sinks = function() {
+    // callback -- clears all sinks.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.add_sink = function(index) {
+    // callback -- adds a sink.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.open_space = function (row, col, src) {
+    if (row < 0) return false;
+    if (row >= this.height) return false;
+    if (col < 0) return false;
+    if (col >= this.width) return false;
+    if (this.board[src] == 0) return false;
+    if (this.knights[src] != 0) return false;
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.moves = function (src) {
+    var row = Math.floor(src / this.width);
+    var col = src % this.width;
+    var temp = new Set__MODULE_ID__();
+    var roffset = new Array(-2,-2,-1,-1,1,1,2,2);
+    var coffset = new Array(-1,1,-2,2,-2,2,-1,1);
+    for (var i=0; i<8; ++i) {
+      var nr = row + roffset[i];
+      var nc = col + coffset[i];
+      var ns = nr * this.width + nc;
+      if (this.open_space(nr,nc,ns)) temp.add(ns);
+    }
+    return temp;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.yank = function (src) {
+    if (this.knights[src] == 0) return;  // can't yank when no piece.
+
+    this.yanked = src;
+
+    this.dest_list = this.moves(src);
+
+    this.clear_sinks();
+
+    this.add_sink(src);
+    this.cell_changed(src);
+
+    for (var value=0; value < this.width * this.height; value++) {
+      if (this.dest_list.has(value)) {
+        this.add_sink(value);
+        this.cell_changed(value);
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.place = function (dest) {
+    // if dropped to nowhere, same as going back.
+    if (dest == -1) dest = this.yanked;
+
+    if (dest != this.yanked) {
+      this.knights[dest] = this.knights[this.yanked];
+      this.knights[this.yanked] = 0;
+      this.cell_changed(dest);
+      this.register(dest);
+      this.deregister(this.yanked);
+    
+      // Is this actually an undo?
+      if (this.move_from[this.move_count-1] == dest && this.move_to[this.move_count-1] == this.yanked) {
+        this.move_count--;
+      } else {
+        this.move_from[this.move_count] = this.yanked;
+        this.move_to[this.move_count] = dest;
+        this.move_count++;
+        while (this.move_from.length > this.move_count) {
+          this.move_from.splice(this.move_count, 1);
+          this.move_to.splice(this.move_count, 1);
+        }
+      }
+      this.move_count_change();
+    }
+
+    var old_yanked = this.yanked;
+    var old_dest_list = this.dest_list;
+    this.yanked = -1;
+    this.dest_list = new Set__MODULE_ID__();
+    this.cell_changed(old_yanked);
+    for (var value=0; value < this.width * this.height; value++) {
+      if (old_dest_list.has(value)) {
+        this.cell_changed(value);
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.undo = function () {
+    if (this.yanked == -1) {
+      this.move_count--;
+      var old_from = this.move_from[this.move_count];
+      var old_to = this.move_to[this.move_count];
+      this.knights[old_from] = this.knights[old_to];
+      this.knights[old_to] = 0;
+      this.register(old_from);
+      this.deregister(old_to);
+      this.cell_changed(old_from);
+      this.cell_changed(old_to);
+      this.move_count_change();
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.redo = function () {
+    if (this.yanked == -1) {
+      var old_from = this.move_from[this.move_count];
+      var old_to = this.move_to[this.move_count];
+      this.move_count++;
+      this.knights[old_to] = this.knights[old_from];
+      this.knights[old_from] = 0;
+      this.register(old_to);
+      this.deregister(old_from);
+      this.cell_changed(old_from);
+      this.cell_changed(old_to);
+      this.move_count_change();
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.redo_possible = function () {
+    return (this.move_from.length > this.move_count);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.undo_possible = function () {
+    return (this.move_count > 0);
+  }
+
+  // actions.
+  puzzle_data__MODULE_ID__.prototype.get_text = function (index, is_sink) {
+    if (index < 0) return '';
+    var color = 0;
+    if (this.yanked != -1) {
+      color = this.knights[this.yanked];
+    }
+    if (index == this.yanked) {
+      if (color == 1) {
+        return '<img title="moving this piece" src="http://weihwa.images02.googlepages.com/white-knight-glow.gif" alt="WS"></img>';
+      } else {
+        return '<img title="moving this piece" src="http://weihwa.images02.googlepages.com/black-knight-glow.gif" alt="BS"></img>';
+      }
+    }
+    if (is_sink) {
+      if (color == 1) {
+        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/white-knight-ghost.gif" alt="WD"></img>';
+      } else {
+        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/black-knight-ghost.gif" alt="BD"></img>';
+      }
+    } 
+    if (this.dest_list.has(index)) {
+      if (color == 1) {
+        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/white-dot.gif" alt="WD"></img>';
+      } else {
+        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/black-dot.gif" alt="BD"></img>';
+      }
+    } 
+    if (this.knights[index] == 1) {
+      return '<img title="white knight" src="http://weihwa.images02.googlepages.com/white-knight.gif" alt="WN"></img>';
+    }
+    if (this.knights[index] == 2) {
+      return '<img title="black knight" src="http://weihwa.images02.googlepages.com/black-knight.gif" alt="BN"></img>';
+    }
+    return '<img title="blank" src="http://weihwa.images02.googlepages.com/blank.gif" alt="--"></img>';
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "front end".
+
+  function game_setup__MODULE_ID__() {
+    var game_setup = this;
+
+    game_setup.source = 0;
+    game_setup.sink = -1;
+
+    game_setup.highlight = -1;
+
+    game_setup.show_best = false;
+
+    game_setup.puzzle = new puzzle_data__MODULE_ID__();
+
+    // define callbacks.
+    game_setup.refresh = function (index) {
+      if (index != -1)
+        _gel(game_setup.get_cell_id(index)).innerHTML = game_setup.get_value_at(index);
+    }
+    game_setup.puzzle.cell_changed = this.refresh;
+
+    game_setup.score_refresh = function (index) {
+      _gel("scoreboard__MODULE_ID__").innerHTML = game_setup.score_html();
+    }
+    game_setup.puzzle.move_count_change = this.score_refresh;
+
+    game_setup.deregister = function (index) {
+      Drag__MODULE_ID__.remove_source(index);
+    }
+    game_setup.puzzle.deregister = this.deregister;
+
+    game_setup.register = function (index) {
+      Drag__MODULE_ID__.add_source(index, _gel(game_setup.get_cell_id(index)));
+    }
+    game_setup.puzzle.register = this.register;
+
+    game_setup.clear_sinks = function () {
+      Drag__MODULE_ID__.clear_sinks();
+    }
+    game_setup.puzzle.clear_sinks = this.clear_sinks;
+
+    game_setup.add_sink = function (index) {
+      Drag__MODULE_ID__.add_sink(index, _gel(game_setup.get_cell_id(index)));
+    }
+    game_setup.puzzle.add_sink = this.add_sink;
+  }
+
+  game_setup__MODULE_ID__.prototype.get_value_at = function (index) {
+    return this.puzzle.get_text(index, (index == this.sink));
+  }
+
+  game_setup__MODULE_ID__.prototype.refresh_all = function (index) {
+    for (var i=0; i<this.puzzle.width * this.puzzle.height; i++) {
+      this.refresh(i);
+    }
+    this.score_refresh();
+  }
+
+  game_setup__MODULE_ID__.prototype.get_cell_id = function (index) {
+    return ('cell_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.value_from_id = function (id) {
+    var regexp = /cell_(.*)___MODULE_ID__/;
+    var matches = regexp.exec(id);
+    return matches[1];
+  }
+
+  game_setup__MODULE_ID__.prototype.score_html = function() {
+    var result = "";
+    result += '<table border="2" frame="bevel" cellpadding="2px" cellspacing="0px">';
+    result += '<tr><td align="center">';
+    result += 'Moves:<br>';
+    result += '<span style="font-size:24pt">' + this.puzzle.move_count + '</span>';
+    if (this.puzzle.undo_possible()) {
+      result += '<form><input title="Click here to undo your last move" type="button" value="undo" onclick="game__MODULE_ID__.action_handle_undo()"></form>';
+    } else {
+      result += '<form><input disabled title="Undo not possible" type="button" value="undo"></form>';
+    }
+    if (this.puzzle.redo_possible()) {
+      result += '<form><input title="Click here to redo your last move" type="button" value="redo" onclick="game__MODULE_ID__.action_handle_redo()"></form>';
+    } else {
+      result += '<form><input disabled title="Redo not possible" type="button" value="redo"></form>';
+    }
+    result += '</td></tr>';
+    if (this.show_best) {
+      result += '<tr><td align="center">';
+      result += 'Best:<br>';
+      result += '<span style="font-size:24pt">' + this.puzzle.best + '</span>';
+      result += '<form><input title="Click here to hide our best score" type="button" value="hide" onclick="game__MODULE_ID__.action_hide_best()"></form>';
+      result += '</td></tr>';
+    } else {
+      result += '<tr><td>';
+      result += '<form><input title="Click here to show our best score" type="button" value="best" onclick="game__MODULE_ID__.action_show_best()"></form>';
+      result += '</td></tr>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+  game_setup__MODULE_ID__.prototype.table_html = function(puznum) {
+    var result = "";
+    var tw = this.puzzle.width * 36;
+    var th = this.puzzle.height * 36;
+    result += '<table border="4" frame="bevel" rules="none" cellpadding="0px" cellspacing="0px" width="' + tw + 'px" height="' + th + 'px" background="http://weihwa.images02.googlepages.com/background-' + puznum + '.gif">';
+    for (var row = 0; row < this.puzzle.height; ++row) {
+      result += '<tr>';
+      for (var col = 0; col < this.puzzle.width; ++col) {
+        result += '<td>';
+        result += '<span id="' + game__MODULE_ID__.get_cell_id(row * this.puzzle.width + col);
+        result += '" onclick="game__MODULE_ID__.action_handle_click(' + (row * this.puzzle.width + col) + ')">';
+        result += game__MODULE_ID__.get_value_at(row * this.puzzle.width + col);
+        result += '</span>';
+        result += '</td>';
+      }
+      result += '</tr>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+
+  ////////////////////////////////////////////////////
+  // UI actions.
+
+  game_setup__MODULE_ID__.prototype.action_dragging_started = function (index) {
+    this.puzzle.yank(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_hit_sink = function (index) {
+    var last_sink = this.sink;
+    this.sink = index;
+    this.refresh(last_sink);
+    this.refresh(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_lost_sink = function () {
+    var last_sink = this.sink;
+    this.sink = -1;
+    this.refresh(last_sink);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_dragging_ended = function (index) {
+    var last_sink = this.sink;
+    this.puzzle.place(this.sink);
+    this.sink = -1;
+    this.refresh(last_sink);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_handle_click = function (index) {
+    // no clicks yet
+  }
+
+  game_setup__MODULE_ID__.prototype.action_reset_puzzle = function(puznum) {
+    this.puzzle.reset_puzzle(puznum);
+    this.show_best = false;
+    _gel("gameboard__MODULE_ID__").innerHTML = this.table_html(puznum);
+    this.puzzle.reregister();
+    this.refresh_all();
+  }
+
+  game_setup__MODULE_ID__.prototype.action_handle_undo = function (index) {
+    this.puzzle.undo();
+  }
+
+  game_setup__MODULE_ID__.prototype.action_handle_redo = function (index) {
+    this.puzzle.redo();
+  }
+
+  game_setup__MODULE_ID__.prototype.action_hide_best = function (index) {
+    this.show_best = false;
+    this.score_refresh();
+  }
+
+  game_setup__MODULE_ID__.prototype.action_show_best = function (index) {
+    this.show_best = true;
+    this.score_refresh();
+  }
+
+
+  ////////////////////////////////////////////////////
+  // Dragging callback overrides.
+
+  Drag__MODULE_ID__.dragging_started = function (object) {
+    game__MODULE_ID__.action_dragging_started(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag__MODULE_ID__.hit_sink = function (object) {
+    game__MODULE_ID__.action_hit_sink(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag__MODULE_ID__.lost_sink = function () {
+    game__MODULE_ID__.action_lost_sink();
+  }
+
+  Drag__MODULE_ID__.dragging_ended = function (object) {
+    game__MODULE_ID__.action_dragging_ended(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag__MODULE_ID__.click_happened = function (object) {
+    game__MODULE_ID__.action_handle_click(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+
+  ///////////////////////////////////////
+  // Direct access functions.
+  
+  var game__MODULE_ID__ = new game_setup__MODULE_ID__();
+
+  function table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="0"><tr><td>';
+
+    result += '<span id="scoreboard__MODULE_ID__" valign="top">';
+    result += game__MODULE_ID__.score_html();
+    result += '</span>';
+
+    result += '</td><td>';
+
+    result += '<span id="gameboard__MODULE_ID__" valign="top">';
+    result += game__MODULE_ID__.table_html(1);
+    result += '</span>';
+
+
+    result += '</td><tr>';
+
+    result += '</table>';
+
+
+    return result;
+  }
+
+  function selection_table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="0" cellpadding="0px" cellspacing="0px">';
+    for (var puznum = 0; puznum < 6; ++puznum) {
+      result += '<td align="middle" align="center">';
+      result += '<img title="Click here to try this puzzle" src="http://weihwa.images02.googlepages.com/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="game__MODULE_ID__.action_reset_puzzle(' + puznum + ')"></img>';
+      result += '</td>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+  function init_dragging__MODULE_ID__() {
+    Drag__MODULE_ID__.set_basis(_gel("dummy"));
+    game__MODULE_ID__.puzzle.reregister();
+  }
+
+  var image_cache__MODULE_ID__ = new Array();
+  function cache_images__MODULE_ID__() {
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[0].src = "http://weihwa.images02.googlepages.com/blank.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[1].src = "http://weihwa.images02.googlepages.com/white-dot.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[2].src = "http://weihwa.images02.googlepages.com/white-knight.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[3].src = "http://weihwa.images02.googlepages.com/white-knight-glow.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[4].src = "http://weihwa.images02.googlepages.com/white-knight-ghost.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[5].src = "http://weihwa.images02.googlepages.com/black-dot.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[6].src = "http://weihwa.images02.googlepages.com/black-knight.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[7].src = "http://weihwa.images02.googlepages.com/black-knight-glow.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[8].src = "http://weihwa.images02.googlepages.com/black-knight-ghost.gif";
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<span id="debug" style="font-size:12pt;font-weight:bold"></span>
+
+<div style="position:relative;float:left;margin-right:3px;margin-top:0px;margin-bottom:0px;">
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(selection_table_html__MODULE_ID__());
+</SCRIPT>
+</div>
+
+<b><a target="_top" href="http://en.wikipedia.org/wiki/Knight_%28chess%29">Knight</a> Swap</b>:
+Swap the positions of the white and black knights in as few moves as possible.
+There are 6 different challenges; click on the letters of the logo (at left) to change challenges.
+<BR>
+
+<div style="position:relative;margin-right:3px;margin-top:3px" id="grid__MODULE_ID__">
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(table_html__MODULE_ID__());
+</SCRIPT>
+</div>
+
+<font size=-2>
+Inspired by the work of Henry Ernest Dudeney and Serhiy Grabarchuk (from his 2003 book <i>Puzzle Miniatures, vol. 2</i>).  Minimal movecounts generated by a program
+partially written by Jim Leonard.
+</font>
+
+<span id="dummy" style="cursor:pointer;cursor:hand;font-size:12pt;position:absolute;left:0px;top:0px"></span>
+<SCRIPT LANGUAGE="JavaScript">
+  init_dragging__MODULE_ID__();
+  cache_images__MODULE_ID__();
+</SCRIPT>
+
+</SCRIPT>
+
+
+</FONT>
+
+
+  ]]> 
+
+  </Content>
+</Module>
+

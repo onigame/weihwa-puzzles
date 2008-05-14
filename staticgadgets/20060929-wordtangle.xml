@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20060929@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="250"
+  />
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="display:none;">
+Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.epl?art_id=958
+<img src='http://weihwa.images01.googlepages.com/black.png'>
+</div>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20060929@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/drag.js"></script>
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils3.js"></script>
+--->
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/drag.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils3.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.prefix = 'http://weihwa.images01.googlepages.com/';
+//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/chess/';
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(puznum) {
+    this.resetPuzzleData(puznum);
+    this._IGGG_refreshAll();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzleData = function(puznum) {
+    this.puznum = puznum;
+
+    if (puznum == 0) {
+      this.answer = 'SALVOEQUIPNURSETAKEN';
+      this.seed = '30243411021423143312';
+    } else if (puznum == 1) {
+      this.answer = 'SCRAPAZURELABELTREAT';
+      this.seed = '13204214132013434321';
+    } else if (puznum == 2) {
+      this.answer = 'JIBESIDEALLEAVETAMED';
+      this.seed = '30432142034311241321';
+    } else if (puznum == 3) {
+      this.answer = 'TESTSAXIALGIZMOSTEEP';
+      this.seed = '04231320141132423143';
+    } else if (puznum == 4) {
+      this.answer = 'LOAFSUNCAPSCHWATEENY';
+      this.seed = '31214204330332412141';
+    } else if (puznum == 5) {
+      this.answer = 'ATONELONERALTARSLOTS';
+      this.seed = '24331312141342002143';
+    }
+    this.height = 8;
+    this.width = 9;
+
+    this.current = new Array(72);
+    this.constrain = new Array(72);
+
+    for (var i=0; i<72; i++) {
+      this.current[i] = '';
+      this.constrain[i] = 0;  // 1 = vert, 2 = horiz, 0 = fixed
+    }
+
+    for (var row=0; row<4; row++) {
+      for (var col=0; col<5; col++) {
+        var i = row * 5 + col;
+        var val = this.seed.charAt(i) * 1;
+        if (val == 0) {
+          this.current[(row+2)*9+col+2] = this.answer.charAt(i);
+          this.constrain[(row+2)*9+col+2] = 0;
+        }
+        if (val == 1) {
+          this.current[0*9+col+2] = this.answer.charAt(i);
+          this.constrain[0*9+col+2] = 1;
+        }
+        if (val == 2) {
+          this.current[(row+2)*9+0] = this.answer.charAt(i);
+          this.constrain[(row+2)*9+0] = 2;
+        }
+        if (val == 3) {
+          this.current[7*9+col+2] = this.answer.charAt(i);
+          this.constrain[7*9+col+2] = 1;
+        }
+        if (val == 4) {
+          this.current[(row+2)*9+8] = this.answer.charAt(i);
+          this.constrain[(row+2)*9+8] = 2;
+        }
+      }
+    }
+
+    _gel("win").innerHTML = "&nbsp;<br>&nbsp;";
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isSolved = function() {
+    for (var row=0; row<4; row++) {
+      for (var col=0; col<5; col++) {
+        var i = row * 5 + col;
+        if (this.answer.charAt(i) != this.current[(row+2)*9 + (col+2)]) {
+          return false; 
+        }
+      }
+    }
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isBorder = function(index) {
+    var row = Math.floor(index / 9);
+    var col = index % 9;
+    if ((row == 1) || (row == 6)) {
+      return ((col != 0) && (col != 8));
+    }
+    if ((col == 1) || (col == 7)) {
+      return ((row != 0) && (row != 7));
+    }
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getNormalView = function(index) {
+    if (index == 0) return '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+    if (this.isBorder(index)) return '<img src="' + this.prefix + 'black.png" alt="-">';
+    if (this.current[index] == '') return '';
+    var color = '#000000';
+    if (this.constrain[index] == 1) color = '#C000C0';
+    if (this.constrain[index] == 2) color = '#00C000';
+    return '<span style="color:' + color + '">&nbsp;' + this.current[index] + '&nbsp;</span>';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSourceView = function(source, target) {
+    return this._IGGG_getNormalView(source);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getTargetView = function(target, source) {
+    var color = '#000000';
+    if (this.constrain[source] == 1) color = '#FF00FF';
+    if (this.constrain[source] == 2) color = '#00FF00';
+    return '<span style="color:' + color + '"><b>&nbsp;' + this.current[source] + '&nbsp;</b></span>';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getPossibleTargetView = function(target, source) {
+    return this._IGGG_getNormalView(target);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getDragView = function(index) {
+    return this._IGGG_getNormalView(index);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSurrogateView = function(index) {
+    return this._IGGG_getNormalView(index);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleDragStart = function(source) {
+    if (this.constrain[source] == 1) {
+      game__MODULE_ID__.setXMapper(_IG_Drag.prototype.noMoveMapper);
+      game__MODULE_ID__.setYMapper(null);
+    } else if (this.constrain[source] == 2) {
+      game__MODULE_ID__.setXMapper(null);
+      game__MODULE_ID__.setYMapper(_IG_Drag.prototype.noMoveMapper);
+    } else {
+      game__MODULE_ID__.setXMapper(null);
+      game__MODULE_ID__.setYMapper(null);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleDrag = function(source, target) {
+    if (target == source) return;
+    if (target == -1) return;
+    var temp_current = this.current[target];
+    var temp_constrain = this.constrain[target];
+    var pos = 0;
+    if (temp_current != '') {
+      if (temp_constrain == 1) {
+        var col = target % 9;
+        if (this.current[col] == '')
+          pos = col;
+        else
+          pos = 63 + col;
+      } else {
+        var row = Math.floor(target / 9);
+        if (this.current[row*9] == '')
+          pos = row*9;
+        else
+          pos = row*9 + 8;
+      }
+    }
+    this.current[target] = this.current[source];
+    this.constrain[target] = this.constrain[source];
+    this.current[source] = '';
+    this.constrain[source] = 0;
+    if (pos != 0) {
+      this.current[pos] = temp_current;
+      this.constrain[pos] = temp_constrain;
+      this._IGGG_refreshCell(pos);
+    }
+    this._IGGG_refreshCell(target);
+    this._IGGG_refreshDragSources(pos);
+
+    if (this.isSolved()) {
+      _gel("win").innerHTML = 'You win!<BR><span style="font-size:10;background-color:white;color:white">September 29th is my sister Mae\'s birthday!  Please send her a birthday greeting at catsgomew at gmail dot com.</span>';
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleClick = function(source) {
+    // do nothing
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragSource = function(index) {
+    if (this.constrain[index] == 0) return false;
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragTarget = function(index, sourceIndex) {
+    if (this.constrain[index] == 0 && this.current[index] != '') return false;
+    if (this.constrain[sourceIndex] == 1) {
+      if (sourceIndex % 9 != index % 9) return false;
+      var row = Math.floor(index / 9);
+      if (row == 1) return false;
+      if (row == 6) return false;
+      if (row == 0 && Math.floor(sourceIndex / 9) == 7) return false;
+      if (row == 7 && Math.floor(sourceIndex / 9) == 0) return false;
+      return true;
+    } else {
+      if (Math.floor(sourceIndex / 9) != Math.floor(index / 9)) return false;
+      var col = index % 9;
+      if (col == 1) return false;
+      if (col == 7) return false;
+      if (col == 0 && sourceIndex % 9 == 8) return false;
+      if (col == 8 && sourceIndex % 9 == 0) return false;
+      return true;
+    }
+  }
+
+  // only used for objects that can't be handled.
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragStart = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetHit = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetLost = function(object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragEnd = function(s_object, t_object) { }
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragClick = function(object) { }
+
+  //   _IGGG_refreshCell(index)
+  //   _IGGG_addDragSource(index)
+  //   _IGGG_removeDragSource(index)
+  //   _IGGG_refreshDragSources()
+  //   _IGGG_refreshDragTargets()
+
+  ///////////////////////////////////////
+
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+
+  function start__MODULE_ID__() {
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", puzzle__MODULE_ID__.height, puzzle__MODULE_ID__.width);
+    _gel("table_html").innerHTML = game__MODULE_ID__.getTableHTML();
+    game__MODULE_ID__.initDragging();
+
+//    if (navigator.userAgent.toLowerCase().match("firefox")) {
+//    }
+    game__MODULE_ID__.dragHandler.topMargin = 10;
+    game__MODULE_ID__.dragHandler.bottomMargin = 10;
+    game__MODULE_ID__.dragHandler.leftMargin = 10;
+    game__MODULE_ID__.dragHandler.rightMargin = 10;
+    if (navigator.userAgent.toLowerCase().match("ie")) {
+      game__MODULE_ID__.dragHandler.surrogateOffsetX = -2;
+      game__MODULE_ID__.dragHandler.surrogateOffsetY = 0;
+      game__MODULE_ID__.dragHandler.leftMargin = 10;
+      game__MODULE_ID__.dragHandler.rightMargin = 10;
+      game__MODULE_ID__.dragHandler.topMargin = 10;
+      game__MODULE_ID__.dragHandler.bottomMargin = 10;
+    } else if (navigator.userAgent.toLowerCase().match("safari")) {
+      game__MODULE_ID__.dragHandler.surrogateOffsetX = -2;
+      game__MODULE_ID__.dragHandler.surrogateOffsetY = 0;
+      game__MODULE_ID__.dragHandler.leftMargin = 5;
+      game__MODULE_ID__.dragHandler.rightMargin = 10;
+      game__MODULE_ID__.dragHandler.topMargin = 10;
+      game__MODULE_ID__.dragHandler.bottomMargin = 10;
+    }
+
+    for (var i=0; i<72; ++i) {
+      if (puzzle__MODULE_ID__.isBorder(i)) {
+        _gel(game__MODULE_ID__.getCellTDID(i)).style.backgroundColor = "#000000";
+      }
+    }
+
+  }
+
+  function reset__MODULE_ID__(puznum) {
+    _gel("form_width").value = _gel("form_width").value.replace(/[^0-9]/g, "");
+    _gel("form_height").value = _gel("form_height").value.replace(/[^0-9]/g, "");
+    puzzle__MODULE_ID__.resetPuzzle(1 * _gel("form_height").value,
+                                    1 * _gel("form_width").value,
+                                   _gel("form_wrap_vert").checked,
+                                   _gel("form_wrap_horiz").checked);
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", puzzle__MODULE_ID__.height, puzzle__MODULE_ID__.width);
+    _gel("table_html").innerHTML = game__MODULE_ID__.getTableHTML();
+    game__MODULE_ID__.initDragging();
+  }
+
+  ///////////////////////////////////////////////
+                                                                                                                                                                                                     
+  function selection_table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="0" cellpadding="0px" cellspacing="0px">';
+    for (var puznum = 0; puznum < 6; ++puznum) {
+      result += '<td align="middle" align="center">';
+      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa.images02.googlepages.com/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="puzzle__MODULE_ID__.resetPuzzle(' + puznum + ')"></img>';
+      result += '</td>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<div style="position:relative;float:left;margin-right:3px;margin-top:0px;margin-bottom:0px;">
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(selection_table_html__MODULE_ID__());
+</SCRIPT>
+</div>
+
+<b>Word Wreck Tangle</b>: Drag the letters into the rectangle so that words read both across and down.
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   <span style="color:#C000C0">Purple</span> letters only move up-and-down, while <span style="color:#00C000">green</span> letters only move left and right.
+   Click and drag a colored letter to move it.  You win if four five-letter English words read left-to-right along the rows
+   and five four-letter words read down along the columns.
+</span>
+
+<HR>
+<span id="table_html"></span>
+<HR>
+<span id="win" style="font-size:12pt;font-weight:bold">&nbsp;<BR>&nbsp;</span>
+
+<span id="debug1" style="font-size:16pt;font-weight:bold"></span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

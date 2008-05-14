@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzle Challenges" 
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20050526@gmail.com"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="400"
+    render_inline="optional"
+  /> 
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;} 
+</style>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  function _gel(thing) {
+    return document.getElementById(thing);
+  }
+
+  function showCongratulationsSection__MODULE_ID__() {
+//    _gel("congrats__MODULE_ID__").style.display = "inline";
+//    _gel("instructions__MODULE_ID__").style.display = "none";
+    _gel("verify_button__MODULE_ID__").value = "Correct!";
+  }
+
+  function showInstructionsSection__MODULE_ID__() {
+//    _gel("congrats__MODULE_ID__").style.display = "none";
+//    _gel("instructions__MODULE_ID__").style.display = "inline";
+    _gel("verify_button__MODULE_ID__").value = "Try again";
+  }
+
+  function clearInput__MODULE_ID__() {
+    _gel("user_input__MODULE_ID__").value = "";
+  }
+
+  function replay__MODULE_ID__() {
+    clearInput__MODULE_ID__();
+    showInstructionsSection__MODULE_ID__();
+  }
+  
+  // Returns true if the only digits are 3388.
+  function hasCorrectDigits__MODULE_ID__(str) {
+    if (str.match(/[38][38]/)) return false;
+    var threes = str.replace(/[^3]/g, "");
+    if (threes != "33") return false;
+    var eights = str.replace(/[^8]/g, "");
+    if (eights != "88") return false;
+    var others = str.replace(/[^01245679]/g, "");
+    if (others != "") return false;
+    return true;
+  }
+
+  function close_enough__MODULE_ID__(val1, val2) {
+    if (val1 > val2) return close_enough__MODULE_ID__(val2, val1);
+    if (val2 - val1 < 0.0001) return true;
+    return false;
+  }
+
+  function verify__MODULE_ID__() {
+    var input_widget = _gel("user_input__MODULE_ID__");
+
+    // We filter out any input that isn't arithmetic or whitespace.
+    var expression = input_widget.value.replace(/[^0-9*/+()-]/g, "");
+
+    // The JavaScript interpreter will do the evaluation for us.  We
+    // wrap it in a try/catch just in case eval throws an error.
+    var return_value;
+    try {
+      return_value = eval(expression);
+    } catch (err) {
+      // The user may have entered a partial expression, such as 8*.
+      showInstructionsSection__MODULE_ID__();
+      return;
+    }
+
+    if (close_enough__MODULE_ID__(return_value,24)
+        && hasCorrectDigits__MODULE_ID__(input_widget.value)) {
+      showCongratulationsSection__MODULE_ID__();
+    } else {
+      showInstructionsSection__MODULE_ID__();
+    }
+  }
+
+// Javascript ends -->
+</script>
+
+
+<font size=-1>
+
+<div style="position:relative;width:93px;float:left;margin-right:2px;margin-top:2px;margin-bottom:0px;">
+<IMG SRC="http://www.google.com/ig/images/weihwa.jpg"
+     WIDTH="90px"
+     ALT="Wei-Hwa Huang: Googler &amp; Four-Time World Puzzle Champion"
+     TITLE="Wei-Hwa Huang: Googler &amp; Four-Time World Puzzle Champion"
+>
+</div>
+
+<B>May 26th, 2006</B>:
+While we're still getting some fancier stuff ready behind the
+scenes, I thought this would be a good place to put some 
+neo-classic puzzles.  Hope you like this one:
+</P>
+
+<div style="position:relative;width:155px;float:left;margin-right:3px;margin-top:0px;margin-bottom:0px;">
+
+<IMG SRC="http://weihwa.feedback.googlepages.com/digit1.gif"
+     ALT="silly animated gif -- how often does it cycle?"><IMG SRC="http://weihwa.feedback.googlepages.com/operator1.gif"
+     ALT="silly animated gif -- how often does it cycle?"><IMG SRC="http://weihwa.feedback.googlepages.com/digit2.gif"
+     ALT="silly animated gif -- how often does it cycle?"><IMG SRC="http://weihwa.feedback.googlepages.com/operator2.gif"
+     ALT="silly animated gif -- how often does it cycle?"><IMG SRC="http://weihwa.feedback.googlepages.com/digit3.gif"
+     ALT="silly animated gif -- how often does it cycle?"><IMG SRC="http://weihwa.feedback.googlepages.com/operator3.gif"
+     ALT="silly animated gif -- how often does it cycle?"><IMG SRC="http://weihwa.feedback.googlepages.com/digit4.gif"
+     ALT="silly animated gif -- how often does it cycle?">
+
+</div>
+
+<P>
+Using the numbers 3, 3, 8, 8 (in any order), make a mathematical expression that equals 24.  You can use only addition, subtraction, multiplication, and division (and parentheses), but in any order you wish.  Note that you have to use all four numbers; otherwise 3 times 8 would be valid -- and <i>that</i> wouldn't be much of a puzzle, would it?
+</P>
+
+</font>
+
+
+<font size="-2">
+  <p>
+    <form action="javascript:verify__MODULE_ID__()">
+      When you think you have an answer, try entering it here (use * for multiplication and / for division):<BR>
+      <input id="user_input__MODULE_ID__" type="text" name="answer"/>
+      <input id="verify_button__MODULE_ID__" type="button" value="Check" onclick="verify__MODULE_ID__()"/>
+    </form>
+  </p>
+
+</font>
+
+
+  ]]> 
+
+  </Content>
+</Module>

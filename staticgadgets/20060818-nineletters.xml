@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20060818@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="390"
+    render_inline="optional"
+  />
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<span id="debug" style="font-size:16pt;font-weight:bold"></span>
+                                                                                                                                                                                                   
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20060817@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils.js"></script>
+                                                                                                                                                                                                   
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright Google, Inc.
+  // Author: Wei-Hwa Huang
+                                                                                                                                                                                                   
+  Drag.min_x = 15;
+  Drag.min_y = 10;
+  Drag.max_x = 10;
+  Drag.max_y = 10;
+  Drag.basis_offset_y = 0;
+  Drag.basis_offset_x = 2;
+  if (navigator.userAgent.toLowerCase().match("msie")) {
+    Drag.basis_offset_y = 0;
+    Drag.basis_offset_x = -2;
+    Drag.min_x = 15;
+    Drag.max_x = 10;
+    Drag.min_y = 10;
+    Drag.max_y = 10;
+  }
+
+  // build a rot13 map.
+  var alphabet_rot13__MODULE_ID__ = "abcdefghijklmnopqrstuvwxyzabcdefghijklm";
+  var map_rot13__MODULE_ID__ = new Array();
+  for (i = 0; i < 26; ++i)
+    map_rot13__MODULE_ID__[alphabet_rot13__MODULE_ID__.charAt(i)] = alphabet_rot13__MODULE_ID__.charAt(i+13);
+
+  function rot13__MODULE_ID__(text) {
+    var result = "";
+    for (i = 0; i < text.length; ++i) {
+      result += map_rot13__MODULE_ID__[text.charAt(i)];
+    }
+    return result;
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "back end".
+
+  function puzzle_data__MODULE_ID__() {
+    var temp = new Array(
+      "adorable",
+      "affirm",
+      "ambulatory",
+      "barrow",
+      "castigate",
+      "choose",
+      "complain",
+      "considering",
+      "cultivate",
+      "devil",
+      "docket",
+      "elevated",
+      "entrust",
+      "fellow",
+      "frogman",
+      "groove",
+      "lady",
+      "literature",
+      "lowfat",
+      "nucleus",
+      "panorama",
+      "pinnacle",
+      "postpone",
+      "pronounce",
+      "raiment",
+      "reassemble",
+      "ringleader",
+      "speculate",
+      "straps",
+      "tessellate",
+      "underpays",
+      "went on"
+    );
+    this.values = new Array(32);
+    for (var i = 0; i < 32; ++i) {
+      this.values[i] = temp[Math.floor(i/2)+i%2*16];
+    }
+
+    var rot13answers = new Array(
+       // note: rot13 code, for anyone reading this code who doesn't want to spoil themselves.
+       "niregnoyr", "pnecragre", "pnegevqtr", "qviretrag", 
+       "ryrpgebqr", "vzcebivat", "vasregvyr", "yvgrenyyl", 
+       "zvqfgernz", "cebfrphgr", "ernqqerff", "erneenatr", 
+       "ervafgnyy", "fubegfgbc", "fvapreryl", "fdhnjxvat"
+    );
+  
+    this.answers = new Array();
+    for (var i=0; i<16; ++i) {
+      this.answers[i] = rot13__MODULE_ID__(rot13answers[i]);
+    }
+
+    this.user_answers = new Array();
+
+    this.mapping = new Array(
+       9, 15, 0, 9, 5, 7, 2, 8, 8, 11, 4, 13, 1, 0, 14, 10, 11, 10, 5, 7, 1, 15, 12, 6, 14, 12, 3, 6, 3, 13, 2, 4
+    );
+
+    this.correct_column = new Array(
+       1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0,
+       0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1
+    );
+  }
+ 
+  puzzle_data__MODULE_ID__.prototype.get_partner = function(index) {
+    if (index % 2 == 0) return (index - (-1)); 
+    return (index - 1);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_color = function (index) {
+    var partner_index = this.get_partner(index);
+    if (this.mapping[partner_index] == this.mapping[index]) {
+      if (this.correct_column[index] == index % 2) {
+        return '#ABFF73';  // pastel green
+      } else {
+        return '#FFFF84';  // pastel yellow
+      }
+    } else {
+      return 'transparent';
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.cell_changed = function(index) {
+    // callback -- modifies a cell.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.deregister = function(index) {
+    // callback -- makes a cell unmovable.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.display_answer = function(index, answer) {
+    // callback -- displays an answer at position index.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.display_message = function(message) {
+    // callback -- displays a message.
+  }
+
+  // actions.
+  puzzle_data__MODULE_ID__.prototype.get_text = function (index) {
+    if (index == -1) {
+      // blank (grey)
+//      return '<span style="border:thin dashed grey;font-size:8pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
+//    This commented version is the original, which worked fine on Firefox but not in IE.  :-(
+ //     return '<span style="font-size:8pt"><img src="http://weihwa.feedback.googlepages.com/dotted.png"/></span>';
+      return '<span style="font-size:8pt"></span>';
+    }
+    return '<span style="background-color:' + this.get_color(index) + ';font-size:8pt">' + this.values[index] + '</span>';
+  }
+
+  puzzle_data__MODULE_ID__.prototype.swap = function (pos1, pos2) {
+    if (pos1 == pos2) return;
+
+    var ocp1 = this.get_color(this.get_partner(pos1));
+    var ocp2 = this.get_color(this.get_partner(pos2));
+ 
+    var temp = this.values[pos1];
+    this.values[pos1] = this.values[pos2];
+    this.values[pos2] = temp;
+    temp = this.mapping[pos1];
+    this.mapping[pos1] = this.mapping[pos2];
+    this.mapping[pos2] = temp;
+    temp = this.correct_column[pos1];
+    this.correct_column[pos1] = this.correct_column[pos2];
+    this.correct_column[pos2] = temp;
+
+    this.cell_changed(pos1);
+    this.cell_changed(pos2);
+  
+    if (this.get_partner(pos1) != pos2) {
+      if (ocp1 != this.get_color(this.get_partner(pos1))) {
+        this.cell_changed(this.get_partner(pos1));
+      }
+      if (ocp2 != this.get_color(this.get_partner(pos2))) {
+        this.cell_changed(this.get_partner(pos2));
+      }
+    }
+    this.display_message("Check");
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_answer_index = function (answer) {
+    for (var i=0; i<16; ++i) {
+      if (answer == this.answers[i]) return i;
+    }
+    return -1;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.matches_existing_answer = function (answer) {
+    for (var i=0; i<this.user_answers.length; ++i) {
+      if (answer == this.user_answers[i]) return true;
+    }
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.find_half = function (answer_index, column) {
+    for (var i=0; i<32; ++i) {
+      if (this.mapping[i] == answer_index && this.correct_column[i] == column) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.check_user_answer = function (answer) {
+    if (this.matches_existing_answer(answer)) {
+      this.display_message("Already done");
+      return false;
+    }
+    var answer_index = this.get_answer_index(answer);
+    if (answer_index == -1) {
+      this.display_message("Incorrect");
+      return false;
+    }
+    var row = this.user_answers.length;
+    this.swap(this.find_half(answer_index, 0), row * 2);
+    this.swap(this.find_half(answer_index, 1), row * 2 + 1);
+    this.deregister(row * 2);
+    this.deregister(row * 2 + 1);
+    this.user_answers.push(answer);
+    this.display_answer(row, answer);
+    this.display_message((row + 1) + " Correct!");
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "front end".
+  ///  Encodes the user's current "state".
+
+  function game_setup__MODULE_ID__() {
+    var game_setup = this;
+
+    game_setup.width = 2;
+    game_setup.height = 16;
+    game_setup.size = 32;
+
+    game_setup.start_position = 0;
+    game_setup.mouse_position = 0;
+
+    game_setup.x_values = new Array(this.size);
+    game_setup.y_values = new Array(this.size);
+
+    game_setup.game_over = false;
+    game_setup.game_over_state = 0;  // 0 = time over, 1 = too slow, 2 = victory;
+
+    game_setup.detached = new Array(
+      false, false, false, false, false, false, false, false,
+      false, false, false, false, false, false, false, false,
+      false, false, false, false, false, false, false, false,
+      false, false, false, false, false, false, false, false
+    );
+
+    game_setup.puzzle = new puzzle_data__MODULE_ID__();
+
+    // define callbacks.
+    game_setup.refresh = function (index) {
+      if (index != -1)
+        _gel(game_setup.get_cell_id(index)).innerHTML = game_setup.get_value_at(index);
+    }
+    game_setup.puzzle.cell_changed = this.refresh;
+
+    game_setup.deregister = function (index) {
+      Drag.remove_source(game_setup.get_cell_id(index));
+      Drag.remove_sink(game_setup.get_cell_id(index));
+      _gel(game_setup.get_cell_id(index)).style["cursor"] = "auto";
+      game_setup.detached[index] = true;
+    }
+    game_setup.puzzle.deregister = this.deregister;
+
+    game_setup.display_answer = function (index, answer) {
+      _gel(game_setup.get_answer_id(index)).innerHTML = '<span style="background-color:#ABFF73;font-size:8pt;font-weight:bold">' + answer + '</span>';
+    }
+    game_setup.puzzle.display_answer = this.display_answer;
+
+    game_setup.display_message = function (message) {
+      _gel("verify_button__MODULE_ID__").value = message;
+    }
+    game_setup.puzzle.display_message = this.display_message;
+
+  }
+
+  game_setup__MODULE_ID__.prototype.get_cell_id = function (index) {
+    return ('cell_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.get_answer_id = function (index) {
+    return ('answer_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.value_from_id = function (id) {
+    var regexp = /cell_(.*)___MODULE_ID__/;
+    var matches = regexp.exec(id);
+    return matches[1];
+  }
+
+  game_setup__MODULE_ID__.prototype.get_value_at = function (index) {
+    if (!Drag.is_dragging) {
+      return this.puzzle.get_text(index);
+    } else if (this.mouse_position == index) {
+      return this.puzzle.get_text(-1);
+    } else if (this.start_position == index) {
+      return this.puzzle.get_text(this.mouse_position);
+    } else {
+      return this.puzzle.get_text(index);
+    }
+  }
+
+  ////////////////////////////////////////////////////
+  // UI actions.
+
+  game_setup__MODULE_ID__.prototype.action_verify_answer = function (user_answer) {
+    var expression = user_answer.toLowerCase().replace(/[^a-z]/g, "");
+    this.puzzle.check_user_answer(expression);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_register_attach = function (index, x, y) {
+    this.x_values[index] = x;
+    this.y_values[index] = y;
+  }
+
+  game_setup__MODULE_ID__.prototype.action_dragging_started = function (index, x, y) {
+    _gel("dummy").innerHTML = this.puzzle.get_text(index);
+    _gel("dummy").width = _gel(this.get_cell_id(index)).width;
+    this.start_position = index;
+    this.mouse_position = index;
+    this.x_offset = x;
+    this.y_offset = y;
+    this.refresh(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_hit_sink = function (over) {
+    var old_position = this.mouse_position;
+    this.mouse_position = over;
+    this.refresh(old_position);
+    this.refresh(this.mouse_position);
+    this.refresh(this.start_position);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_lost_sink = function () {
+    var old_position = this.mouse_position;
+    this.mouse_position = -1;
+    this.refresh(old_position);
+    this.refresh(this.mouse_position);
+    this.refresh(this.start_position);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_dragging_ended = function (index) {
+    if (index != this.mouse_position && this.mouse_position != -1) {
+      this.puzzle.swap(this.mouse_position, index);
+    }
+    this.refresh(index);
+    _gel("dummy").innerHTML = "";
+  }
+
+  ////////////////////////////////////////////////////
+  // Dragging callback overrides.
+
+  Drag.dragging_started = function(object) {
+    game__MODULE_ID__.action_dragging_started(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag.hit_sink = function (object) {
+    game__MODULE_ID__.action_hit_sink(game__MODULE_ID__.value_from_id(object.id));
+  }
+                                                                                                                                                                                                   
+  Drag.lost_sink = function () {
+    game__MODULE_ID__.action_lost_sink();
+  }
+
+  Drag.dragging_ended = function(object) {
+    game__MODULE_ID__.action_dragging_ended(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+
+  ///////////////////////////////////////
+  // Direct access functions.
+  
+  var game__MODULE_ID__ = new game_setup__MODULE_ID__();
+
+  function table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="1" cellpadding="0px" cellspacing="0px">';
+    for (var row = 0; row < game__MODULE_ID__.height; ++row) {
+      result += '<tr>';
+      for (var col = 0; col < game__MODULE_ID__.width; ++col) {
+        result += '<td align="center">';
+        result += '<div';
+          result += ' id="' + game__MODULE_ID__.get_cell_id(row * game__MODULE_ID__.width + col) + '"';
+          result += ' style="cursor:move"';
+        result += '>';
+        result += game__MODULE_ID__.get_value_at(row * game__MODULE_ID__.width + col);
+        result += '</div>';
+        result += '</td>';
+      }
+      result += '<td align="center">';
+      result += '<div';
+      result += ' id="' + game__MODULE_ID__.get_answer_id(row) + '"';
+      result += ' style="font-size:8pt"';
+      result += '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      result += '</div>';
+      result += '</tr>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+  function init_dragging__MODULE_ID__() {
+    Drag.set_basis(_gel("dummy"));
+    for (var row = 0; row < game__MODULE_ID__.height; ++row) {
+      for (var col = 0; col < game__MODULE_ID__.width; ++col) {
+        Drag.add_source(game__MODULE_ID__.get_cell_id(row * game__MODULE_ID__.width + col), _gel(game__MODULE_ID__.get_cell_id(row * game__MODULE_ID__.width + col)));
+        Drag.add_sink(game__MODULE_ID__.get_cell_id(row * game__MODULE_ID__.width + col), _gel(game__MODULE_ID__.get_cell_id(row * game__MODULE_ID__.width + col)));
+      }
+    }
+  }
+
+  function verify__MODULE_ID__() {
+    game__MODULE_ID__.action_verify_answer(_gel("user_input__MODULE_ID__").value);
+    _gel("user_input__MODULE_ID__").value = "";
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<b>Confounded Compounds 2</b>:
+This is just like the original <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage6">Confounded Compounds</a>,
+except that now I'm using <i>nine</i>-letter words, and the components aren't always four letters.  But like the last one,
+the components won't have much relation to the actual word.
+<BR>
+
+<div style="position:relative;float:left;margin-right:3px;margin-top:3px" id="grid__MODULE_ID__">
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(table_html__MODULE_ID__());
+</SCRIPT>
+</div>
+<BR>
+<form action="javascript:verify__MODULE_ID__()">
+  <font size=-1>When you think you have a 9-letter word, enter it here.  If you're right, it will appear next to the appropriate pair.</font><BR>
+  <input id="user_input__MODULE_ID__" size="10" type="text" name="answer" style="font-size:8pt"/>
+  <input id="verify_button__MODULE_ID__" type="button" value="Check" onclick="verify__MODULE_ID__()"/>
+  <font size=-1><BR>Need help?  Try dragging the words around to swap their positions.
+  A correct pair will turn <span style="background-color:#ABFF73">green</span>, while a correctly-paired set in the wrong order will turn <span style="background-color:FFFF84">yellow</span>.</font>
+</form>
+
+<div id="dummy" align="center"></div>
+<img width="0px" height="0px" src="http://weihwa.feedback.googlepages.com/dotted.png"/>
+<div id="debug" align="center"></div>
+
+<SCRIPT LANGUAGE="JavaScript">
+  init_dragging__MODULE_ID__();
+</SCRIPT>
+
+</FONT>
+
+
+  ]]> 
+
+  </Content>
+</Module>
+

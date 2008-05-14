@@ -1,0 +1,728 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20061020@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="100">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+  </ModulePrefs>
+  <UserPref
+      name="minibat2"
+      default_value="20000000000000000000000000000000000000000000000000"
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="display:none;">
+Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.epl?art_id=958
+<img src='http://weihwa.images03.googlepages.com/cell_black_1.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_black_2.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_black_3.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_black_4.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_black_5.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_black_6.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_black_7.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_1.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_13.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_14a.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_15a.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_16a.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_17a.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_2.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_3.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_4.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_5.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_6.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_7.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_brown_8a.png'>
+<img src='http://weihwa.images03.googlepages.com/cell_empty.png'>
+<img src='http://weihwa.images03.googlepages.com/col_black_0.png'>
+<img src='http://weihwa.images03.googlepages.com/col_black_1.png'>
+<img src='http://weihwa.images03.googlepages.com/col_black_2.png'>
+<img src='http://weihwa.images03.googlepages.com/col_black_3.png'>
+<img src='http://weihwa.images03.googlepages.com/col_black_4.png'>
+<img src='http://weihwa.images03.googlepages.com/col_black_5.png'>
+<img src='http://weihwa.images03.googlepages.com/col_empty.png'>
+<img src='http://weihwa.images03.googlepages.com/col_green_0.png'>
+<img src='http://weihwa.images03.googlepages.com/col_green_1.png'>
+<img src='http://weihwa.images03.googlepages.com/col_green_2.png'>
+<img src='http://weihwa.images03.googlepages.com/col_green_3.png'>
+<img src='http://weihwa.images03.googlepages.com/col_green_4.png'>
+<img src='http://weihwa.images03.googlepages.com/col_green_5.png'>
+<img src='http://weihwa.images03.googlepages.com/col_red_0.png'>
+<img src='http://weihwa.images03.googlepages.com/col_red_1.png'>
+<img src='http://weihwa.images03.googlepages.com/col_red_2.png'>
+<img src='http://weihwa.images03.googlepages.com/col_red_3.png'>
+<img src='http://weihwa.images03.googlepages.com/col_red_4.png'>
+<img src='http://weihwa.images03.googlepages.com/col_red_5.png'>
+<img src='http://weihwa.images03.googlepages.com/corner-light.png'>
+<img src='http://weihwa.images03.googlepages.com/corner.png'>
+<img src='http://weihwa.images03.googlepages.com/fleet.png'>
+<img src='http://weihwa.images03.googlepages.com/grey.png'>
+<img src='http://weihwa.images03.googlepages.com/row_black_0.png'>
+<img src='http://weihwa.images03.googlepages.com/row_black_1.png'>
+<img src='http://weihwa.images03.googlepages.com/row_black_2.png'>
+<img src='http://weihwa.images03.googlepages.com/row_black_3.png'>
+<img src='http://weihwa.images03.googlepages.com/row_black_4.png'>
+<img src='http://weihwa.images03.googlepages.com/row_black_5.png'>
+<img src='http://weihwa.images03.googlepages.com/row_empty.png'>
+<img src='http://weihwa.images03.googlepages.com/row_green_0.png'>
+<img src='http://weihwa.images03.googlepages.com/row_green_1.png'>
+<img src='http://weihwa.images03.googlepages.com/row_green_2.png'>
+<img src='http://weihwa.images03.googlepages.com/row_green_3.png'>
+<img src='http://weihwa.images03.googlepages.com/row_green_4.png'>
+<img src='http://weihwa.images03.googlepages.com/row_green_5.png'>
+<img src='http://weihwa.images03.googlepages.com/row_red_0.png'>
+<img src='http://weihwa.images03.googlepages.com/row_red_1.png'>
+<img src='http://weihwa.images03.googlepages.com/row_red_2.png'>
+<img src='http://weihwa.images03.googlepages.com/row_red_3.png'>
+<img src='http://weihwa.images03.googlepages.com/row_red_4.png'>
+<img src='http://weihwa.images03.googlepages.com/row_red_5.png'>
+</div>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20061020@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<!---
+<script type="text/javascript" src="puzzle-utils3.js"></script>
+--->
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils3.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.prefix = 'http://weihwa.images03.googlepages.com/';
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(puzzleNum) {
+    this.resetPuzzleData(puzzleNum);
+    this._IGGG_refreshAll();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzleData = function(index) {
+    this.puzzleNum = index;
+    if (index == 23) {
+      this.answer = new Array(1,0,0,0,0,1,0,0,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0); this.rowClues = new Array(2, 2, -1, -1, 2, -1); this.colClues = new Array(1, 2, 0, 2, -1, 4); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0);
+    } else if (index == 31) {
+      this.answer = new Array(0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0); this.rowClues = new Array(2, -1, 1, -1, 1, 1); this.colClues = new Array(1, 3, 1, 2, 1, -1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 10) {
+      this.answer = new Array(0,0,1,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,1,1,0,0,1); this.rowClues = new Array(3, 0, 1, -1, 0, -1); this.colClues = new Array(1, 3, -1, 0, 1, 3); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2);
+    } else if (index == 28) {
+      this.answer = new Array(1,1,1,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,0); this.rowClues = new Array(4, -1, -1, 2, 0, 2); this.colClues = new Array(-1, 2, 1, 1, 0, 3); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 9) {
+      this.answer = new Array(1,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0); this.rowClues = new Array(-1, 1, 0, 3, -1, -1); this.colClues = new Array(3, 2, 2, 1, -1, 1); this.givens = new Array(2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 1, 0);
+    } else if (index == 15) {
+      this.answer = new Array(1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,0,0); this.rowClues = new Array(4, -1, 2, -1, -1, 3); this.colClues = new Array(1, 1, -1, 2, 2, -1); this.givens = new Array(2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0);
+    } else if (index == 6) {
+      this.answer = new Array(0,0,1,1,0,0,0,0,0,0,0,1,1,0,1,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,0,0); this.rowClues = new Array(2, 1, -1, 2, 2, 1); this.colClues = new Array(3, -1, -1, 1, -1, -1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 43) {
+      this.answer = new Array(0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,1,0,1,1,0,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,1); this.rowClues = new Array(1, -1, 3, 2, 1, 2); this.colClues = new Array(-1, 1, 1, 2, -1, 3); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3);
+    } else if (index == 42) {
+      this.answer = new Array(1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0); this.rowClues = new Array(2, -1, 2, 2, 2, 0); this.colClues = new Array(3, -1, 1, 2, -1, -1); this.givens = new Array(0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 39) {
+      this.answer = new Array(1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,1); this.rowClues = new Array(2, -1, -1, 2, -1, 4); this.colClues = new Array(4, -1, 1, -1, 1, 2); this.givens = new Array(0, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 38) {
+      this.answer = new Array(1,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1,1,1); this.rowClues = new Array(2, -1, 0, 1, 1, 4); this.colClues = new Array(4, -1, 1, 1, 1, -1); this.givens = new Array(0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 33) {
+      this.answer = new Array(0,0,1,0,0,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0); this.rowClues = new Array(2, 2, 2, 2, -1, 1); this.colClues = new Array(2, 1, 2, -1, -1, 4); this.givens = new Array(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0);
+    } else if (index == 44) {
+      this.answer = new Array(1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1,1,0); this.rowClues = new Array(1, -1, 2, 2, -1, 3); this.colClues = new Array(3, -1, 1, 1, -1, 0); this.givens = new Array(5, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 4) {
+      this.answer = new Array(1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,1,0,0,0,1,0,0,0,1,0,0); this.rowClues = new Array(-1, -1, 1, 2, 3, 1); this.colClues = new Array(3, -1, -1, -1, -1, 4); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0);
+    } else if (index == 14) {
+      this.answer = new Array(0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,0,1,1,0,0,1,0,0,0,0,1,1,0,0,0,0,0); this.rowClues = new Array(2, 1, -1, 3, 2, 1); this.colClues = new Array(3, -1, 1, 3, -1, 3); this.givens = new Array(0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 5) {
+      this.answer = new Array(1,1,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,1,0,0,0,1); this.rowClues = new Array(3, 1, -1, 1, 1, 3); this.colClues = new Array(3, -1, -1, 2, 1, 1); this.givens = new Array(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 25) {
+      this.answer = new Array(0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,1,1,0,1,0,0,1); this.rowClues = new Array(0, 3, -1, -1, -1, 3); this.colClues = new Array(-1, 2, 1, 3, 0, 2); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 12) {
+      this.answer = new Array(1,0,0,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0); this.rowClues = new Array(4, -1, -1, -1, 2, -1); this.colClues = new Array(2, 0, -1, -1, 2, 1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0);
+    } else if (index == 13) {
+      this.answer = new Array(0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0); this.rowClues = new Array(-1, 1, 2, -1, 2, 3); this.colClues = new Array(-1, 1, -1, 1, 2, 3); this.givens = new Array(0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0);
+    } else if (index == 40) {
+      this.answer = new Array(0,1,0,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0); this.rowClues = new Array(2, -1, 3, -1, 2, 2); this.colClues = new Array(-1, 4, -1, 1, 2, -1); this.givens = new Array(0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 48) {
+      this.answer = new Array(1,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,0); this.rowClues = new Array(3, 1, 1, 1, 2, -1); this.colClues = new Array(-1, 2, -1, 1, 4, -1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 16) {
+      this.answer = new Array(0,1,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0); this.rowClues = new Array(1, 2, -1, 2, 3, 1); this.colClues = new Array(-1, 1, -1, -1, 4, 1); this.givens = new Array(0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 18) {
+      this.answer = new Array(1,0,0,1,0,0,1,0,0,0,0,0,1,0,1,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0); this.rowClues = new Array(-1, 1, -1, 1, 1, 2); this.colClues = new Array(3, -1, 1, 3, -1, 2); this.givens = new Array(0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 0, 0, 0, 0);
+    } else if (index == 45) {
+      this.answer = new Array(1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,0); this.rowClues = new Array(2, 1, -1, 2, 1, 2); this.colClues = new Array(1, 2, -1, -1, -1, 2); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0);
+    } else if (index == 37) {
+      this.answer = new Array(1,0,0,1,0,1,1,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0); this.rowClues = new Array(3, 2, 2, 1, -1, 1); this.colClues = new Array(-1, 2, -1, 2, -1, 3); this.givens = new Array(0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 22) {
+      this.answer = new Array(0,1,0,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,1,0,0); this.rowClues = new Array(3, -1, 1, 2, 0, 3); this.colClues = new Array(0, -1, 1, 3, 1, 1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0);
+    } else if (index == 29) {
+      this.answer = new Array(0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,1,0,0,1,1,0,0,0,0,1); this.rowClues = new Array(3, 0, -1, 2, 3, -1); this.colClues = new Array(2, -1, 2, -1, 0, -1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3);
+    } else if (index == 1) {
+      this.answer = new Array(1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,0,1,0,0,0,0,0,0,0,1,1,0,0); this.rowClues = new Array(3, 0, 0, 4, -1, -1); this.colClues = new Array(-1, 0, -1, 2, 1, 1); this.givens = new Array(2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0);
+    } else if (index == 0) {
+      this.answer = new Array(1,1,1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,0); this.rowClues = new Array(-1, -1, 1, 1, 2, -1); this.colClues = new Array(3, 1, 1, -1, 2, -1); this.givens = new Array(0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 3, 0, 0, 0, 0, 0, 1);
+    } else if (index == 7) {
+      this.answer = new Array(0,0,1,0,0,1,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,1); this.rowClues = new Array(2, 1, 3, 0, -1, 2); this.colClues = new Array(-1, 1, 3, 0, -1, 3); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0);
+    } else if (index == 35) {
+      this.answer = new Array(1,0,0,0,1,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0); this.rowClues = new Array(2, -1, 4, -1, -1, 2); this.colClues = new Array(-1, 2, 1, 0, 3, -1); this.givens = new Array(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 20) {
+      this.answer = new Array(0,1,1,0,1,0,0,0,0,0,0,0,1,0,0,1,1,1,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0); this.rowClues = new Array(-1, -1, 4, -1, -1, -1); this.colClues = new Array(3, 1, 1, 1, 3, -1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0);
+    } else if (index == 27) {
+      this.answer = new Array(0,0,0,0,1,1,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,0,0); this.rowClues = new Array(2, 0, -1, 2, -1, 1); this.colClues = new Array(-1, 0, 2, -1, -1, 1); this.givens = new Array(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 21) {
+      this.answer = new Array(0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,0,0,1,0,0,0); this.rowClues = new Array(-1, 1, 1, 0, -1, 1); this.colClues = new Array(1, 3, -1, 1, 1, 2); this.givens = new Array(0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 2) {
+      this.answer = new Array(0,1,0,1,1,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1); this.rowClues = new Array(-1, 0, 2, -1, 2, 2); this.colClues = new Array(-1, 4, -1, 1, 2, -1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3);
+    } else if (index == 8) {
+      this.answer = new Array(0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0); this.rowClues = new Array(3, 1, -1, -1, 2, -1); this.colClues = new Array(3, 0, 1, -1, 3, 1); this.givens = new Array(0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0, 0);
+    } else if (index == 34) {
+      this.answer = new Array(0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,1,0,1); this.rowClues = new Array(2, 1, 1, 1, 3, -1); this.colClues = new Array(-1, 1, -1, 2, 1, -1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 41) {
+      this.answer = new Array(0,0,0,0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,1,0,1); this.rowClues = new Array(0, -1, 0, 1, 1, -1); this.colClues = new Array(3, -1, 2, -1, 2, 1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 11) {
+      this.answer = new Array(1,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,1,0,0,1,0,1); this.rowClues = new Array(1, 3, 0, 1, 2, -1); this.colClues = new Array(-1, 1, 0, 3, -1, 3); this.givens = new Array(2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0);
+    } else if (index == 3) {
+      this.answer = new Array(1,0,0,0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,1); this.rowClues = new Array(1, -1, 0, -1, 3, 1); this.colClues = new Array(-1, -1, 1, 2, -1, 2); this.givens = new Array(5, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 17) {
+      this.answer = new Array(0,1,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,1,0); this.rowClues = new Array(-1, -1, 0, 3, 1, 1); this.colClues = new Array(1, -1, -1, -1, 2, 2); this.givens = new Array(0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 26) {
+      this.answer = new Array(1,1,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,1,1,1,0,0,0,0,0,0,0); this.rowClues = new Array(4, -1, 2, -1, 4, 0); this.colClues = new Array(3, -1, 1, 2, 2, 1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 30) {
+      this.answer = new Array(0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,1,0,1,1,0,1,1,0,0,0,0,0); this.rowClues = new Array(1, -1, 2, -1, 4, -1); this.colClues = new Array(4, -1, 2, 2, 0, -1); this.givens = new Array(1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 49) {
+      this.answer = new Array(1,1,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0); this.rowClues = new Array(2, 2, 1, -1, 3, 1); this.colClues = new Array(4, 1, -1, 1, 1, 1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 46) {
+      this.answer = new Array(1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0); this.rowClues = new Array(2, -1, 1, 1, 1, -1); this.colClues = new Array(1, 4, 0, -1, 3, 1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
+    } else if (index == 32) {
+      this.answer = new Array(0,1,0,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,1,0); this.rowClues = new Array(4, -1, 2, -1, 2, -1); this.colClues = new Array(-1, 3, -1, 2, 2, -1); this.givens = new Array(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0);
+    } else if (index == 24) {
+      this.answer = new Array(0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,1,0,1,1,0,0,1,0,1); this.rowClues = new Array(0, 1, -1, -1, 2, 3); this.colClues = new Array(-1, 1, 0, -1, -1, 3); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0);
+    } else if (index == 36) {
+      this.answer = new Array(0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,1); this.rowClues = new Array(1, 3, 1, 2, 0, -1); this.colClues = new Array(0, 2, 0, 3, -1, -1); this.givens = new Array(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    } else if (index == 19) {
+      this.answer = new Array(0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0,0,0,0); this.rowClues = new Array(2, -1, 1, 3, -1, -1); this.colClues = new Array(0, 3, -1, -1, 1, 2); this.givens = new Array(0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0);
+    } else if (index == 47) {
+      this.answer = new Array(1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,1,1); this.rowClues = new Array(1, 1, 2, 1, -1, 2); this.colClues = new Array(-1, 1, 2, -1, 3, 1); this.givens = new Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    }
+    this.userGrid = new Array();
+    for (var i = 0; i < this.givens.length; ++i) {
+      if (this.givens[i] < 2) {
+        this.userGrid[i] = this.givens[i];
+      } else {
+        this.userGrid[i] = 2;
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isUserOcean = function(row, col) {
+    if (row < 0) return true; if (row >= 6) return true;
+    if (col < 0) return true; if (col >= 6) return true;
+    if (this.userGrid[row * 6 + col] == 1) return true;
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isUserShip = function(row, col) {
+    if (row < 0) return false; if (row >= 6) return false;
+    if (col < 0) return false; if (col >= 6) return false;
+    if (this.userGrid[row * 6 + col] == 2) return true;
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.getUserShipValue = function(row, col) {
+    if (this.isUserShip(row-1, col-1)) return 13;
+    if (this.isUserShip(row-1, col+1)) return 13;
+    if (this.isUserShip(row+1, col-1)) return 13;
+    if (this.isUserShip(row+1, col+1)) return 13;
+    var ship_left = this.isUserShip(row, col-1);
+    var ship_right = this.isUserShip(row, col+1);
+    var ship_up = this.isUserShip(row-1, col);
+    var ship_down = this.isUserShip(row+1, col);
+    if ((ship_left || ship_right) && (ship_up || ship_down)) return 13;
+    if (ship_left && ship_right) return 7;
+    if (ship_up && ship_down) return 7;
+    var ocean_left = this.isUserOcean(row, col-1);
+    var ocean_right = this.isUserOcean(row, col+1);
+    var ocean_up = this.isUserOcean(row-1, col);
+    var ocean_down = this.isUserOcean(row+1, col);
+    if (ship_up && ocean_down) return 3;
+    if (ship_right && ocean_left) return 4;
+    if (ship_down && ocean_up) return 5;
+    if (ship_left && ocean_right) return 6;
+    if (ship_down) return 14;
+    if (ship_left) return 15;
+    if (ship_up) return 16;
+    if (ship_right) return 17;
+    if (ocean_left && ocean_right && ocean_up && ocean_down) return 2;
+    return 8;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.gridHTML = function(row, col) {
+    var index = row * 6 + col;
+    var color = "";
+    var value = 0;
+    if (this.givens[index] != 0) {
+      color = "black";
+      value = this.givens[index];
+    } else {
+      color = "brown";
+      if (this.userGrid[index] < 2) {
+        value = this.userGrid[index];
+      } else {
+        value = this.getUserShipValue(row, col);
+      }
+    }
+
+    if (value == 0) {
+      return '<img src="' + this.prefix + 'cell_empty.png" alt="-">';
+    }
+    if (value >= 14 || value == 8) {
+      value += 'a';
+    }
+    var png = this.prefix + 'cell_' + color + '_' + value + '.png';
+    if (color == "black") {
+      return ('<img src="' + png + '" alt="G' + value + '" title="given information">');
+    }
+    if (color == "brown") {
+      return ('<img src="' + png + '" alt="U' + value + '" title="placed by you">');
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.rowCount = function(row) {
+    var answer = 0;
+    for (var col = 0; col < 6; ++col) {
+      if (this.userGrid[row * 6 + col] == 2) answer++;
+    }
+    return answer;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.colCount = function(col) {
+    var answer = 0;
+    for (var row = 0; row < 6; ++row) {
+      if (this.userGrid[row * 6 + col] == 2) answer++;
+    }
+    return answer;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isSolved = function() {
+    for (var i = 0; i < 36; ++i) {
+      if (this.userGrid[i] == 0) return false;
+      if (this.answer[i] + 1 != this.userGrid[i]) return false;
+    }
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.rowHTML = function(row) {
+    var value = this.rowClues[row];
+    if (value == -1) {
+      return ('<img src="' + this.prefix + 'row_empty.png" alt="?" title="no information for this row">');
+    }
+    var userCount = this.rowCount(row);
+    var color = "black";
+    var alt = "B";
+    var title = "row not satisfied yet";
+    if (userCount == value) {
+      color = "green";
+      alt = "G";
+      title = "row satisfied";
+    } else if (userCount > value) {
+      color = "red";
+      alt = "R";
+      title = "row over-satisfied";
+    }
+    var png = this.prefix + 'row_' + color + '_' + value + '.png';
+    return ('<img src="' + png + '" alt="' + alt + value + '" title="' + title + '">');
+  }
+
+  puzzle_data__MODULE_ID__.prototype.colHTML = function(col) {
+    var value = this.colClues[col];
+    if (value == -1) {
+      return ('<img src="' + this.prefix + 'col_empty.png" alt="?" title="no information for this column">');
+    }
+    var userCount = this.colCount(col);
+    var color = "black";
+    var alt = "B";
+    var title = "column not satisfied yet";
+    if (userCount == value) {
+      color = "green";
+      alt = "G";
+      title = "column satisfied";
+    } else if (userCount > value) {
+      color = "red";
+      alt = "R";
+      title = "column over-satisfied";
+    }
+    var png = this.prefix + 'col_' + color + '_' + value + '.png';
+    return ('<img src="' + png + '" alt="' + alt + value + '" title="' + title + '">');
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getNormalView = function(index) {
+    var row = Math.floor(index / 7);
+    var col = index % 7;
+    if (row == 6 && col == 6) {
+      if (this.isSolved()) {
+        user_solved__MODULE_ID__();
+      }
+      return '<img src="' + this.prefix + 'corner.png" alt="reset" title="click here to reset the puzzle">';
+    } else if (row == 6) {
+      return this.colHTML(col);
+    } else if (col == 6) {
+      return this.rowHTML(row);
+    } else {
+      return this.gridHTML(row, col);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSourceView = function(source, target) {
+    if (source == 48) {
+      return '<img src="' + this.prefix + 'corner-light.png" alt="reset" title="click here to reset the puzzle">';
+    } else {
+      return '<img src="' + this.prefix + 'grey.png" alt="flux" title="cell selected">';
+    }
+    return this._IGGG_getNormalView(source);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getTargetView = function(source, target) {
+    return this._IGGG_getNormalView(target);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getDragView = function(index) {
+    return this._IGGG_getNormalView(index);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSurrogateView = function(index) {
+    return ("");
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleDrag = function(source, target) {
+    if (source == 48) {
+      this.resetPuzzle(this.puzzleNum);
+      user_reset__MODULE_ID__(false);
+      return;
+    }
+    var index = Math.floor(source / 7) * 6 + (source % 7);
+    if (game__MODULE_ID__.isRightButton()) {
+      this.userGrid[index] = (this.userGrid[index] + 1) % 3;
+    } else {
+      this.userGrid[index] = (this.userGrid[index] + 2) % 3;
+    }
+    this._IGGG_refreshCell(source - 8);
+    this._IGGG_refreshCell(source - 7);
+    this._IGGG_refreshCell(source - 6);
+    this._IGGG_refreshCell(source - 1);
+    this._IGGG_refreshCell(source);
+    this._IGGG_refreshCell(source + 1);
+    this._IGGG_refreshCell(source + 6);
+    this._IGGG_refreshCell(source + 7);
+    this._IGGG_refreshCell(source + 8);
+    this._IGGG_refreshCell(Math.floor(source/7) * 7 + 6);
+    this._IGGG_refreshCell(42 + source % 7);
+    this._IGGG_refreshCell(48);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleClick = function(source) {
+    // do nothing
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragSource = function(index) {
+    var row = Math.floor(index / 7);
+    var col = index % 7;
+    if (row == 6 && col == 6) return true;
+    if (row == 6 || col == 6) return false;
+    var index = row * 6 + col;
+    if (this.givens[index] != 0) return false;
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragTarget = function(index) {
+    return false;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragStart = function(object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetHit = function(object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragTargetLost = function(object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragEnd = function(s_object, t_object) {
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleOnDragClick = function(object) {
+  }
+
+  //   _IGGG_refreshCell(index)
+  //   _IGGG_addDragSource(index)
+  //   _IGGG_removeDragSource(index)
+  //   _IGGG_refreshDragSources()
+  //   _IGGG_addDragTarget(index)
+  //   _IGGG_removeDragTarget(index)
+  //   _IGGG_refreshDragTargets()
+
+  ///////////////////////////////////////
+
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  var prefs__MODULE_ID__;
+
+  var puznum__MODULE_ID__ = 0;
+  var curpuznum__MODULE_ID__ = 0;
+  var puzsolved__MODULE_ID__ = new Array();
+
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+                                                                                                                                                                  
+  function start__MODULE_ID__() {
+
+    prefs__MODULE_ID__ = new _IG_Prefs(__MODULE_ID__);
+    getPrefs__MODULE_ID__();
+
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+
+    reset__MODULE_ID__(curpuznum__MODULE_ID__);
+
+    _IG_AdjustIFrameHeight();
+    solved_already__MODULE_ID__ = false;
+  }
+
+  function table_html__MODULE_ID__() {
+    var result = "";
+    result += '<span id="gameboard__MODULE_ID__">';
+    result += game__MODULE_ID__.getTableHTML();
+    result += '</span>';
+    return result;
+  }
+
+  function reset__MODULE_ID__(puznum) {
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid", 7, 7);
+    _gel("table_html").innerHTML = game__MODULE_ID__.getTableHTML();
+    puzzle__MODULE_ID__.resetPuzzle(puznum);
+    game__MODULE_ID__.initDragging();
+  }
+
+//////////////////////////
+
+  function getPrefs__MODULE_ID__() {
+    // Get user preferences
+    var data = prefs__MODULE_ID__.getString("minibat2");
+    for (var i=0; i<50; i++) {
+      var ch = data.charAt(i);
+      puzsolved__MODULE_ID__[i] = (ch % 2 == 1);
+      if (ch >= 2) curpuznum__MODULE_ID__ = i;
+    }
+    _gel("newp").disabled = true;
+    puznum__MODULE_ID__ = curpuznum__MODULE_ID__;
+    _gel("puznum").innerHTML = (curpuznum__MODULE_ID__*1+1) + (puzsolved__MODULE_ID__[curpuznum__MODULE_ID__] ? "*" : "");
+    _gel("newp").value = "On Puzzle " + (curpuznum__MODULE_ID__*1+1);
+    _gel("levp1").disabled = (puznum__MODULE_ID__ >= 49);
+    _gel("levm1").disabled = (puznum__MODULE_ID__ <= 0);
+    updatePrefTable__MODULE_ID__();
+  }
+
+  function setPrefs__MODULE_ID__() {
+    var data = "";
+    for (var i=0; i<50; i++) {
+      var ch = 0;
+      if (puzsolved__MODULE_ID__[i]) ch++;
+      if (curpuznum__MODULE_ID__ == i) ch += 2;
+      data += ch;
+    } 
+    prefs__MODULE_ID__.set("minibat2", data);
+    updatePrefTable__MODULE_ID__();
+  }
+
+  function resetPrefs__MODULE_ID__() {
+    for (var i=0; i<50; i++) {
+      puzsolved__MODULE_ID__[i] = false;
+    }
+    setPrefs__MODULE_ID__();
+  }
+
+  function updatePrefTable__MODULE_ID__() {
+    var num = 0;
+    for (var i=0; i<50; i++) {
+      if (puzsolved__MODULE_ID__[i]) {
+        _gel("pv" + i).style.backgroundColor = "#00FF00";
+        num++;
+      } else {
+        _gel("pv" + i).style.backgroundColor = "#FF0000";
+      }
+    }
+    _gel("pv" + curpuznum__MODULE_ID__).style.backgroundColor = "#0000FF";
+    if (num == 50) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+  }
+
+//////////////////////////
+
+  function changeLevel__MODULE_ID__(amount) {
+    puznum__MODULE_ID__ += amount;
+    if (puznum__MODULE_ID__ < 0) puznum__MODULE_ID__ = 0;
+    if (puznum__MODULE_ID__ > 49) puznum__MODULE_ID__ = 49;
+
+    _gel("newp").disabled = false;
+    _gel("newp").value = "Get Puzzle " + (puznum__MODULE_ID__*1+1) + (puzsolved__MODULE_ID__[puznum__MODULE_ID__] ? "*" : "");
+
+    _gel("levp1").disabled = (puznum__MODULE_ID__ >= 49);
+    _gel("levm1").disabled = (puznum__MODULE_ID__ <= 0);
+  }
+
+  function reset_button__MODULE_ID__() {
+    changeLevel__MODULE_ID__(0);
+    _gel("newp").disabled = true;
+    _gel("puznum").innerHTML = (puznum__MODULE_ID__*1+1) + (puzsolved__MODULE_ID__[puznum__MODULE_ID__] ? "*" : "");
+    _gel("newp").value = "On Puzzle " + (puznum__MODULE_ID__*1+1);
+    curpuznum__MODULE_ID__ = puznum__MODULE_ID__;
+    user_reset__MODULE_ID__(true);
+    reset__MODULE_ID__(puznum__MODULE_ID__);
+    setPrefs__MODULE_ID__();
+    solved_already__MODULE_ID__ = false;
+  }
+
+  function user_solved__MODULE_ID__() {
+    if (!solved_already__MODULE_ID__) {
+      _gel("win").innerHTML = "Congratulations!";
+      solved_already__MODULE_ID__ = true;
+      puzsolved__MODULE_ID__[curpuznum__MODULE_ID__] = true;
+      setPrefs__MODULE_ID__();
+    }
+  }
+                                                                                                                                                                  
+  function user_reset__MODULE_ID__(update_stats) {
+    _gel("win").innerHTML = "&nbsp;"
+    if (update_stats && !solved_already__MODULE_ID__) {
+      solved_already__MODULE_ID__ = false;
+    }
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="changeLevel__MODULE_ID__(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="changeLevel__MODULE_ID__(-1)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="reset_button__MODULE_ID__()"/>
+</form>
+
+<b>Mini Battleships</b>:  Fifty small <a target="_top" href="http://en.wikipedia.org/wiki/Battleship_(puzzle)">Battleships</a> puzzles!
+Place the six-ship fleet into the grid.
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+   Ships can be oriented vertically or horizontally.
+   The numbers along the side tell you how many "ship parts" are in that respective row or column.
+   Ships are never adjacent to each other, not even diagonally.
+   Some ship components and blank spaces are given to you and cannot be changed.
+</span>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   All 36 squares must be labeled before the puzzle is considered solved.
+   Click on an empty space to mark it with a ship part.  Click on a brown ship part to mark it with an ocean ('x').
+   Click on an brown ocean mark to make it empty.  Right-click has the reverse effect of click.
+   As you surround a ship part with ocean, it will be automatically shaped to fit.
+   The numbers will turn <span style="color:#008000">green</span> or <span style="color:#FF0000">red</span>
+   depending on how many ship parts you've placed.
+</span>
+<BR>
+
+<table border="0" cellpadding="2px">
+<tr><td>
+<span id="table_html"></span>
+</td><td valign="top">
+<img src="http://weihwa.images03.googlepages.com/fleet.png" alt="A fleet has one length-3 cruiser, two length-2 destroyers, and three length-1 submarines">
+</td></tr>
+</table>
+
+<HR>
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <table border=0 cellpadding=0 cellspacing=0><tr>
+    <td id="pv0" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv1" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv2" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv3" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv4" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv5" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv6" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv7" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv8" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv9" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+  </tr><tr>
+    <td id="pv10" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv11" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv12" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv13" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv14" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv15" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv16" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv17" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv18" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv19" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+  </tr><tr>
+    <td id="pv20" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv21" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv22" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv23" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv24" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv25" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv26" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv27" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv28" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv29" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+  </tr><tr>
+    <td id="pv30" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv31" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv32" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv33" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv34" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv35" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv36" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv37" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv38" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv39" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+  </tr><tr>
+    <td id="pv40" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv41" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv42" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv43" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv44" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv45" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv46" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv47" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+    <td id="pv48" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td> <td id="pv49" style="height:3;width:3"><img src="http://www.google.com/ig/images/cleardot.gif"></td>
+  </tr></table>
+
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td>
+  <input style="font-size:10" type="button" value="Clear Stats" onclick="resetPrefs__MODULE_ID__()"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

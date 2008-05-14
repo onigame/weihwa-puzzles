@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20061201@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="100">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_1201"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20061201@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/igoogle_gridlib.js"></script>
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/igoogle_gridlib.js"></script>
+--->
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json2.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function _IG_game_state() {
+    this.cur_puz = 0;
+    this.puz_count = 24;
+    this.puz_solved = new Array();
+    this.puz_progress = new Array();
+    for (var i=0; i<this.puz_count; ++i) {
+      this.puz_solved[i] = 0;
+      this.puz_progress[i] = new Array();
+    }
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
+    if (this.game_state.puz_solved[puznum] == 1) {
+      return "#00FF00";
+    } else {
+      return "#FF0000";
+    }
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.score = function() {
+    var answer = 0;
+    for (var i=0; i<this.game_state.puz_count; ++i) {
+      answer += this.game_state.puz_solved[i];
+    }
+    return answer;
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+    var num = this.score();
+    if (num == 12) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = this.score();
+  }
+
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+    this.prefix = 'http://weihwa.images03.googlepages.com/';
+//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/20061201-trilands/';
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+    this.load_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.clearPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+    this._IGG_refreshAll();
+    this.save_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.resetPuzzleData = function(index) {
+    if (index == 0) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,0,1,0,1,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,0,0,0,1,1,1,1,0,0,1,0,0,0,1,1,1,0,0,1,0,1,1,1,1,1,1,0,1,1,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 1) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,1,1,0,1,1,1,1,0,0,1,1,0,0,1,1,1,0,0,1,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 2) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,1,0,0,1,0,0,0,1,0,1,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,1,1,0,1,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0,1,1,0,1,1,1,0,0,1,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 3) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,1,0,1,0,0,0,1,1,0,1,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,1,0,1,1,1,1,1,0,0,0,1,0,1,1,1,1,1,0,0,0,1,0,1,1,1,0,0,1,0,1,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,1,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 4) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1,1,0,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,1,0,0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 5) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,1,1,0,0,1,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,1,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,1,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 6) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1,1,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,1,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,0,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,0,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 7) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,1,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,1,1,0,0,1,0,0,0,1,0,0,1,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0,1,1,0,1,1,1,0,1,1,0,1,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 8) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,1,1,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,1,0,1,1,1,1,0,1,0,0,0,0,1,1,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 9) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,0,1,0,1,0,0,0,0,0,0,1,1,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,0,1,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,0,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 10) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,1,1,0,1,0,0,0,1,1,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,1,0,1,0,1,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 11) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,1,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,1,0,1,1,1,1,1,0,0,1,1,0,1,1,1,0,1,1,0,0,0,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 12) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,1,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 13) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,1,0,1,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 14) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,1,0,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,1,0,1,1,1,1,0,0,1,1,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 15) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,1,1,0,0,1,0,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 16) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,1,0,1,0,0,0,1,1,0,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,1,0,0,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 17) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,1,0,1,0,0,1,0,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,1,0,1,1,1,1,0,0,0,0,1,1,0,1,1,1,1,0,1,0,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 18) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,1,0,0,1,1,1,1,1,0,1,1,0,0,1,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 19) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,1,0,0,1,1,1,1,1,0,0,1,0,0,1,1,1,1,0,1,1,0,0,0,1,1,1,0,1,0,0,0,1,0,1,1,1,0,0,0,1,0,0,1,1,1,1,0,1,0,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 20) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,1,0,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,1,1,0,0,1,1,1,0,0,0,1,0,0,0,1,1,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 21) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,1,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,1,0,1,1,1,1,0,0,0,1,0,1,1,1,1,0,1,0,0,0,0,0,1,1,1,1,0,0,0,1,0,1,1,1,1,0,0,1,0,0,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 22) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,1,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,1,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,1,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1);
+    } else if (index == 23) {
+      this.answer = new Array(0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,1,0,0,0,1,0,0,1,1,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0);
+      this.givens = new Array(1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1);
+    }
+    this.area = 81;
+    this.rowcount = 15;
+    this.colcount = 14;
+    this.userGrid = new Array();
+    for (var i = 0; i < this.answer.length; ++i) {
+      this.userGrid[i] = this.givens[i];
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.load_progress = function () {
+    if (!this._IGG_refreshCell) {
+      this._IGG_refreshCell = function () {};
+    }
+    if (!this.game_state.puz_progress) {
+      this.game_state.puz_progress = new Array();
+    }
+    if (!this.game_state.puz_progress[this.game_state.cur_puz]) {
+      this.game_state.puz_progress[this.game_state.cur_puz] = new Array();
+    }
+    if (this.game_state.puz_progress[this.game_state.cur_puz].length == 0) return;
+    for (var i=0; i<this.area; i++) {
+      if (this.game_state.puz_progress[this.game_state.cur_puz][i]) {
+        this.userGrid[i] = this.game_state.puz_progress[this.game_state.cur_puz][i];
+      }
+    }
+    if (this.isSolved()) {
+      _gel("startoverbutton").value = "Solved!";
+    } else {
+      _gel("startoverbutton").value = "Start Over";
+    }
+    if (this._IGG_refreshAll)
+      this._IGG_refreshAll();
+  }
+                                                                                                                                                                                              
+  puzzle_data__MODULE_ID__.prototype.save_progress = function () {
+    if (!this.game_state.puz_progress) {
+      this.game_state.puz_progress = new Array();
+    }
+    if (!this.game_state.puz_progress[this.game_state.cur_puz]) {
+      this.game_state.puz_progress[this.game_state.cur_puz] = new Array();
+    }
+    for (var i=0; i<this.area; i++) {
+      this.game_state.puz_progress[this.game_state.cur_puz][i] = this.userGrid[i];
+    }
+    pref_controller__MODULE_ID__.game_state = this.game_state;
+    pref_controller__MODULE_ID__.setPrefs();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.userDataAt = function(pos) {
+    if (pos < 0) return 1;
+    if (pos >= this.area) return 1;
+    return (this.userGrid[pos]);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.color = function(row, col) {
+    var magic = col * 2 + row * 19;
+    if (row % 2 == 0) {
+      if (col % 2 == (row/2) % 2) {
+        // diag UR, LL
+        var ur = this.userDataAt((magic - 4) / 4);
+        var ll = this.userDataAt((magic - 4) / 4 + 9);
+        if (ur == 1) {
+          return ((ll == 1) ? 0 : 3);
+        } else {
+          return ((ll == 1) ? 2 : 1);
+        }
+      } else {
+        // diag UL, LR
+        var ul = this.userDataAt((magic - 6) / 4);
+        var lr = this.userDataAt((magic - 6) / 4 + 10);
+        if (ul == 1) {
+          return ((lr == 1) ? 0 : 4);
+        } else {
+          return ((lr == 1) ? 5 : 1);
+        }
+      }
+    } else if (col % 2 == ((row-1)/2 % 2)) {
+      // right cell
+      var value = this.userDataAt((magic + 13) / 4);
+      return ((value == 1) ? 8 : 9); 
+    } else {
+      // left cell
+      var value = this.userDataAt((magic + 15) / 4);
+      return ((value == 1) ? 6 : 7); 
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.isSolved = function() {
+    for (var i = 0; i < this.area; ++i) {
+      if (this.userGrid[i] + this.answer[i] != 1) return false;
+    }
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_getNormalView = function(index) {
+    var row = Math.floor(index / 14);
+    var col = index % 14;
+    var color = this.color(row, col);
+    return '<img src="' + this.prefix + 'hexland' + color + '.png">';
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_getSurrogateView = function(index) {
+    return ("");
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_handleDrag = function(source, target) {
+    var row = Math.floor(source / this.colcount);
+    var col = source % this.colcount;
+    var magic = col * 2 + row * 19;
+    var pos = 0;
+    var left = 0;;
+    if (col % 2 == ((row-1)/2 % 2)) {
+      pos = (magic + 13) / 4;
+      left = source - 1;
+    } else {
+      pos = (magic + 15) / 4;
+      left = source;
+    }
+    this.userGrid[pos] = 1 - this.userGrid[pos];
+    this._IGG_refreshCell(left - this.colcount);
+    this._IGG_refreshCell(left - this.colcount + 1);
+    this._IGG_refreshCell(left);
+    this._IGG_refreshCell(left + 1);
+    this._IGG_refreshCell(left + this.colcount);
+    this._IGG_refreshCell(left + this.colcount + 1);
+    if (this.isSolved()) {
+      _gel("startoverbutton").value = "Solved!";
+      pref_controller__MODULE_ID__.game_state.puz_solved[pref_controller__MODULE_ID__.game_state.cur_puz] = 1;
+      pref_controller__MODULE_ID__.updatePrefDisplay();
+    } else {
+      _gel("startoverbutton").value = "Start Over";
+    }
+    this.save_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_isDragSource = function(index) {
+    var row = Math.floor(index / this.colcount);
+    var col = index % this.colcount;
+    if (row % 2 == 0) return false;
+    if (row + col * 2 <= 5) return false;
+    if (row + col * 2 >= 35) return false;
+    if (row - col * 2 >= 9) return false;
+    if (col * 2 - row >= 21) return false;
+    var magic = col * 2 + row * 19;
+    if (col % 2 == ((row-1)/2 % 2)) {
+      // right cell
+      return (this.givens[(magic + 13) / 4] == 0);
+    } else {
+      // left cell
+      return (this.givens[(magic + 15) / 4] == 0);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGG_isDragTarget = function(index) {
+    return false;
+  }
+
+  ///////////////////////////////////////
+
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  var pref_controller__MODULE_ID__;
+
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+                                                                                                                                                                  
+  function start__MODULE_ID__() {
+    pref_controller__MODULE_ID__ = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_1201', true);
+    pref_controller__MODULE_ID__.num_puzzles = 24;
+    pref_controller__MODULE_ID__.box_height = 4;
+    pref_controller__MODULE_ID__.box_width = 4;
+    pref_controller__MODULE_ID__.rows = 4;
+    pref_controller__MODULE_ID__.cols = 6;
+
+    _gel("game_state_html").innerHTML = pref_controller__MODULE_ID__.getTableHTML();
+    pref_controller__MODULE_ID__.getPrefs();
+                                                                                                                                                                                              
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+    reset__MODULE_ID__(pref_controller__MODULE_ID__.game_state);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  function reset__MODULE_ID__(game_state) {
+    puzzle__MODULE_ID__.resetPuzzle(game_state);
+    game__MODULE_ID__ = new _IG_Grid(puzzle__MODULE_ID__, "mygrid", puzzle__MODULE_ID__.rowcount, puzzle__MODULE_ID__.colcount);
+    _gel("table_html").innerHTML = "";
+    game__MODULE_ID__.getTable().cellPadding = 0;
+    game__MODULE_ID__.getTable().cellSpacing = 0;
+    _gel("table_html").appendChild(game__MODULE_ID__.getTable());
+    puzzle__MODULE_ID__._IGG_refreshAll();
+    game__MODULE_ID__.initDragging();
+  }
+
+  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+    this.nav_puz += amount;
+    if (this.nav_puz < 0) this.nav_puz = 0;
+    if (this.nav_puz > this.game_state.puz_count) this.nav_puz = this.game_state.puz_count;
+    this.update_navbar();
+  }
+
+  _IG_puzzle_pref_controller.prototype.new_puzzle_request = function() {
+    this.game_state.cur_puz = this.nav_puz;
+    reset__MODULE_ID__(this.game_state);
+    this.setPrefs();
+    this.update_navbar();
+  }
+
+//////////////////////////
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="pref_controller__MODULE_ID__.change_level(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="pref_controller__MODULE_ID__.change_level(-1)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller__MODULE_ID__.new_puzzle_request()"/>
+</form>
+
+<b>Trilands</b>:  You must flood the giant island until you are left with 6 islands, each with three huts.
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+   Touching lands are considered to be part of the same island.
+</span>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   You may click on a hut to flood it; click it again to unflood it.
+</span>
+<BR>
+
+<table border=2 cellpadding=3 cellspacing=3><tr><td>
+<span id="table_html"></span>
+</td></tr><tr><td>
+<center>
+  <input id="startoverbutton" style="font-size:10;visibility:visible" type="button" value="Start Over"
+    onclick="puzzle__MODULE_ID__.clearPuzzle(pref_controller__MODULE_ID__.game_state);"/>
+</center>
+</td></tr></table>
+
+<HR>
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <center><span id="game_state_html"></span></center>
+                                                                                                                                                                                              
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td style="font-size:9pt">
+<span style="visibility:hidden">
+  Your points: <span id="points">?</span>
+</span>
+  <input id="resetbutton" style="font-size:10;visibility:hidden" type="button" value="Clear Stats"
+    onclick="pref_controller__MODULE_ID__.resetPrefs();puzzle__MODULE_ID__.resetPuzzle(pref_controller__MODULE_ID__.game_state);"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+                                                                                                                                                                                              
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+

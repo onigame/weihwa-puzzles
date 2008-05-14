@@ -1,0 +1,1355 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20061110@gmail.com"
+    author_link="http://weihwa.feedback.googlepages.com/home"
+    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="100">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_1110"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20061110@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<!---
+<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils4.js"></script>
+--->
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils4.js"></script>
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json2.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function _IG_game_state() {
+    this.cur_puz = 0;
+    this.puz_count = 12;
+    this.puz_solved = new Array();
+    this.puz_progress = new Array();
+    for (var i=0; i<this.puz_count; ++i) {
+      this.puz_solved[i] = 0;
+      this.puz_progress[i] = new Array();
+    }
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
+    if (this.game_state.puz_solved[puznum] == 1) {
+      return "#00FF00";
+    } else {
+      return "#FF0000";
+    }
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.score = function() {
+    var answer = 0;
+    for (var i=0; i<this.game_state.puz_count; ++i) {
+      answer += this.game_state.puz_solved[i];
+    }
+    return answer;
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+    var num = this.score();
+    if (num == 12) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = this.score();
+  }
+
+  ///////////////////////////////////////////////
+
+  function kakuro_cell__MODULE_ID__(id, max_value) {
+    this.id = id;
+    this.max_value = max_value;
+    this.fixed = false;
+    this.value = -1;
+    this.regions = new Array();
+
+    this.friend_values = new Multiset();
+  }
+
+  kakuro_cell__MODULE_ID__.prototype.add_region = function (region) {
+    this.regions.push(region);
+  }
+
+  kakuro_cell__MODULE_ID__.prototype.get_value = function () {
+    return this.value;
+  }
+
+  kakuro_cell__MODULE_ID__.prototype.allows = function (value) {
+    return (!this.friend_values.has(value));
+  }
+
+  kakuro_cell__MODULE_ID__.prototype.allowed_values = function () {
+    var answer = "";
+    for (var i=1; i<=this.max_value; ++i) {
+      if (!this.friend_values.has(i)) {
+        answer += "" + i;
+      }
+    }
+    return answer;
+  }
+
+  kakuro_cell__MODULE_ID__.prototype.add_placed = function (value, src_id) {
+    if (src_id == this.id) return;
+    var change_happening = (!this.friend_values.has(value));
+    this.friend_values.add(value);
+    if (change_happening)
+      this.changed(this.id);
+  }
+
+  kakuro_cell__MODULE_ID__.prototype.remove_placed = function (value, src_id) {
+    if (src_id == this.id) return;
+    var change_happening = (this.friend_values.count(value) == 1);
+    this.friend_values.remove(value);
+    if (change_happening)
+      this.changed(this.id);
+  }
+
+  kakuro_cell__MODULE_ID__.prototype.set_value = function (value, fixed) {
+    for (var i = 0; i < this.regions.length; ++i) {
+      this.regions[i].remove_placed(this.value, this.id);
+      this.regions[i].add_placed(value, this.id);
+    }
+    this.fixed = fixed;
+    this.value = value;
+    this.changed(this.id);
+  }
+
+  kakuro_cell__MODULE_ID__.prototype.reset_value = function () {
+    for (var i = 0; i < this.regions.length; ++i) {
+      this.regions[i].remove_placed(this.value, this.id);
+    }
+    this.value = -1;
+    this.changed(this.id);
+  }
+
+  kakuro_cell__MODULE_ID__.prototype.changed = function (id) {
+    // callback -- indicates cell change.
+  }
+
+  function kakuro_region__MODULE_ID__(id, sum, max_value) {
+    this.id = id;
+    this.sum = sum;
+    this.max_value = max_value;
+    this.len = 0;
+    this.placed_count = 0;
+    this.cells = new Array();
+    this.placed = new Multiset();
+    this.cur_sum = 0;
+  }
+
+  kakuro_region__MODULE_ID__.prototype.add_cell = function (cell) {
+    this.cells.push(cell);
+    this.len++;
+  }
+
+  kakuro_region__MODULE_ID__.prototype.add_placed = function (value, src_id) {
+    if (value != -1) {
+      this.placed.add(value);
+      this.cur_sum += value;
+      this.placed_count++;
+      for (var i = 0; i < this.cells.length; ++i) {
+        if (this.cells[i].id != src_id) {  // this check isn't really necessary but it pays to be paranoid.
+          this.cells[i].add_placed(value, src_id);
+        }
+      }
+      this.changed(this.id);
+    }
+  }
+
+  kakuro_region__MODULE_ID__.prototype.has_dupes = function (cell) {
+    return this.placed.has_dupes();
+  }
+
+  kakuro_region__MODULE_ID__.prototype.satisfied = function (cell) {
+    return ((this.cur_sum == this.sum) && (!this.placed.has_dupes()) && (this.placed_count == this.len));
+  }
+
+  kakuro_region__MODULE_ID__.prototype.filled_but_wrong = function (cell) {
+    return ((this.cur_sum != this.sum) && (!this.placed.has_dupes()) && (this.placed_count == this.len));
+  }
+
+  kakuro_region__MODULE_ID__.prototype.allowed_values = function (cell) {
+    var answer = "";
+    for (var i=1; i<=this.max_value; ++i) {
+      if (!this.placed.has(i)) {
+        answer += i;
+      }
+    }
+    return answer;
+  }
+
+  kakuro_region__MODULE_ID__.prototype.remove_placed = function (value, src_id) {
+    if (value != -1) {
+      this.placed.remove(value);
+      this.cur_sum -= value;
+      this.placed_count--;
+      for (var i = 0; i < this.cells.length; ++i) {
+        if (this.cells[i].id != src_id) {  // this check isn't really necessary but it pays to be paranoid.
+          this.cells[i].remove_placed(value, src_id);
+        }
+      }
+      this.changed(this.id);
+    }
+  }
+
+  kakuro_region__MODULE_ID__.prototype.changed = function (id) {
+    // callback -- indicates region change.
+  }
+
+  ////////////////////////////////////////////////////////
+
+  function puzzle_data__MODULE_ID__() {
+  }
+
+  puzzle_data__MODULE_ID__.prototype.reset_puzzle = function(game_state) {
+    this.x = -1;  // generic "unused" value.
+    var x = this.x;
+
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+
+    if (index == 0) {
+      this.height = 6;
+      this.width = 6;
+      this.max_val = 5;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,
+        0,0,0,0,0,1,1,
+        0,0,0,0,1,1,1,
+        0,0,0,1,1,1,0,
+        0,0,1,1,1,0,0,
+        0,1,1,0,0,0,0,
+        0,1,1,0,0,0,0
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,
+        x,x,x,x,x,0,0,
+        x,x,x,x,1,1,1,
+        x,x,x,2,2,2,x,
+        x,x,3,3,3,x,x,
+        x,4,4,x,x,x,x,
+        x,5,5,x,x,x,x
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,
+        x,x,x,x,x,4,5,
+        x,x,x,x,3,4,5,
+        x,x,x,2,3,4,x,
+        x,x,1,2,3,x,x,
+        x,0,1,x,x,x,x,
+        x,0,1,x,x,x,x
+      );
+      this.a_sum = new Array(4,6,8,7,3,7);
+      this.d_sum = new Array(7,7,4,7,6,4);
+    } else if (index == 1) {
+      this.height = 6;
+      this.width = 7;
+      this.max_val = 6;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,0,
+        0,1,1,0,0,0,0,0,
+        0,1,1,0,1,1,0,0,
+        0,0,1,1,1,1,0,0,
+        0,0,0,1,1,1,1,1,
+        0,0,0,1,1,0,1,1,
+        0,0,0,0,0,0,1,1
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,0,0,x,x,x,x,x,
+        x,1,1,x,2,2,x,x,
+        x,x,3,3,3,3,x,x,
+        x,x,x,4,4,4,4,4,
+        x,x,x,5,5,x,6,6,
+        x,x,x,x,x,x,7,7
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,0,1,x,x,x,x,x,
+        x,0,1,x,3,4,x,x,
+        x,x,1,2,3,4,x,x,
+        x,x,x,2,3,4,5,6,
+        x,x,x,2,3,x,5,6,
+        x,x,x,x,x,x,5,6
+      );
+      this.a_sum = new Array(7,3,5,10,16,6,6,3);
+      this.d_sum = new Array(5,7,11,11,8,6,8);
+    } else if (index == 2) {
+      this.height = 6;
+      this.width = 6;
+      this.max_val = 6;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,
+        0,0,0,0,1,1,1,
+        0,0,0,1,1,1,1,
+        0,0,1,1,0,1,1,
+        0,1,1,0,1,1,0,
+        0,1,1,1,1,0,0,
+        0,0,1,1,0,0,0
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,
+        x,x,x,x,0,0,0,
+        x,x,x,1,1,1,1,
+        x,x,2,2,x,3,3,
+        x,4,4,x,5,5,x,
+        x,6,6,6,6,x,x,
+        x,x,7,7,x,x,x
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,
+        x,x,x,x,4,6,7,
+        x,x,x,2,4,6,7,
+        x,x,1,2,x,6,7,
+        x,0,1,x,5,6,x,
+        x,0,1,3,5,x,x,
+        x,x,1,3,x,x,x
+      );
+      this.a_sum = new Array(8,12,4,3,6,3,13,7);
+      this.d_sum = new Array(3,12,5,8,4,5,10,9);
+    } else if (index == 3) {
+      this.height = 8;
+      this.width = 8;
+      this.max_val = 7;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,0,0,
+        0,0,0,0,1,1,0,0,0,
+        0,0,0,1,1,1,1,0,0,
+        0,0,1,1,0,0,1,1,0,
+        0,1,1,0,0,0,0,1,1,
+        0,1,1,0,0,0,0,1,1,
+        0,0,1,1,0,0,1,1,0,
+        0,0,0,1,1,1,1,0,0,
+        0,0,0,0,1,1,0,0,0
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,x,x,
+        x,x,x,x,0,0,x,x,x,
+        x,x,x,1,1,1,1,x,x,
+        x,x,2,2,x,x,3,3,x,
+        x,4,4,x,x,x,x,5,5,
+        x,6,6,x,x,x,x,7,7,
+        x,x,8,8,x,x,9,9,x,
+        x,x,x,10,10,10,10,x,x,
+        x,x,x,x,11,11,x,x,x
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,x,x,
+        x,x,x,x,4,6,x,x,x,
+        x,x,x,2,4,6,8,x,x,
+        x,x,1,2,x,x,8,10,x,
+        x,0,1,x,x,x,x,10,11,
+        x,0,1,x,x,x,x,10,11,
+        x,x,1,3,x,x,9,10,x,
+        x,x,x,3,5,7,9,x,x,
+        x,x,x,x,5,7,x,x,x
+      );
+      this.a_sum = new Array(4,19,4,10,3,6,8,7,5,5,10,3);
+      this.d_sum = new Array(3,12,6,5,10,3,5,5,7,7,14,7);
+    } else if (index == 4) {
+      this.height = 7;
+      this.width = 7;
+      this.max_val = 7;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,0,
+        0,1,1,1,0,0,0,0,
+        0,1,1,1,1,0,0,0,
+        0,1,1,0,1,1,0,0,
+        0,1,1,1,0,1,1,1,
+        0,0,0,1,1,0,1,1,
+        0,0,0,0,1,1,1,1,
+        0,0,0,0,0,1,1,1
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,0,0,0,x,x,x,x,
+        x,1,1,1,1,x,x,x,
+        x,2,2,x,3,3,x,x,
+        x,4,4,4,x,5,5,5,
+        x,x,x,6,6,x,7,7,
+        x,x,x,x,8,8,8,8,
+        x,x,x,x,x,9,9,9
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,0,1,2,x,x,x,x,
+        x,0,1,2,4,x,x,x,
+        x,0,1,x,4,6,x,x,
+        x,0,1,3,x,6,8,9,
+        x,x,x,3,5,x,8,9,
+        x,x,x,x,5,7,8,9,
+        x,x,x,x,x,7,8,9
+      );
+      this.a_sum = new Array(7,18,7,7,12,8,4,3,11,7);
+      this.d_sum = new Array(17,10,10,5,9,4,3,3,11,12);
+    } else if (index == 5) {
+      this.height = 7;
+      this.width = 7;
+      this.max_val = 7;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,0,
+        0,0,0,0,0,1,1,0,
+        0,0,0,0,1,1,1,1,
+        0,0,1,1,1,0,1,1,
+        0,1,1,1,0,1,1,1,
+        0,1,1,0,1,1,1,0,
+        0,1,1,1,1,0,0,0,
+        0,0,1,1,0,0,0,0
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,x,x,x,x,0,0,x,
+        x,x,x,x,1,1,1,1,
+        x,x,2,2,2,x,3,3,
+        x,4,4,4,x,5,5,5,
+        x,6,6,x,7,7,7,x,
+        x,8,8,8,8,x,x,x,
+        x,x,9,9,x,x,x,x
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,x,x,x,x,6,8,x,
+        x,x,x,x,4,6,8,9,
+        x,x,1,2,4,x,8,9,
+        x,0,1,2,x,7,8,9,
+        x,0,1,x,5,7,8,x,
+        x,0,1,3,5,x,x,x,
+        x,x,1,3,x,x,x,x
+      );
+      this.a_sum = new Array(3,13,13,4,7,8,10,6,14,6);
+      this.d_sum = new Array(12,18,6,5,7,5,3,4,15,9);
+    } else if (index == 6) {
+      this.height = 9;
+      this.width = 8;
+      this.max_val = 8;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,0,0,
+        0,0,0,0,1,1,0,0,0,
+        0,0,0,1,1,1,0,0,0,
+        0,0,1,1,1,0,1,1,0,
+        0,1,1,0,0,1,1,1,0,
+        0,1,1,0,1,1,0,1,1,
+        0,0,1,1,1,0,0,1,1,
+        0,0,1,1,0,1,1,1,0,
+        0,0,0,0,1,1,1,0,0,
+        0,0,0,0,1,1,0,0,0
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,x,x,
+        x,x,x,x,0,0,x,x,x,
+        x,x,x,1,1,1,x,x,x,
+        x,x,2,2,2,x,3,3,x,
+        x,4,4,x,x,5,5,5,x,
+        x,6,6,x,7,7,x,8,8,
+        x,x,9,9,9,x,x,10,10,
+        x,x,11,11,x,12,12,12,x,
+        x,x,x,x,13,13,13,x,x,
+        x,x,x,x,14,14,x,x,x
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,x,x,
+        x,x,x,x,4,7,x,x,x,
+        x,x,x,2,4,7,x,x,x,
+        x,x,1,2,4,x,10,12,x,
+        x,0,1,x,x,8,10,12,x,
+        x,0,1,x,5,8,x,12,13,
+        x,x,1,3,5,x,x,12,13,
+        x,x,1,3,x,9,11,12,x,
+        x,x,x,x,6,9,11,x,x,
+        x,x,x,x,6,9,x,x,x
+      );
+      this.a_sum = new Array(4,8,11,9,6,9,5,7,7,11,8,6,12,12,5);
+      this.d_sum = new Array(6,15,9,8,8,5,5,4,4,10,8,10,25,3);
+    } else if (index == 7) {
+      this.height = 9;
+      this.width = 8;
+      this.max_val = 8;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,0,0,
+        0,0,0,1,1,0,0,0,0,
+        0,0,1,1,1,1,0,0,0,
+        0,1,1,1,0,1,1,0,0,
+        0,1,1,0,1,1,1,0,0,
+        0,0,0,1,1,1,1,0,0,
+        0,0,0,1,1,1,0,1,1,
+        0,0,0,1,1,0,1,1,1,
+        0,0,0,0,1,1,1,1,0,
+        0,0,0,0,0,1,1,0,0
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,x,x,
+        x,x,x,0,0,x,x,x,x,
+        x,x,1,1,1,1,x,x,x,
+        x,2,2,2,x,3,3,x,x,
+        x,4,4,x,5,5,5,x,x,
+        x,x,x,6,6,6,6,x,x,
+        x,x,x,7,7,7,x,8,8,
+        x,x,x,9,9,x,10,10,10,
+        x,x,x,x,11,11,11,11,x,
+        x,x,x,x,x,12,12,x,x
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,x,x,
+        x,x,x,2,4,x,x,x,x,
+        x,x,1,2,4,6,x,x,x,
+        x,0,1,2,x,6,8,x,x,
+        x,0,1,x,5,6,8,x,x,
+        x,x,x,3,5,6,8,x,x,
+        x,x,x,3,5,6,x,10,11,
+        x,x,x,3,5,x,9,10,11,
+        x,x,x,x,5,7,9,10,x,
+        x,x,x,x,x,7,9,x,x
+      );
+      this.a_sum = new Array(13,14,9,8,8,8,15,11,5,7,9,10,3);
+      this.d_sum = new Array(6,16,9,11,12,15,16,6,10,6,8,5);
+    } else if (index == 8) {
+      this.height = 8;
+      this.width = 8;
+      this.max_val = 8;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,1,1,0,0,
+        0,0,0,1,1,1,1,1,0,
+        0,0,1,1,1,0,0,1,1,
+        0,1,1,0,1,1,0,1,1,
+        0,1,1,0,1,1,0,1,1,
+        0,1,1,0,0,1,1,1,0,
+        0,0,1,1,1,1,1,0,0,
+        0,0,0,1,1,0,0,0,0
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,x,x,
+        x,x,x,x,x,0,0,x,x,
+        x,x,x,1,1,1,1,1,x,
+        x,x,2,2,2,x,x,3,3,
+        x,4,4,x,5,5,x,6,6,
+        x,7,7,x,8,8,x,9,9,
+        x,10,10,x,x,11,11,11,x,
+        x,x,12,12,12,12,12,x,x,
+        x,x,x,13,13,x,x,x,x
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,x,x,
+        x,x,x,x,x,6,8,x,x,
+        x,x,x,2,4,6,8,10,x,
+        x,x,1,2,4,x,x,10,11,
+        x,0,1,x,4,7,x,10,11,
+        x,0,1,x,4,7,x,10,11,
+        x,0,1,x,x,7,9,10,x,
+        x,x,1,3,5,7,9,x,x,
+        x,x,x,3,5,x,x,x,x
+      );
+      this.a_sum = new Array(5,16,13,5,3,8,6,4,4,12,7,8,25,4);
+      this.d_sum = new Array(6,15,9,6,14,11,5,12,4,8,17,13);
+    } else if (index == 9) {
+      this.height = 8;
+      this.width = 7;
+      this.max_val = 8;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,0,
+        0,0,1,1,0,0,1,1,
+        0,1,1,1,1,0,1,1,
+        0,1,1,0,1,1,1,0,
+        0,0,0,0,1,1,1,0,
+        0,0,1,1,1,0,0,0,
+        0,0,1,1,1,0,1,1,
+        0,1,1,0,1,1,1,1,
+        0,1,1,0,0,1,1,0
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,x,0,0,x,x,1,1,
+        x,2,2,2,2,x,3,3,
+        x,4,4,x,5,5,5,x,
+        x,x,x,x,6,6,6,x,
+        x,x,7,7,7,x,x,x,
+        x,x,8,8,8,x,9,9,
+        x,10,10,x,11,11,11,11,
+        x,12,12,x,x,13,13,x
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,x,2,4,x,x,9,11,
+        x,0,2,4,6,x,9,11,
+        x,0,2,x,6,7,9,x,
+        x,x,x,x,6,7,9,x,
+        x,x,3,5,6,x,x,x,
+        x,x,3,5,6,x,10,12,
+        x,1,3,x,6,8,10,12,
+        x,1,3,x,x,8,10,x
+      );
+      this.a_sum = new Array(6,9,12,3,7,11,15,10,12,6,5,13,4,7);
+      this.d_sum = new Array(7,4,10,12,3,4,31,7,7,19,10,3,3);
+    } else if (index == 10) {
+      this.height = 8;
+      this.width = 7;
+      this.max_val = 8;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,0,
+        0,0,1,1,1,1,0,0,
+        0,0,1,1,1,1,1,0,
+        0,0,1,1,0,1,1,1,
+        0,1,1,0,0,0,1,1,
+        0,1,1,0,0,0,1,1,
+        0,1,1,1,0,1,1,0,
+        0,0,1,1,1,1,1,0,
+        0,0,0,1,1,1,1,0
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,x,0,0,0,0,x,x,
+        x,x,1,1,1,1,1,x,
+        x,x,2,2,x,3,3,3,
+        x,4,4,x,x,x,5,5,
+        x,6,6,x,x,x,7,7,
+        x,8,8,8,x,9,9,x,
+        x,x,10,10,10,10,10,x,
+        x,x,x,11,11,11,11,x
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,x,1,2,4,6,x,x,
+        x,x,1,2,4,6,8,x,
+        x,x,1,2,x,6,8,9,
+        x,0,1,x,x,x,8,9,
+        x,0,1,x,x,x,8,9,
+        x,0,1,3,x,7,8,x,
+        x,x,1,3,5,7,8,x,
+        x,x,x,3,5,7,8,x
+      );
+      this.a_sum = new Array(12,15,4,8,5,3,3,6,15,12,18,19);
+      this.d_sum = new Array(8,28,6,11,5,12,6,9,29,6);
+    } else if (index == 11) {
+      this.height = 7;
+      this.width = 7;
+      this.max_val = 8;
+      this.is_cell = new Array(
+        0,0,0,0,0,0,0,0,
+        0,1,1,0,0,1,1,1,
+        0,1,1,0,1,1,1,1,
+        0,1,1,1,1,1,0,0,
+        0,0,1,1,0,1,1,0,
+        0,0,0,1,1,1,1,1,
+        0,1,1,1,1,0,1,1,
+        0,1,1,1,0,0,1,1
+      );
+      this.a_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,0,0,x,x,1,1,1,
+        x,2,2,x,3,3,3,3,
+        x,4,4,4,4,4,x,x,
+        x,x,5,5,x,6,6,x,
+        x,x,x,7,7,7,7,7,
+        x,8,8,8,8,x,9,9,
+        x,10,10,10,x,x,11,11
+      );
+      this.d_id = new Array(
+        x,x,x,x,x,x,x,x,
+        x,0,2,x,x,7,8,10,
+        x,0,2,x,5,7,8,10,
+        x,0,2,4,5,7,x,x,
+        x,x,2,4,x,7,9,x,
+        x,x,x,4,6,7,9,11,
+        x,1,3,4,6,x,9,11,
+        x,1,3,4,x,x,9,11
+      );
+      this.a_sum = new Array(3,10,7,22,20,3,5,20,12,7,7,4);
+      this.d_sum = new Array(6,4,15,6,21,8,4,19,8,15,6,8);
+    }
+
+    // Now, stuff that's global to all puzzles.
+    this.area = (this.width+1) * (this.height+1);
+    this.cells = new Array(this.area);  // the top row and left column are unused, e.g.
+    for (var i=0;i<this.area;++i) {
+      this.cells[i] = new kakuro_cell__MODULE_ID__(i, this.max_val);
+    }
+
+    this.a_count = this.a_sum.length;
+    this.d_count = this.d_sum.length;
+    this.a_label = new Array(this.area);
+    this.d_label = new Array(this.area);
+    for (var i=this.area-1;i>=0;--i) {
+      this.a_label[i] = x;
+      this.d_label[i] = x;
+    }
+    for (var i=this.area-1;i>=0;--i) {
+      if (this.a_id[i] != x) {
+        this.a_label[i] = x;
+        this.a_label[i-1] = this.a_id[i];
+      }
+      if (this.d_id[i] != x) {
+        this.d_label[i] = x;
+        this.d_label[i-(this.width+1)] = this.d_id[i];
+      }
+    }
+
+    this.a_positions = new Array(this.a_count);
+    this.d_positions = new Array(this.d_count);
+    for (var i=0;i<this.area;++i) {
+      if (this.a_label[i] != x) {
+        this.a_positions[this.a_label[i]] = i;
+      }
+      if (this.d_label[i] != x) {
+        this.d_positions[this.d_label[i]] = i;
+      }
+    }
+
+    this.a_regions = new Array(this.a_count);  
+    this.d_regions = new Array(this.d_count);  
+    for (var i=0;i<this.a_count;++i) {
+      this.a_regions[i] = new kakuro_region__MODULE_ID__(i, this.a_sum[i], this.max_val);
+    }
+    for (var i=0;i<this.d_count;++i) {
+      this.d_regions[i] = new kakuro_region__MODULE_ID__(i, this.d_sum[i], this.max_val);
+    }
+    for (var i=0;i<this.area;++i) {
+      if (this.a_id[i] != x) {
+        this.cells[i].add_region(this.a_regions[this.a_id[i]]);
+        this.a_regions[this.a_id[i]].add_cell(this.cells[i]);
+      }
+      if (this.d_id[i] != x) {
+        this.cells[i].add_region(this.d_regions[this.d_id[i]]);
+        this.d_regions[this.d_id[i]].add_cell(this.cells[i]);
+      }
+    }
+
+    this.palette_count = new Multiset();
+    for (var val = 1; val <= this.max_val; ++val) {
+      for (var dup = 0; dup <= (this.max_val - val); ++dup) {
+        this.palette_count.add(val);
+      }
+    }
+
+    // callbacks
+    var callback_this = this;
+
+    for (var i=0; i<this.area; i++) {
+      this.cells[i].changed = function (index) {
+        callback_this._IGGG_refreshCell(index);
+      }
+    }
+    for (var i=0; i<this.a_count; ++i) {
+      this.a_regions[i].changed = function (index) {
+        callback_this._IGGG_refreshCell(callback_this.a_positions[index]);
+      }
+    }
+    for (var i=0; i<this.d_count; ++i) {
+      this.d_regions[i].changed = function (index) {
+        callback_this._IGGG_refreshCell(callback_this.d_positions[index]);
+      }
+    }
+
+    // keyboard cursor
+    this.cursor_pos = -1;
+
+    this.load_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.clear_board = function () {
+    for (var i=0; i<this.area; i++) {
+      if (this.cells[i].get_value() > 0) {
+        var digit = this.cells[i].get_value();
+        this.increment_palette(digit);
+        this.cells[i].reset_value();
+      }
+    }
+    this._IGGG_refreshDragSources();
+    this.save_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.load_progress = function () {
+    if (!this._IGGG_refreshCell) {
+      this._IGGG_refreshCell = function () {};
+    }
+    if (!this.game_state.puz_progress) {
+      this.game_state.puz_progress = new Array();
+    }
+    if (!this.game_state.puz_progress[this.game_state.cur_puz]) {
+      this.game_state.puz_progress[this.game_state.cur_puz] = new Array();
+    }
+    if (this.game_state.puz_progress[this.game_state.cur_puz].length == 0) return;
+    for (var i=0; i<this.area; i++) {
+      if (this.game_state.puz_progress[this.game_state.cur_puz][i]) {
+        var digit = this.game_state.puz_progress[this.game_state.cur_puz][i];
+        if (digit > 0) {
+          this.palette_count.remove(digit);
+          this.cells[i].set_value(digit, false);
+        }
+      }
+    }
+    if (this._IGGG_refreshAll)
+      this._IGGG_refreshAll();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.save_progress = function () {
+    if (!this.game_state.puz_progress) {
+      this.game_state.puz_progress = new Array();
+    }
+    if (!this.game_state.puz_progress[this.game_state.cur_puz]) {
+      this.game_state.puz_progress[this.game_state.cur_puz] = new Array();
+    }
+    for (var i=0; i<this.area; i++) {
+      this.game_state.puz_progress[this.game_state.cur_puz][i] = this.cells[i].value;
+    }
+    pref_controller__MODULE_ID__.game_state = this.game_state;
+    pref_controller__MODULE_ID__.setPrefs();
+  }
+
+  puzzle_data__MODULE_ID__.prototype.increment_palette = function (id) {
+    if (id == -1) return;
+    this.palette_count.add(id);
+    this._IGGG_refreshCell(id + this.area);
+  }
+ 
+  puzzle_data__MODULE_ID__.prototype.decrement_palette = function (id) {
+    if (id == -1) return;
+    this.palette_count.remove(id);
+    this._IGGG_refreshCell(id + this.area);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.valueAt = function (index) {
+    if (index == this.area) return -1;
+    if (index > this.area) return index - this.area;
+    if (!this.cells[index]) return -1;
+    return this.cells[index].value;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragSource = function (src) {
+    if (src > this.area) {
+      var digit = src - this.area;
+      return (this.palette_count.count(digit) != 0);
+    }
+    if (!this.is_cell[src]) return false;
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_isDragTarget = function (index, src) {
+    if (this.valueAt(src) == -1) return false;
+    if (index > this.area) {
+      var digit = index - this.area;
+      return (digit == this.valueAt(src));
+    }
+    if (!this.is_cell[index]) return false;
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.move_cursor = function(dst) {
+    var old_cursor_pos = this.cursor_pos;
+    this.cursor_pos = dst;
+    this._IGGG_refreshCell(old_cursor_pos);
+    this._IGGG_refreshCell(this.cursor_pos);
+  }
+                                                                                                                                                                                                                                 
+  puzzle_data__MODULE_ID__.prototype.move_cursor_dir = function(dir) {
+    // 0 = up, 1 = right, 2 = down, 3 = left.
+    if (this.cursor_pos == -1) return;
+
+    var candidate;
+    if (dir % 4 == 0) {
+      candidate = this.cursor_pos - this.width - 1;
+    } else if (dir % 4 == 1) {
+      candidate = this.cursor_pos + 1;
+    } else if (dir % 4 == 2) {
+      candidate = this.cursor_pos + this.width + 1;
+    } else if (dir % 4 == 3) {
+      candidate = this.cursor_pos - 1;
+    } else {
+      return;
+    }
+
+    if (candidate < 0) return;
+    if (candidate >= this.area) return;
+    if (this.is_cell[candidate] == 0) return;
+
+    this.move_cursor(candidate);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.process_key_press = function(keynum, keychar) {
+    if (keynum == 38 || keynum == 104) {
+      this.move_cursor_dir(0);
+      return;
+    }
+    if (keynum == 39 || keynum == 102) {
+      this.move_cursor_dir(1);
+      return;
+    }
+    if (keynum == 40 || keynum == 98) {
+      this.move_cursor_dir(2);
+      return;
+    }
+    if (keynum == 37 || keynum == 100) {
+      this.move_cursor_dir(3);
+      return;
+    }
+    if (keynum == 46 || keychar == " " || keychar == "0") {
+      var oldpos = this.cursor_pos;
+      this._IGGG_handleDrag(this.cursor_pos, -1);
+      this.move_cursor(oldpos);
+      return;
+    }
+    for (var key = 1; key <= this.max_val; key++) {
+      if (keychar == key && this.palette_count.has(keychar)) {
+        this._IGGG_handleDrag(this.area + key, this.cursor_pos);
+        return;
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.is_solved = function() {
+    for (var i=0;i<this.a_count;++i) {
+      if (!this.a_regions[i].satisfied()) return false;
+    }
+    for (var i=0;i<this.d_count;++i) {
+      if (!this.d_regions[i].satisfied()) return false;
+    }
+    return true;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_a_region_text = function(index) {
+    var a_id = this.a_label[index];
+    var answer = "";
+    answer += '<span style="color:#FFFFFF" title="';
+    answer += "Sum: " + this.a_regions[a_id].cur_sum + " ";
+    if (this.a_regions[a_id].satisfied()) {
+      answer += "Sum satisfied";
+    } else if (this.a_regions[a_id].has_dupes()) {
+      answer += "Error: duplicate digit";
+    } else if (this.a_regions[a_id].filled_but_wrong()) {
+      answer += "Error: sum incorrect";
+    } else {
+      answer += "Possible digits: " + this.a_regions[a_id].allowed_values();
+    }
+    answer += '">';
+    answer += this.a_sum[a_id];
+    answer += '</span>';
+    return answer;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_d_region_text = function(index) {
+    var d_id = this.d_label[index];
+    var answer = "";
+    answer += '<span style="color:#FFFFFF" title="';
+    answer += "Sum: " + this.d_regions[d_id].cur_sum + " ";
+    if (this.d_regions[d_id].satisfied()) {
+      answer += "Sum satisfied";
+    } else if (this.d_regions[d_id].has_dupes()) {
+      answer += "Error: duplicate digit";
+    } else if (this.d_regions[d_id].filled_but_wrong()) {
+      answer += "Error: sum incorrect";
+    } else {
+      answer += "Possible digits: " + this.d_regions[d_id].allowed_values();
+    }
+    answer += '">&nbsp;';
+    answer += this.d_sum[d_id];
+    answer += '</span>'
+    return answer;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_background_image = function(index) {
+    var answer = "http://weihwa.images02.googlepages.com/";
+    if (this.a_label[index] == this.x) {
+      answer += 'black';
+    } else if (this.a_regions[this.a_label[index]].satisfied()) {
+      answer += 'green';
+    } else if (this.a_regions[this.a_label[index]].filled_but_wrong()) {
+      answer += 'red';
+    } else if (this.a_regions[this.a_label[index]].has_dupes()) {
+      answer += 'red';
+    } else {
+      answer += 'black';
+    }
+    answer += '-';
+    if (this.d_label[index] == this.x) {
+      answer += 'black';
+    } else if (this.d_regions[this.d_label[index]].satisfied()) {
+      answer += 'green';
+    } else if (this.d_regions[this.d_label[index]].filled_but_wrong()) {
+      answer += 'red';
+    } else if (this.d_regions[this.d_label[index]].has_dupes()) {
+      answer += 'red';
+    } else {
+      answer += 'black';
+    }
+    answer += '.png';
+    return answer;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSurrogateView = function (index) {
+    if (index == this.area) return;
+    var digit = this.valueAt(index);
+    if (digit == -1) return "";
+    var answer = "";
+    answer += '<span style="font-size:16pt" title="' + digit + '">';
+    answer += digit;
+    answer += '</span>';
+    return answer;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.palette_html = function (digit, count, color) {
+    var answer = "";
+    if (count == 0) {
+      color = "#C0C0C0";
+      answer += '<span style="cursor:default;font-size:16pt;color:' + color + '" title="' + digit + ' (gone)">';
+      answer += digit;
+      answer += '<br><div style="align:center;font-size:7pt">(gone)</div>';
+      answer += '</span>';
+    } else {
+      answer += '<span style="font-size:16pt" title="' + digit + ' (' + count + ' left)">'
+      answer += digit;
+      answer += '<br><div style="align:center;font-size:7pt">(' + count + ' left)</div>';
+      answer += '</span>';
+    }
+    return answer;
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getNormalView = function (index) {
+    if (index == this.area) return;
+    if (index > this.area) {
+      // we're in the palette
+      var digit = index - this.area;
+      return this.palette_html(digit, this.palette_count.count(digit), "#000000");
+    }
+    if (index == 0 && this.is_solved()) {
+      return '<img src="http://weihwa.images02.googlepages.com/well-done.png"></img>';
+    }
+    if (this.is_cell[index] != 0) {
+      var bgcolor = (index == this.cursor_pos) ? 'background-color:#CCCCCC;' : '';
+      if (this.cells[index].get_value() == -1) {
+        var allowed = this.cells[index].allowed_values();
+        var title = (allowed == "") ? "No values possible!" : ("Could be: " + allowed);
+        return '<div title="' + title + '" style="' + bgcolor + 'font-size:16pt;color:#FFFFFF">?</div>';
+      }
+      var title = "Placed by you";
+      return '<div title="' + title + '" style="' + bgcolor + 'text-align:center;font-size:16pt">' + this.cells[index].get_value() + '</div>';
+    } else {
+      var answer = '<div style="background-image:url(' + this.get_background_image(index) + ')">';
+  
+      answer += '<table border=0 cellpadding="0px" cellspacing="0px" width="24px">';
+      answer += "<tr><td></td><td colspan=2 align=right>";
+      answer += '<span style="cursor:default;font-size:8pt">';
+      answer += (this.a_label[index] == this.x) ? "?" : this.get_a_region_text(index);
+      answer += '</span>';
+      answer += "</td></tr><tr><td colspan=2 align=left>";
+      answer += '<span style="cursor:default;font-size:8pt">';
+      answer += (this.d_label[index] == this.x) ? "?" : this.get_d_region_text(index);
+      answer += '</span>';
+      answer += "</td><td></td></tr>";
+      answer += "</table>";
+  
+      answer += "</div>";
+      return answer;
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getSourceView = function (index) {
+    if (index == this.area) return;
+    if (index > this.area) {
+      // we're in the palette
+      var digit = index - this.area;
+      return this.palette_html(digit, this.palette_count.count(digit) - 1, "#000000");
+    }
+    if (this.is_cell[index] != 0) {
+      var bgcolor = (index == this.cursor_pos) ? 'background-color:#CCCCCC;' : '';
+      if (this.cells[index].get_value() == -1) {
+        var allowed = this.cells[index].allowed_values();
+        var title = (allowed == "") ? "No values possible!" : ("Could be: " + allowed);
+        return '<div title="' + title + '" style="' + bgcolor + 'font-size:16pt;color:#FFFFFF">?</div>';
+      }
+      var title = "Placed by you";
+      return '<div title="' + title + '" style="' + bgcolor + 'text-align:center;font-size:16pt;color:#C0C0C0">' + this.cells[index].get_value() + '</div>';
+    }
+    return "";
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_getTargetView = function (target, source) {
+    if (target == this.area) return;
+    if (target > this.area) {
+      // we're in the palette
+      var digit = target - this.area;
+      return this.palette_html(digit, this.palette_count.count(digit) + 1, "#C0C0C0");
+    } else {
+      var digit = this.valueAt(source);
+      if (this.cells[target].allows(digit))
+        return '<span title="" style="text-align:center;font-size:16pt;font-weight:bold;color:#C0C0C0">' + digit + '</span>';
+      else
+        return '<span title="" style="text-align:center;font-size:16pt;font-weight:bold;color:#C00000">' + digit + '</span>';
+    }
+    return this._IGGG_getNormalView(target);
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleDrag = function (source, target) {
+    if (source == -1) return;
+    if (source == target) return;
+    if (target == -1) {
+      if (this.valueAt(source) == -1) return;
+      target = this.valueAt(source) + this.area;
+    }
+    if (source > this.area) {
+      // palette to grid
+      if (target > this.area) return;
+      var digit = source - this.area;
+      this.increment_palette(this.cells[target].get_value());
+      this.decrement_palette(digit);
+      this.cells[target].set_value(digit, false);
+    } else if (target > this.area) {
+      // grid to palette
+      var digit = target - this.area;
+      this.increment_palette(digit);
+      this.cells[source].reset_value();
+    } else {
+      // grid to grid
+      var digit = this.cells[source].get_value();
+      this.increment_palette(this.cells[target].get_value());
+      this.cells[source].reset_value();
+      this.cells[target].set_value(digit, false);
+    }
+    this._IGGG_refreshDragSources();
+    this._IGGG_refreshCell(0);
+    this.save_progress();
+  }
+
+  puzzle_data__MODULE_ID__.prototype._IGGG_handleClick = function (index) {
+    // cheap trick to steal the focus.
+    _gel("dummybox").style.visibility = "visible";
+    _gel("dummybox").focus();
+    _gel("palette").focus();
+    _gel("dummybox").style.visibility = "hidden";
+    if (this.cursor_pos == index) {
+      this.move_cursor(-1);
+    } else {
+      this.move_cursor(index);
+    }
+  }
+
+  ///////////////////////////////////////////////
+  // Direct access functions.
+  
+  var puzzle__MODULE_ID__;
+  var game__MODULE_ID__;
+  var pref_controller__MODULE_ID__;
+
+  _IG_RegisterOnloadHandler(start__MODULE_ID__);
+
+  function reset__MODULE_ID__(game_state) {
+    puzzle__MODULE_ID__.reset_puzzle(game_state);
+    game__MODULE_ID__ = new _IG_GameGrid(puzzle__MODULE_ID__, "mygrid",
+       puzzle__MODULE_ID__.height + 1, puzzle__MODULE_ID__.width + 1);
+    _gel("table_html").innerHTML = "";
+    _gel("table_html").appendChild(game__MODULE_ID__.getTable());
+    game__MODULE_ID__.getTable().border = "1";
+    make_palette__MODULE_ID__();
+
+    game__MODULE_ID__.dragHandler.topMargin = 0;
+    game__MODULE_ID__.dragHandler.bottomMargin = 30;
+    game__MODULE_ID__.dragHandler.leftMargin = 10;
+    game__MODULE_ID__.dragHandler.rightMargin = 10;
+    if (navigator.userAgent.toLowerCase().match("ie")) {
+      game__MODULE_ID__.dragHandler.surrogateOffsetX = -2;
+      game__MODULE_ID__.dragHandler.surrogateOffsetY = 0;
+      game__MODULE_ID__.dragHandler.leftMargin = 10;
+      game__MODULE_ID__.dragHandler.rightMargin = 10;
+      game__MODULE_ID__.dragHandler.topMargin = 10;
+      game__MODULE_ID__.dragHandler.bottomMargin = 10;
+    } else if (navigator.userAgent.toLowerCase().match("safari")) {
+      game__MODULE_ID__.dragHandler.surrogateOffsetX = -2;
+      game__MODULE_ID__.dragHandler.surrogateOffsetY = 0;
+      game__MODULE_ID__.dragHandler.leftMargin = 5;
+      game__MODULE_ID__.dragHandler.rightMargin = 10;
+      game__MODULE_ID__.dragHandler.topMargin = 10;
+      game__MODULE_ID__.dragHandler.bottomMargin = 10;
+    }
+    game__MODULE_ID__.initDragging();
+  }
+
+  function start__MODULE_ID__() {
+    pref_controller__MODULE_ID__ = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_1110', true);
+
+    _gel("game_state_html").innerHTML = pref_controller__MODULE_ID__.getTableHTML();
+    pref_controller__MODULE_ID__.getPrefs();
+
+    puzzle__MODULE_ID__ = new puzzle_data__MODULE_ID__();
+    reset__MODULE_ID__(pref_controller__MODULE_ID__.game_state);
+
+    _IG_AdjustIFrameHeight();
+  }
+
+  function make_palette__MODULE_ID__() {
+    var palette_table = document.createElement('table');
+    palette_table.border = "1";
+    palette_table.cellPadding = "3px";
+    palette_table.cellSpacing = "0px";
+    palette_table.width = "40px";
+    var palette = document.createElement('tbody');
+    _gel("palette").innerHTML = "";
+    _gel("palette").appendChild(palette_table);
+    palette_table.appendChild(palette);
+    palette.appendChild(document.createElement('tr'));
+    for (var digit = 1; digit <= puzzle__MODULE_ID__.max_val; digit++) {
+      var row = document.createElement('tr');
+      palette.appendChild(row);
+      var tabledata = document.createElement('td');
+      row.appendChild(tabledata);
+      tabledata.align = "center";
+      tabledata.appendChild(game__MODULE_ID__.getCell(digit + puzzle__MODULE_ID__.area));
+    }
+  }
+
+  function pass_key_press__MODULE_ID__(e) {
+    var keynum;
+    if (window.event) { e = window.event; }
+    if (e.which) { keynum = e.which; }
+    if (e.keyCode) { keynum = e.keyCode; }
+    var keychar = String.fromCharCode(keynum).toUpperCase();
+    if (keychar == 'V') _gel("resetbutton2").style.visibility = "visible";
+    puzzle__MODULE_ID__.process_key_press(keynum, keychar);
+  }
+ 
+  if (document.captureEvents != undefined) document.captureEvents(Event.KEYUP);   
+  if (document.addEventListener) {
+    document.addEventListener("keyup", pass_key_press__MODULE_ID__, false);
+  } else {
+    document.onkeyup = pass_key_press__MODULE_ID__;
+  }
+
+  ///////////////////////////////////
+
+  _IG_puzzle_pref_controller.prototype.update_navbar = function() {
+    if (this.game_state.cur_puz == this.nav_puz) {
+      _gel("newp").disabled = true;
+      _gel("newp").value = "On Puzzle " + (this.game_state.cur_puz*1+1) + ((this.game_state.puz_solved[this.game_state.cur_puz] == 1) ? "*" : "");
+    } else {
+      _gel("newp").disabled = false;
+      _gel("newp").value = "Get Puzzle " + (this.nav_puz*1+1) + ((this.game_state.puz_solved[this.nav_puz] == 1) ? "*" : "");
+    }
+    _gel("puznum").innerHTML = (this.game_state.cur_puz*1+1) + ((this.game_state.puz_solved[this.game_state.cur_puz] == 1) ? "*" : "");
+    _gel("levp1").disabled = (this.nav_puz >= this.game_state.puz_count - 1);
+    _gel("levm1").disabled = (this.nav_puz <= 0);
+    _IG_AdjustIFrameHeight();
+  }
+
+  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+    this.nav_puz += amount;
+    if (this.nav_puz < 0) this.nav_puz = 0;
+    if (this.nav_puz > this.game_state.puz_count) this.nav_puz = this.game_state.puz_count;
+    this.update_navbar();
+  }
+                                                                                                                                                                                              
+  _IG_puzzle_pref_controller.prototype.new_puzzle_request = function() {
+    this.game_state.cur_puz = this.nav_puz;
+    reset__MODULE_ID__(this.game_state);
+    this.setPrefs();
+    this.update_navbar();
+  }
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="pref_controller__MODULE_ID__.change_level(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="pref_controller__MODULE_ID__.change_level(-1)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller__MODULE_ID__.new_puzzle_request()"/>
+</form>
+
+<b>Mini Kakuro 3</b>:  The twist in these Kakuro puzzles is that low numbers are used frequently,
+  while you only have a few copies of the big numbers.
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+  Place the given digits into the grid so that no digit appears
+  more than once in any "word" and that the sum of the digits in the word match the
+  indicated sum.  Sometimes there is one digit left over; don't let that rattle you.
+</span>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+  Drag letters from the "palette" on the left into the grid to place them.
+  You'll know you've solved it when all the sums turn
+  <span style="color:#008000">green</span>.  Click on a cell to get a keyboard-sensitive cursor.
+</span>
+
+<BR>
+
+<table border="0"><tr><td rowspan=2 valign=top>
+<span id="palette"></span>
+</td><td>
+<span id="table_html"></span>
+</td></tr><tr><td>
+<center>
+  <input id="resetbutton3" style="font-size:10n" type="button" value="Clear Puzzle"
+   onclick="puzzle__MODULE_ID__.clear_board();">
+</center>
+</td></tr></table>
+
+  <input id="resetbutton2" style="font-size:10;visibility:hidden" type="button" value="Clear Stats"
+    onclick="pref_controller__MODULE_ID__.resetPrefs();puzzle__MODULE_ID__._IGGG_refreshAll();"/>
+
+<span style="visibility:hidden">
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <center><span id="game_state_html"></span></center>
+</td><td style="font-size:9pt">
+  <span id="numsolved">? puzzles</span> solved
+</td><td style="font-size:9pt">
+<span style="visibility:hidden">
+  Your points: <span id="points">?</span>
+</span>
+  <input id="resetbutton" style="font-size:10;visibility:hidden" type="button" value="Clear Stats"
+    onclick="pref_controller__MODULE_ID__.resetPrefs();puzzle__MODULE_ID__._IGGG_refreshAll();"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+</span>
+
+<span id="debug" style="font-size:16pt;font-weight:bold"></span>
+
+</FONT>
+
+<input id="dummybox" style="visibility:hidden" type="text">
+
+  ]]> 
+
+  </Content>
+</Module>
+

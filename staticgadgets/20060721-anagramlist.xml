@@ -1,0 +1,725 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzle: 2006-07-21"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20060721@gmail.com"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
+    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    height="450"
+    render_inline="optional"
+  />
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  // This puzzle doesn't have the answers anywhere in the source, so don't
+  // bother trying to find it here.  Sorry.
+
+  ///////////////////////////////////////////////
+
+  Drag.min_x = 5;
+  Drag.min_y = 20;
+  Drag.max_x = 5;
+  Drag.max_y = 20;
+  Drag.basis_offset_y = 0;
+  Drag.basis_offset_x = 0;
+  if (navigator.userAgent.toLowerCase().match("msie")) { 
+    Drag.basis_offset_x = 10; 
+    Drag.min_x = 15;
+    Drag.max_x = -5;
+  }
+
+  function puzzle_data__MODULE_ID__() {
+    this.reset_puzzle(0);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.reset_puzzle = function(index) {
+    if (index == 0) {
+      this.source = new Array("LEVEE", "ENNUI", "IMP", "BENT", "FORTUNE", "NERVES", "HANDOUT");
+    } else if (index == 1) {
+      this.source = new Array("FINDER", "HAIRDO", "BONNETS", "RESONANCE", "HOMES", "FIREARMS", "AMUSED");
+    } else if (index == 2) {
+      this.source = new Array("CLERICS", "LATHERING", "BOLOGNA", "TONNAGE", "HOMBRE", "SALVO");
+    } else if (index == 3) {
+      this.source = new Array("LYRICS", "CONTINENTS", "INANE", "WADER", "SITUATING", "PRESET");
+    } else if (index == 4) {
+      this.source = new Array("HERMIT", "MAKES", "BURNT", "LIVED", "FORAGED", "HERNIATE", "FAZE", "ELBOW");
+    } else if (index == 5) {
+      this.source = new Array("EARTH", "HEAT", "RUSTIC", "ATHEISM", "OUNCES", "UNCROSS");
+    }
+    this.letters = new Array();
+    this.signs = new Array();
+    this.answer_grid = new Array();
+    this.num_words = this.source.length;
+    for (var i=0; i<this.num_words; ++i) {
+      this.signs[i] = 1;
+      var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; 
+      this.letters[i] = alphabet.charAt(Math.floor(Math.random() * 26)); // a letter if signs[i] is +1, a number if it is -1
+      for (var j=0; j<11; ++j) {
+        var ag_index = j * this.num_words + i;
+        if (j > this.source[i].length) {
+          this.answer_grid[ag_index] = -2; // blank
+        } else if (j == this.source[i].length) {
+          this.answer_grid[ag_index] = -1; // letter
+        } else {
+          this.answer_grid[ag_index] = j;
+        }
+      }
+    }
+    this.yanked = -1;
+    this.cursor_pos = -1;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.cell_changed = function(index) {
+    // callback -- modifies a cell.
+    // if x is the numbers of words, then:
+    //   0 <= index <  x : original words
+    //   x <= index < 2x : signs
+    //  2x <= index < 3x : letter to add/delete
+    //  3x <= index < 4x : equals sign
+    //  5x <= index  : letter in answer
+  }
+
+  puzzle_data__MODULE_ID__.prototype.deregister = function(index) {
+    // callback -- deregisters a cell.
+  }
+                                                                                                                                                                                                                            
+  puzzle_data__MODULE_ID__.prototype.register = function(index) {
+    // callback -- registers a cell.
+  }
+                                                                                                                                                                                                                            
+  puzzle_data__MODULE_ID__.prototype.cell_changed = function(index) {
+    // callback -- modifies a cell.
+  }
+                                                                                                                                                                                                                            
+  puzzle_data__MODULE_ID__.prototype.clear_sinks = function() {
+    // callback -- clears all sinks.
+  }
+                                                                                                                                                                                                                            
+  puzzle_data__MODULE_ID__.prototype.add_sink = function(index) {
+    // callback -- adds a sink.
+  }
+
+  puzzle_data__MODULE_ID__.prototype.move_cursor = function(dst) {
+    var old_cursor_pos = this.cursor_pos;
+    this.cursor_pos = dst;
+    this.cell_changed(old_cursor_pos);
+    this.cell_changed(this.cursor_pos);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.move_cursor_dir = function(dir) {
+    // 0 = up, 1 = right, 2 = down, 3 = left.
+    // 4567 = same, but no wraparound.
+    if (this.cursor_pos == -1) return;
+    var word_index = this.cursor_pos % this.num_words;
+    var letter_index = Math.floor(this.cursor_pos / this.num_words) - 4;
+    var agl = this.answer_grid_length(word_index);
+
+    if (dir == 4 && word_index == 0) return;
+    if (dir == 5 && letter_index == agl - 1) return;
+    if (dir == 6 && word_index == this.num_words - 1) return;
+    if (dir == 7 && letter_index == 0) return;
+
+    var new_word_index = 0;
+    var new_letter_index = 0;
+
+    if (dir % 4 == 0) {
+      new_word_index = word_index - 1;
+      new_letter_index = letter_index;
+      if (new_word_index < 0) new_word_index += this.num_words;
+      var new_agl = this.answer_grid_length(new_word_index);
+      if (new_letter_index >= new_agl) new_letter_index = new_agl - 1;
+    }
+    if (dir % 4 == 1) {
+      new_word_index = word_index;
+      new_letter_index = letter_index + 1;
+      if (new_letter_index >= agl) new_letter_index = 0;
+    }
+    if (dir % 4 == 2) {
+      new_word_index = word_index + 1;
+      new_letter_index = letter_index;
+      if (new_word_index >= this.num_words) new_word_index -= this.num_words;
+      var new_agl = this.answer_grid_length(new_word_index);
+      if (new_letter_index >= new_agl) new_letter_index = new_agl - 1;
+    }
+    if (dir % 4 == 3) {
+      new_word_index = word_index;
+      new_letter_index = letter_index - 1;
+      if (new_letter_index < 0) new_letter_index = agl - 1;
+    }
+
+    this.move_cursor(new_word_index + new_letter_index * this.num_words + 4 * this.num_words);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.find_letter_index_for_key = function(word_index, letter_index, text) { 
+    var agl = this.answer_grid_length(word_index);
+    var i = letter_index;
+    while (i < agl) {
+      if (text == this.answer_grid_letter(this.answer_grid_index(word_index, i))) {
+        return i;
+      }
+      i++;
+    }
+    i = 0;
+    while (i < letter_index) {
+      if (text == this.answer_grid_letter(this.answer_grid_index(word_index, i))) {
+        return i;
+      }
+      i++;
+    }
+    return -1;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.attempt_letter_swap = function(text) {
+    if (this.cursor_pos == -1) return;
+    var word_index = this.cursor_pos % this.num_words;
+    var letter_index = Math.floor(this.cursor_pos / this.num_words) - 4;
+    var new_letter_index = this.find_letter_index_for_key(word_index, letter_index, text);
+    if (new_letter_index != -1) {
+      this.answer_grid_swap(word_index, letter_index, new_letter_index);
+      this.cell_changed(word_index + this.num_words * (new_letter_index + 4));
+      this.move_cursor_dir(1);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.process_key_press = function(keynum, keychar) {
+    if (keynum == 38 || keynum == 104) {
+      this.move_cursor_dir(0);
+      return;
+    }
+    if (keynum == 39 || keynum == 102) {
+      this.move_cursor_dir(1);
+      return;
+    }
+    if (keynum == 40 || keynum == 98) {
+      this.move_cursor_dir(2);
+      return;
+    }
+    if (keynum == 37 || keynum == 100) {
+      this.move_cursor_dir(3);
+      return;
+    }
+    var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if (alphabet.match(keychar)) {
+      this.attempt_letter_swap(keychar);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.reregister = function() {
+    for (var i=0; i<(this.num_words * 11); ++i) {
+      if (this.answer_grid[i] != -2) {
+        this.register(i + 4 * this.num_words);
+      } else {
+        this.deregister(i + 4 * this.num_words);
+      }
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.handle_click = function (src) {
+    if (this.cursor_pos == src) {
+      this.move_cursor(-1);
+    } else {
+      this.move_cursor(src);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.yank = function (src) {
+    var agi = src - 4 * this.num_words;
+    this.yanked = agi;
+    var word_index = agi % this.num_words;
+    this.clear_sinks();
+    for (letter = 0; letter < this.answer_grid_length(word_index); ++letter) {
+      this.add_sink(this.answer_grid_index(word_index, letter) + 4 * this.num_words);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.place = function (dest) {
+    if (dest != -1) {
+      if (dest != this.yanked && this.cursor_pos != -1) {
+        var old_cursor_pos = this.cursor_pos;
+        this.cursor_pos = -1;
+        this.cell_changed(old_cursor_pos);
+      }
+      var agi = dest - 4 * this.num_words;
+      var word_index = agi % this.num_words;
+      var from_let = Math.floor(this.yanked / this.num_words);
+      var to_let = Math.floor(agi / this.num_words);
+      this.answer_grid_swap(word_index, from_let, to_let);
+      this.yanked = -1;
+    } else {
+      var old_yanked = this.yanked;
+      this.yanked = -1;
+      this.cell_changed(old_yanked + 4 * this.num_words);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.valid_letter_change = function (index, value) {
+    if (value.length != 1) return false;
+    if (this.signs[index] == 1) {
+      // all letters are fine
+      var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      return (alphabet.match(value.charAt(0)));
+    } else {
+      // only letters in the word are fine
+      return (this.source[index].match(value.charAt(0)));
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.answer_grid_index = function (word_index, letter_index) {
+    return(this.num_words * letter_index + word_index);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.answer_grid_length = function (word_index) {
+    return(this.source[word_index].length + this.signs[word_index]);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.answer_grid_swap = function (word_index, let_1, let_2) {
+    if (let_1 == let_2) return;
+    var temp = this.answer_grid[this.answer_grid_index(word_index, let_1)];
+    this.answer_grid[this.answer_grid_index(word_index, let_1)] = this.answer_grid[this.answer_grid_index(word_index, let_2)];
+    this.answer_grid[this.answer_grid_index(word_index, let_2)] = temp;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.find_grid_index = function (word_index, value) {
+    for (letter = 0; letter < this.answer_grid_length(word_index); ++letter) {
+      if (this.answer_grid[this.answer_grid_index(word_index, letter)] == value) {
+        return this.answer_grid_index(word_index, letter);
+      }
+    }
+    return -1;
+  }
+
+  puzzle_data__MODULE_ID__.prototype.answer_grid_changed = function (index) {
+    this.cell_changed(index + 4 * this.num_words);
+  }
+
+  puzzle_data__MODULE_ID__.prototype.answer_grid_letter = function (ag_index) {
+    var letter_index = this.answer_grid[ag_index];
+    if (letter_index == -2) {
+      return '';
+    }
+    var word_index = ag_index % this.num_words;
+    if (letter_index == -1) {
+      return this.letters[word_index];
+    } else {
+      return this.source[word_index].charAt(letter_index);
+    }
+  }
+
+  // actions.
+  puzzle_data__MODULE_ID__.prototype.letter_changed = function (index) {
+    var value = _gel('letter' + index + '__MODULE_ID__').value.toUpperCase();
+
+    if (this.signs[index] == 1 && value == this.letters[index]) {
+      // no real change.
+      this.cell_changed(index + 2 * this.num_words);
+    } else if (this.signs[index] == -1 && value == this.source[index].charAt(this.letters[index])) {
+      // no real change.
+      this.cell_changed(index + 2 * this.num_words);
+    } else if (this.valid_letter_change(index, value)) {
+      if (this.signs[index] == 1) {
+        this.letters[index] = value;
+        this.answer_grid_changed(this.find_grid_index(index, -1));
+        this.cell_changed(index + 2 * this.num_words);
+      } else {
+        var new_value = this.source[index].indexOf(value);
+        var grid_index = this.find_grid_index(index, this.source[index].indexOf(value));
+        this.answer_grid[grid_index] = this.letters[index];
+        this.letters[index] = new_value;
+        this.answer_grid_changed(grid_index);
+        this.cell_changed(index + 2 * this.num_words);
+      }
+    } else {
+      this.cell_changed(index + 2 * this.num_words);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.mix_click = function (word_index) {
+    for (letter = 1; letter < this.answer_grid_length(word_index); ++letter) {
+      var rand_pos = Math.floor(Math.random() * (letter + 1));
+      this.answer_grid_swap(word_index, letter, rand_pos);
+    }
+    for (letter = 0; letter < this.answer_grid_length(word_index); ++letter) {
+      this.answer_grid_changed(this.answer_grid_index(word_index, letter));
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.sign_change = function (word_index) {
+    if (this.signs[word_index] == 1) {
+      var candidate = 0;
+      for (letter = 0; letter < this.answer_grid_length(word_index); ++letter) {
+        var lval = this.answer_grid[this.answer_grid_index(word_index, letter)];
+        if (lval == -1) {
+          this.answer_grid[this.answer_grid_index(word_index, letter)] = -2;
+          continue;
+        }
+        if (this.source[word_index].charAt(lval) == this.letters[word_index]) {
+          candidate = letter;
+        }
+      }
+      var candidate_index = this.answer_grid_index(word_index, candidate);
+      this.letters[word_index] = this.answer_grid[candidate_index];
+      this.answer_grid[candidate_index] = -2;
+
+      for (letter = 0; letter < (this.answer_grid_length(word_index) - 1); ++letter) {
+        if (this.answer_grid[this.answer_grid_index(word_index, letter)] == -2) {
+          this.answer_grid_swap(word_index, letter, letter+1);
+        }
+      }
+      for (letter = 0; letter < (this.answer_grid_length(word_index) - 1); ++letter) {
+        if (this.answer_grid[this.answer_grid_index(word_index, letter)] == -2) {
+          this.answer_grid_swap(word_index, letter, letter+1);
+        }
+      }
+
+      for (letter = 0; letter < this.answer_grid_length(word_index); ++letter) {
+        this.answer_grid_changed(this.answer_grid_index(word_index, letter));
+      }
+      this.signs[word_index] = -1;
+      this.cell_changed(word_index + this.num_words);
+      this.cell_changed(word_index + 2 * this.num_words);
+    } else {
+      var new_pos = this.answer_grid_length(word_index);
+      this.answer_grid[this.answer_grid_index(word_index, new_pos)] = this.letters[word_index];
+      this.answer_grid[this.answer_grid_index(word_index, new_pos+1)] = -1;
+
+      this.letters[word_index] = this.source[word_index].charAt(this.letters[word_index]);
+      this.signs[word_index] = 1;
+      for (letter = 0; letter < this.answer_grid_length(word_index); ++letter) {
+        this.answer_grid_changed(this.answer_grid_index(word_index, letter));
+      }
+      this.cell_changed(word_index + this.num_words);
+      this.cell_changed(word_index + 2 * this.num_words);
+    }
+  }
+
+  puzzle_data__MODULE_ID__.prototype.get_text = function (index, cur_sink) {
+    var word_index = index % this.num_words;
+    var space_index = Math.floor(index / this.num_words);
+    if (index < 0) return '';
+    if (space_index == 0) {
+      return '<span style="cursor:default;font-size:10pt">' + this.source[word_index] + '</span>';
+    }
+    if (space_index == 1) {
+      if (this.signs[word_index] == 1) {
+        return '<img style="cursor:pointer;cursor:hand;font-size:10pt" title="click to change to minus" src="http://weihwa.images02.googlepages.com/plus-sign.png" alt="+"></img>';
+      } else {
+        return '<img style="cursor:pointer;cursor:hand;font-size:10pt" title="click to change to plus" src="http://weihwa.images02.googlepages.com/minus-sign.png" alt="-"></img>';
+      }
+    }
+    if (space_index == 2) {
+      if (this.signs[word_index] == 1) {
+        return '<input style="font-size:9pt" id="letter' + word_index + '__MODULE_ID__" size=1 maxlength=1 type="text" name="answer" onchange="letter_change__MODULE_ID__('
+           + word_index + ')" value="' + this.letters[word_index] + '"/>';
+      } else {
+        return '<input style="font-size:9pt" id="letter' + word_index + '__MODULE_ID__" size=1 maxlength=1 type="text" name="answer" onchange="letter_change__MODULE_ID__('
+           + word_index + ')" value="' + this.source[word_index].charAt(this.letters[word_index]) + '"/>';
+      }
+    }
+    if (space_index == 3) {
+      return '<img title="=" style="font-size:10pt" src="http://weihwa.images02.googlepages.com/equals-sign.png" alt="="></img>';
+    }
+    if (space_index > 3) {
+      if (index == this.cursor_pos) {
+        return '<span style="cursor:pointer;cursor:hand;font-size:10pt;font-weight:bold">' + this.answer_grid_letter(index - 4 * this.num_words) + '</span>';
+      }
+      if (this.yanked != -1) { 
+        if (index == cur_sink) {
+          return '<span style="cursor:default;font-size:10pt;font-weight:bold;color:#C0C0C0">' + this.answer_grid_letter(this.yanked); + '</span>';
+        }
+        if (cur_sink != -1 && index - 4 * this.num_words == this.yanked) {
+          return '<span style="cursor:default;font-size:10pt;font-weight:bold;color:#C0C0C0">' + this.answer_grid_letter(cur_sink - 4 * this.num_words); + '</span>';
+        }
+      }
+      return '<span style="cursor:pointer;cursor:hand;font-size:10pt">' + this.answer_grid_letter(index - 4 * this.num_words) + '</span>';
+    }
+  }
+
+  ///////////////////////////////////////////////
+  ///  This code defines the "front end".
+
+  function game_setup__MODULE_ID__() {
+    var game_setup = this;
+
+    game_setup.yanked = -1;
+    game_setup.sink = -1;
+
+    game_setup.puzzle = new puzzle_data__MODULE_ID__();
+
+    // define callbacks.
+    game_setup.refresh = function (index) {
+      if (index != -1)
+        _gel(game_setup.get_cell_id(index)).innerHTML = game_setup.get_value_at(index);
+    }
+    game_setup.puzzle.cell_changed = this.refresh;
+
+    game_setup.deregister = function (index) {
+      Drag.remove_source(index);
+    }
+    game_setup.puzzle.deregister = this.deregister;
+
+    game_setup.register = function (index) {
+      Drag.add_source(index, _gel(game_setup.get_cell_id(index)));
+    }
+    game_setup.puzzle.register = this.register;
+
+    game_setup.clear_sinks = function () {
+      Drag.clear_sinks();
+    }
+    game_setup.puzzle.clear_sinks = this.clear_sinks;
+
+    game_setup.add_sink = function (index) {
+      Drag.add_sink(index, _gel(game_setup.get_cell_id(index)));
+    }
+    game_setup.puzzle.add_sink = this.add_sink;
+  }
+
+  game_setup__MODULE_ID__.prototype.get_value_at = function (index) {
+    return this.puzzle.get_text(index, this.sink);
+  }
+
+  game_setup__MODULE_ID__.prototype.refresh_all = function (index) {
+    for (var i=0; i<this.puzzle.width * this.puzzle.height; i++) {
+      this.refresh(i);
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.get_cell_id = function (index) {
+    return ('cell_' + index + '___MODULE_ID__');
+  }
+
+  game_setup__MODULE_ID__.prototype.value_from_id = function (id) {
+    var regexp = /cell_(.*)___MODULE_ID__/;
+    var matches = regexp.exec(id);
+    return matches[1];
+  }
+
+  game_setup__MODULE_ID__.prototype.table_html = function() {
+    var result = "";
+    result += '<table border="0" rules="none" cellpadding="1px" cellspacing="0px">';
+    for (var row = 0; row < this.puzzle.num_words; ++row) {
+      result += '<tr>';
+      for (var col = 0; col < 15; ++col) {
+        var value = col * this.puzzle.num_words + row;
+        result += '<td align="center">';
+        result += '<span id="' + game__MODULE_ID__.get_cell_id(value);
+        result += '" onclick="game__MODULE_ID__.action_handle_click(' + value + ')">';
+        result += game__MODULE_ID__.get_value_at(value);
+        result += '</span>';
+        result += '</td>';
+      }
+      result += '<td align="center">';
+      result += '<input style="font-size:9pt" type="button" value="Mix"';
+      result += '" onclick="game__MODULE_ID__.action_handle_mix_click(' + row + ')">';
+      result += '</td>';
+
+      result += '</tr>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+
+  ////////////////////////////////////////////////////
+  // UI actions.
+
+  game_setup__MODULE_ID__.prototype.action_dragging_started = function (index) {
+    this.puzzle.yank(index);
+    this.yanked = index;
+  }
+
+  game_setup__MODULE_ID__.prototype.action_hit_sink = function (index) {
+    var last_sink = this.sink;
+    this.sink = index;
+    this.refresh(last_sink);
+    this.refresh(this.yanked);
+    this.refresh(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_lost_sink = function () {
+    var last_sink = this.sink;
+    this.sink = -1;
+    this.refresh(this.yanked);
+    this.refresh(last_sink);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_dragging_ended = function (index) {
+    var last_sink = this.sink;
+    this.puzzle.place(this.sink);
+    this.sink = -1;
+    this.refresh(last_sink);
+    this.refresh(this.yanked);
+    this.yanked = -1;
+  }
+
+  game_setup__MODULE_ID__.prototype.action_handle_click = function (index) {
+    if (Math.floor(index / this.puzzle.num_words) == 1) {
+      this.puzzle.sign_change(index % this.puzzle.num_words);
+    }
+    if (Math.floor(index / this.puzzle.num_words) >= 4) {
+      this.puzzle.handle_click(index);
+    }
+  }
+
+  game_setup__MODULE_ID__.prototype.action_handle_mix_click = function (index) {
+    this.puzzle.mix_click(index);
+  }
+
+  game_setup__MODULE_ID__.prototype.action_reset_puzzle = function(puznum) {
+    this.puzzle.reset_puzzle(puznum);
+    _gel("gameboard__MODULE_ID__").innerHTML = this.table_html();
+    this.puzzle.reregister();
+    this.refresh_all();
+  }
+
+  ////////////////////////////////////////////////////
+  // Dragging callback overrides.
+
+  Drag.dragging_started = function (object) {
+    game__MODULE_ID__.action_dragging_started(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag.hit_sink = function (object) {
+    game__MODULE_ID__.action_hit_sink(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag.lost_sink = function () {
+    game__MODULE_ID__.action_lost_sink();
+  }
+
+  Drag.dragging_ended = function (object) {
+    game__MODULE_ID__.action_dragging_ended(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+  Drag.click_happened = function (object) {
+    game__MODULE_ID__.action_handle_click(game__MODULE_ID__.value_from_id(object.id));
+  }
+
+
+  ///////////////////////////////////////
+  // Direct access functions.
+  
+  var game__MODULE_ID__ = new game_setup__MODULE_ID__();
+
+  function table_html__MODULE_ID__() {
+    var result = "";
+
+    result += '<span id="gameboard__MODULE_ID__">';
+    result += game__MODULE_ID__.table_html();
+    result += '</span>';
+
+    return result;
+  }
+  
+  function letter_change__MODULE_ID__(index) {
+    game__MODULE_ID__.puzzle.letter_changed(index);
+  }
+
+  function init_dragging__MODULE_ID__() {
+    Drag.set_basis(_gel("dummy"));
+    game__MODULE_ID__.puzzle.reregister();
+  }
+
+  function selection_table_html__MODULE_ID__() {
+    var result = "";
+    result += '<table border="0" cellpadding="0px" cellspacing="0px">';
+    for (var puznum = 0; puznum < 6; ++puznum) {
+      result += '<td align="middle" align="center">';
+      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa.images02.googlepages.com/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="game__MODULE_ID__.action_reset_puzzle(' + puznum + ')"></img>';
+      result += '</td>';
+    }
+    result += '</table>';
+    return result;
+  }
+
+  function pass_key_press__MODULE_ID__(e) {
+    var keynum;
+    if (window.event) {
+      keynum = e.keyCode;
+    } else if (e.which) {
+      keynum = e.which;
+    }
+    keychar = String.fromCharCode(keynum).toUpperCase();
+    game__MODULE_ID__.puzzle.process_key_press(keynum, keychar);
+  }
+  
+  if (document.addEventListener) {
+    document.addEventListener("keyup", pass_key_press__MODULE_ID__, false);
+  } else {
+    document.attachEvent("onkeyup", pass_key_press__MODULE_ID__);
+  }
+
+// Javascript ends -->
+</script>
+
+<span id="dummy" style="cursor:pointer;cursor:hand;font-size:12pt;position:absolute;left:0px;top:0px"></span>
+<font size=-1>
+
+<span id="debug0" style="font-size:12pt;font-weight:bold"></span>
+
+<div style="position:relative;float:left;margin-right:3px;margin-top:0px;margin-bottom:0px;">
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(selection_table_html__MODULE_ID__());
+</SCRIPT>
+</div>
+
+<b>Give and Take</b>:  Add (or subtract) one letter from each word, and then rearrange each group of the resulting letters to
+form one word (which may or may not be a proper noun).  The letters you add (or subtract) will spell out the
+name of the category that all the resulting words are in.
+<BR>
+<BR>
+<!---
+<form>
+<select name="puzzlenum__MODULE_ID__" onChange="game__MODULE_ID__.action_reset_puzzle(_gel('puzzlenum__MODULE_ID__').options[_gel('puzzlenum__MODULE_ID__').selectedIndex].value)">
+<option value="0" selected="selected" onClick="game__MODULE_ID__.action_reset_puzzle(0)">Puzzle 1</option>
+<option value="1" onClick="game__MODULE_ID__.action_reset_puzzle(1)">Puzzle 2</option>
+<option value="2" onClick="game__MODULE_ID__.action_reset_puzzle(2)">Puzzle 3</option>
+<option value="3" onClick="game__MODULE_ID__.action_reset_puzzle(3)">Puzzle 4</option>
+<option value="4" onClick="game__MODULE_ID__.action_reset_puzzle(4)">Puzzle 5</option>
+<option value="5" onClick="game__MODULE_ID__.action_reset_puzzle(5)">Puzzle 6</option>
+</select>
+</form>
+-->
+<SCRIPT LANGUAGE="JavaScript">
+  document.write(table_html__MODULE_ID__());
+</SCRIPT>
+<HR>
+
+<font size=-2>
+Inspired by the Family Reunions puzzles by Stanley Newman.  Drag letters to swap them.
+Click on the plus/minus sign to change sign.  Click on the "Mix" button to randomly rearrange
+the letters in that row.  Click in this module and then on a letter to activate a "cursor"; arrow keys and typing
+letters will change the letters appropriately.
+</font>
+
+<span id="debug" style="font-size:12pt;font-weight:bold"></span>
+
+<SCRIPT LANGUAGE="JavaScript">
+  init_dragging__MODULE_ID__();
+</SCRIPT>
+
+
+</FONT>
+
+
+  ]]> 
+
+  </Content>
+</Module>
+
