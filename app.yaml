@@ -10,8 +10,11 @@ handlers:
 - url: /staticgadgets
   static_dir: staticgadgets
 
+- url: /gadgets
+  static_dir: staticgadgets
+
 - url: /current\.xml
   script: current.py
 
 - url: /.*
-  script: helloworld.py
+  script: mainpage.py
