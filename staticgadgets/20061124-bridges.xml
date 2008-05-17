@@ -40,14 +40,14 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 ></A>
 </div>
 
-<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/puzzle-utils5.js"></script>
 <script type="text/javascript" src="http://weihwa.feedback.googlepages.com/igoogle_gridlib_old.js"></script>
 <!---
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/igoogle_gridlib.js"></script>
 --->
 
-<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/json2.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/json2.js"></script>
 
 <script type="text/javascript">
 <!-- Javascript begins

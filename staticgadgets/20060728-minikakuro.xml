@@ -22,7 +22,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
 <span id="debug" style="font-size:16pt;font-weight:bold"></span>
 
-<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/puzzle-utils.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/puzzle-utils.js"></script>
 
 <script type="text/javascript">
 <!-- Javascript begins
