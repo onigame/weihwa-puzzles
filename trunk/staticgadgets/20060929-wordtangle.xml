@@ -23,15 +23,15 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
 <div style="display:none;">
 Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.epl?art_id=958
-<img src='http://weihwa.images01.googlepages.com/black.png'>
+<img src='http://weihwa-puzzles.appspot.com/images/black.png'>
 </div>
 
 <div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
-<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa-puzzles.appspot.com/images/home.png"
      STYLE="border:0px"
      ALT="Puzzle Homepage: Play previous puzzles!"
      TITLE="Puzzle Homepage: Play previous puzzles!"
-></A><A HREF="mailto:weihwa.feedback+20060929@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+></A><A HREF="mailto:weihwa.feedback+20060929@gmail.com"><IMG SRC="http://weihwa-puzzles.appspot.com/images/mail.png"
      STYLE="border:0px"
      ALT="Click here to send feedback"
      TITLE="Click here to send feedback"
@@ -54,7 +54,7 @@ Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.
   ///////////////////////////////////////////////
 
   function puzzle_data__MODULE_ID__() {
-    this.prefix = 'http://weihwa.images01.googlepages.com/';
+    this.prefix = 'http://weihwa-puzzles.appspot.com/images/';
 //    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/chess/';
     this.resetPuzzleData(0);
   }
@@ -339,7 +339,7 @@ Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.
     result += '<table border="0" cellpadding="0px" cellspacing="0px">';
     for (var puznum = 0; puznum < 6; ++puznum) {
       result += '<td align="middle" align="center">';
-      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa.images02.googlepages.com/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="puzzle__MODULE_ID__.resetPuzzle(' + puznum + ')"></img>';
+      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa-puzzles.appspot.com/images/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="puzzle__MODULE_ID__.resetPuzzle(' + puznum + ')"></img>';
       result += '</td>';
     }
     result += '</table>';

@@ -746,31 +746,31 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   game_setup__MODULE_ID__.prototype.get_row_src = function (index) {
     if (this.puzzle.row_regions[index].completed()) {
-      return "http://weihwa.images02.googlepages.com/green.png";
+      return "http://weihwa-puzzles.appspot.com/images/green.png";
     } else if (this.puzzle.row_regions[index].has_dupes()) {
-      return "http://weihwa.images02.googlepages.com/red.png";
+      return "http://weihwa-puzzles.appspot.com/images/red.png";
     } else {
-      return "http://weihwa.images02.googlepages.com/white.png";
+      return "http://weihwa-puzzles.appspot.com/images/white.png";
     }
   }
 
   game_setup__MODULE_ID__.prototype.get_col_src = function (index) {
     if (this.puzzle.col_regions[index].completed()) {
-      return "http://weihwa.images02.googlepages.com/green.png";
+      return "http://weihwa-puzzles.appspot.com/images/green.png";
     } else if (this.puzzle.col_regions[index].has_dupes()) {
-      return "http://weihwa.images02.googlepages.com/red.png";
+      return "http://weihwa-puzzles.appspot.com/images/red.png";
     } else {
-      return "http://weihwa.images02.googlepages.com/white.png";
+      return "http://weihwa-puzzles.appspot.com/images/white.png";
     }
   }
 
   game_setup__MODULE_ID__.prototype.get_state_src = function (index) {
     if (this.puzzle.state_regions[index].completed()) {
-      return "http://weihwa.images02.googlepages.com/green.png";
+      return "http://weihwa-puzzles.appspot.com/images/green.png";
     } else if (this.puzzle.state_regions[index].has_dupes()) {
-      return "http://weihwa.images02.googlepages.com/red.png";
+      return "http://weihwa-puzzles.appspot.com/images/red.png";
     } else {
-      return "http://weihwa.images02.googlepages.com/white.png";
+      return "http://weihwa-puzzles.appspot.com/images/white.png";
     }
   }
 
@@ -887,7 +887,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
     result += '</td><td>';
 
-    result += '<table border="1" frame="box" rules="none" cellpadding="1px" cellspacing="0px" width="220px" height="220px" background="http://weihwa.images02.googlepages.com/background.png">';
+    result += '<table border="1" frame="box" rules="none" cellpadding="1px" cellspacing="0px" width="220px" height="220px" background="http://weihwa-puzzles.appspot.com/images/background.png">';
     for (var row = 0; row < game__MODULE_ID__.height; ++row) {
       result += '<tr style="height:22px">';
       for (var col = 0; col < game__MODULE_ID__.width; ++col) {

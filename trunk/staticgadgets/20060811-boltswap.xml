@@ -25,11 +25,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 <span id="debug" style="font-size:16pt;font-weight:bold"></span>
 
 <div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
-<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa-puzzles.appspot.com/images/home.png"
      STYLE="border:0px"
      ALT="Puzzle Homepage: Play previous puzzles!"
      TITLE="Puzzle Homepage: Play previous puzzles!"
-></A><A HREF="mailto:weihwa.feedback+20060811@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+></A><A HREF="mailto:weihwa.feedback+20060811@gmail.com"><IMG SRC="http://weihwa-puzzles.appspot.com/images/mail.png"
      STYLE="border:0px"
      ALT="Click here to send feedback"
      TITLE="Click here to send feedback"
@@ -268,32 +268,32 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
     if (index == this.yanked) {
       if (color == 1) {
-        return '<img title="moving this piece" src="http://weihwa.images02.googlepages.com/white-king-glow.gif" alt="WS"></img>';
+        return '<img title="moving this piece" src="http://weihwa-puzzles.appspot.com/images/white-king-glow.gif" alt="WS"></img>';
       } else {
-        return '<img title="moving this piece" src="http://weihwa.images02.googlepages.com/black-king-glow.gif" alt="BS"></img>';
+        return '<img title="moving this piece" src="http://weihwa-puzzles.appspot.com/images/black-king-glow.gif" alt="BS"></img>';
       }
     }
     if (is_sink) {
       if (color == 1) {
-        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/white-king-ghost.gif" alt="WD"></img>';
+        return '<img title="possible destination" src="http://weihwa-puzzles.appspot.com/images/white-king-ghost.gif" alt="WD"></img>';
       } else {
-        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/black-king-ghost.gif" alt="BD"></img>';
+        return '<img title="possible destination" src="http://weihwa-puzzles.appspot.com/images/black-king-ghost.gif" alt="BD"></img>';
       }
     } 
     if (this.dest_list.has(index)) {
       if (color == 1) {
-        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/white-dot.gif" alt="WD"></img>';
+        return '<img title="possible destination" src="http://weihwa-puzzles.appspot.com/images/white-dot.gif" alt="WD"></img>';
       } else {
-        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/black-dot.gif" alt="BD"></img>';
+        return '<img title="possible destination" src="http://weihwa-puzzles.appspot.com/images/black-dot.gif" alt="BD"></img>';
       }
     } 
     if (this.kings[index] == 1) {
-      return '<img title="white king" src="http://weihwa.images02.googlepages.com/white-king.gif" alt="WN"></img>';
+      return '<img title="white king" src="http://weihwa-puzzles.appspot.com/images/white-king.gif" alt="WN"></img>';
     }
     if (this.kings[index] == 2) {
-      return '<img title="black king" src="http://weihwa.images02.googlepages.com/black-king.gif" alt="BN"></img>';
+      return '<img title="black king" src="http://weihwa-puzzles.appspot.com/images/black-king.gif" alt="BN"></img>';
     }
-    return '<img title="blank" src="http://weihwa.images02.googlepages.com/blank.gif" alt="--"></img>';
+    return '<img title="blank" src="http://weihwa-puzzles.appspot.com/images/blank.gif" alt="--"></img>';
   }
 
   ///////////////////////////////////////////////
@@ -395,7 +395,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     var result = "";
     var tw = this.puzzle.width * 36;
     var th = this.puzzle.height * 36;
-    result += '<table border="4" frame="bevel" rules="none" cellpadding="0px" cellspacing="0px" width="' + tw + 'px" height="' + th + 'px" background="http://weihwa.images02.googlepages.com/background33.gif">';
+    result += '<table border="4" frame="bevel" rules="none" cellpadding="0px" cellspacing="0px" width="' + tw + 'px" height="' + th + 'px" background="http://weihwa-puzzles.appspot.com/images/background33.gif">';
     for (var row = 0; row < this.puzzle.height; ++row) {
       result += '<tr>';
       for (var col = 0; col < this.puzzle.width; ++col) {

@@ -712,7 +712,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   }
 
   puzzle_data__MODULE_ID__.prototype.get_background_image = function(index) {
-    var answer = "http://weihwa.images02.googlepages.com/";
+    var answer = "http://weihwa-puzzles.appspot.com/images/";
     if (this.a_label[index] == this.x) {
       answer += 'black';
     } else if (this.a_regions[this.a_label[index]].satisfied()) {
@@ -999,7 +999,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     result += '<table border="0" cellpadding="0px" cellspacing="0px">';
     for (var puznum = 0; puznum < 6; ++puznum) {
       result += '<td align="middle" align="center">';
-      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa.images02.googlepages.com/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="game__MODULE_ID__.action_reset_puzzle(' + puznum + ')"></img>';
+      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa-puzzles.appspot.com/images/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="game__MODULE_ID__.action_reset_puzzle(' + puznum + ')"></img>';
       result += '</td>';
     }
     result += '</table>';

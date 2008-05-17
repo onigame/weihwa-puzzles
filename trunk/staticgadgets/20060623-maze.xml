@@ -207,7 +207,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   }
 
   function src_image__MODULE_ID__(orientation) {
-    var pre = "http://weihwa.images02.googlepages.com/";
+    var pre = "http://weihwa-puzzles.appspot.com/images/";
     var hl = (this.highlighted == orientation) ? "-highlight" : "";
     if (orientation == 8) {
       if (!this.state_data.game_over) return pre + "blank.png";
@@ -349,28 +349,28 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   function cached_images__MODULE_ID__() {
     var result = "";
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow0.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow1.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow2.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow3.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow4.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow5.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow6.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow7.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/outoftime.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/toomanysteps.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow0-highlight.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow1-highlight.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow2-highlight.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow3-highlight.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow4-highlight.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow5-highlight.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow6-highlight.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/arrow7-highlight.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/outoftime-highlight.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/toomanysteps-highlight.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/youwin.png">';
-    result += '<img width="0px" height="0px" src="http://weihwa.images02.googlepages.com/blank.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow0.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow1.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow2.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow3.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow4.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow5.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow6.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow7.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/outoftime.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/toomanysteps.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow0-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow1-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow2-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow3-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow4-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow5-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow6-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/arrow7-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/outoftime-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/toomanysteps-highlight.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/youwin.png">';
+    result += '<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/blank.png">';
     return result;
   }
 

@@ -362,27 +362,27 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       var state = this.cell_state[pos];
 
       if (this.use_memory && state == 5 && pos != this.last_seen) {
-        return "http://weihwa.images02.googlepages.com/unclicked.png";
+        return "http://weihwa-puzzles.appspot.com/images/unclicked.png";
       }
 
-      if (state == 0) return "http://weihwa.images02.googlepages.com/unclicked.png";
-      if (state == 1) return "http://weihwa.images02.googlepages.com/depressed.png";
-      if (state == 2) return "http://weihwa.images02.googlepages.com/unclicked_mark.png";
-      if (state == 3) return "http://weihwa.images02.googlepages.com/depressed_mark.png";
-      if (state == 4) return "http://weihwa.images02.googlepages.com/flag.png";
+      if (state == 0) return "http://weihwa-puzzles.appspot.com/images/unclicked.png";
+      if (state == 1) return "http://weihwa-puzzles.appspot.com/images/depressed.png";
+      if (state == 2) return "http://weihwa-puzzles.appspot.com/images/unclicked_mark.png";
+      if (state == 3) return "http://weihwa-puzzles.appspot.com/images/depressed_mark.png";
+      if (state == 4) return "http://weihwa-puzzles.appspot.com/images/flag.png";
       if (state == 5) {
         if (!this.show_zero && this.puzzle.mine_count[pos] == 0) {
-          return "http://weihwa.images02.googlepages.com/revealed_empty.png";
+          return "http://weihwa-puzzles.appspot.com/images/revealed_empty.png";
         } else {
           if (this.use_symbol) {
-            return "http://weihwa.images02.googlepages.com/symbol_" + this.symbol_table[this.puzzle.mine_count[pos]] + ".png";
+            return "http://weihwa-puzzles.appspot.com/images/symbol_" + this.symbol_table[this.puzzle.mine_count[pos]] + ".png";
           } else {
-            return "http://weihwa.images02.googlepages.com/revealed_" + this.puzzle.mine_count[pos] + ".png";
+            return "http://weihwa-puzzles.appspot.com/images/revealed_" + this.puzzle.mine_count[pos] + ".png";
           }
         }
       }
-      if (state == 6) return "http://weihwa.images02.googlepages.com/bomb.png";
-      if (state == 7) return "http://weihwa.images02.googlepages.com/flag_bad.png";
+      if (state == 6) return "http://weihwa-puzzles.appspot.com/images/bomb.png";
+      if (state == 7) return "http://weihwa-puzzles.appspot.com/images/flag_bad.png";
     }
   }
 
