@@ -5,12 +5,12 @@
     description="Regular Puzzle Challenges from a Google Engineer"
     author="Wei-Hwa Huang and others"
     author_email="weihwa.feedback+ig20061004@gmail.com"
-    author_link="http://weihwa.feedback.googlepages.com/home"
-    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_link="http://weihwa-puzzles.appspot.com/"
+    title_url="http://weihwa-puzzles.appspot.com/"
     author_location="Mountain View, CA, USA"
     author_affiliation="Google, Inc."
-    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
-    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    screenshot="http://weihwa-puzzles.appspot.com/images/screenshot.png"
+    thumbnail="http://weihwa-puzzles.appspot.com/images/thumbnail.png"
     height="400"
   />
   <Content type="html">
@@ -27,7 +27,7 @@ Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.
 </div>
 
 <div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
-<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa-puzzles.appspot.com/images/home.png"
+<A TARGET="_top" HREF="http://weihwa-puzzles.appspot.com/"><IMG SRC="http://weihwa-puzzles.appspot.com/images/home.png"
      STYLE="border:0px"
      ALT="Puzzle Homepage: Play previous puzzles!"
      TITLE="Puzzle Homepage: Play previous puzzles!"
@@ -42,8 +42,8 @@ Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/drag.js"></script>
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils3.js"></script>
 --->
-<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/drag.js"></script>
-<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils3.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/drag.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/puzzle-utils3.js"></script>
 
 <script type="text/javascript">
 <!-- Javascript begins

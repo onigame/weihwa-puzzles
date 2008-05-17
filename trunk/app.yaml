@@ -10,6 +10,9 @@ handlers:
 - url: /staticgadgets
   static_dir: staticgadgets
 
+- url: /js
+  static_dir: js
+
 - url: /gadgets
   static_dir: staticgadgets
 
