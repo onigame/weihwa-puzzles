@@ -418,9 +418,9 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
     if (space_index == 1) {
       if (this.signs[word_index] == 1) {
-        return '<img style="cursor:pointer;cursor:hand;font-size:10pt" title="click to change to minus" src="http://weihwa.images02.googlepages.com/plus-sign.png" alt="+"></img>';
+        return '<img style="cursor:pointer;cursor:hand;font-size:10pt" title="click to change to minus" src="http://weihwa-puzzles.appspot.com/images/plus-sign.png" alt="+"></img>';
       } else {
-        return '<img style="cursor:pointer;cursor:hand;font-size:10pt" title="click to change to plus" src="http://weihwa.images02.googlepages.com/minus-sign.png" alt="-"></img>';
+        return '<img style="cursor:pointer;cursor:hand;font-size:10pt" title="click to change to plus" src="http://weihwa-puzzles.appspot.com/images/minus-sign.png" alt="-"></img>';
       }
     }
     if (space_index == 2) {
@@ -433,7 +433,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       }
     }
     if (space_index == 3) {
-      return '<img title="=" style="font-size:10pt" src="http://weihwa.images02.googlepages.com/equals-sign.png" alt="="></img>';
+      return '<img title="=" style="font-size:10pt" src="http://weihwa-puzzles.appspot.com/images/equals-sign.png" alt="="></img>';
     }
     if (space_index > 3) {
       if (index == this.cursor_pos) {
@@ -641,7 +641,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     result += '<table border="0" cellpadding="0px" cellspacing="0px">';
     for (var puznum = 0; puznum < 6; ++puznum) {
       result += '<td align="middle" align="center">';
-      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa.images02.googlepages.com/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="game__MODULE_ID__.action_reset_puzzle(' + puznum + ')"></img>';
+      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa-puzzles.appspot.com/images/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="game__MODULE_ID__.action_reset_puzzle(' + puznum + ')"></img>';
       result += '</td>';
     }
     result += '</table>';

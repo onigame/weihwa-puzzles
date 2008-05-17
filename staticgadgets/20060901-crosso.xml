@@ -23,11 +23,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 </style>
 
 <div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
-<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa.images01.googlepages.com/home.png"
+<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa-puzzles.appspot.com/images/home.png"
      STYLE="border:0px"
      ALT="Puzzle Homepage: Play previous puzzles!"
      TITLE="Puzzle Homepage: Play previous puzzles!"
-></A><A HREF="mailto:weihwa.feedback+20060817@gmail.com"><IMG SRC="http://weihwa.images01.googlepages.com/mail.png"
+></A><A HREF="mailto:weihwa.feedback+20060817@gmail.com"><IMG SRC="http://weihwa-puzzles.appspot.com/images/mail.png"
      STYLE="border:0px"
      ALT="Click here to send feedback"
      TITLE="Click here to send feedback"
@@ -651,7 +651,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     result += '<table border="0" cellpadding="0px" cellspacing="0px">';
     for (var puznum = 0; puznum < 6; ++puznum) {
       result += '<td align="middle" align="center">';
-      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa.images02.googlepages.com/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="game__MODULE_ID__.action_reset_puzzle(' + puznum + ')"></img>';
+      result += '<img title="Click here to try puzzle ' + (puznum + 1) + '" src="http://weihwa-puzzles.appspot.com/images/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="game__MODULE_ID__.action_reset_puzzle(' + puznum + ')"></img>';
       result += '</td>';
     }
     result += '</table>';

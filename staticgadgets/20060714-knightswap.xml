@@ -527,32 +527,32 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
     if (index == this.yanked) {
       if (color == 1) {
-        return '<img title="moving this piece" src="http://weihwa.images02.googlepages.com/white-knight-glow.gif" alt="WS"></img>';
+        return '<img title="moving this piece" src="http://weihwa-puzzles.appspot.com/images/white-knight-glow.gif" alt="WS"></img>';
       } else {
-        return '<img title="moving this piece" src="http://weihwa.images02.googlepages.com/black-knight-glow.gif" alt="BS"></img>';
+        return '<img title="moving this piece" src="http://weihwa-puzzles.appspot.com/images/black-knight-glow.gif" alt="BS"></img>';
       }
     }
     if (is_sink) {
       if (color == 1) {
-        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/white-knight-ghost.gif" alt="WD"></img>';
+        return '<img title="possible destination" src="http://weihwa-puzzles.appspot.com/images/white-knight-ghost.gif" alt="WD"></img>';
       } else {
-        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/black-knight-ghost.gif" alt="BD"></img>';
+        return '<img title="possible destination" src="http://weihwa-puzzles.appspot.com/images/black-knight-ghost.gif" alt="BD"></img>';
       }
     } 
     if (this.dest_list.has(index)) {
       if (color == 1) {
-        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/white-dot.gif" alt="WD"></img>';
+        return '<img title="possible destination" src="http://weihwa-puzzles.appspot.com/images/white-dot.gif" alt="WD"></img>';
       } else {
-        return '<img title="possible destination" src="http://weihwa.images02.googlepages.com/black-dot.gif" alt="BD"></img>';
+        return '<img title="possible destination" src="http://weihwa-puzzles.appspot.com/images/black-dot.gif" alt="BD"></img>';
       }
     } 
     if (this.knights[index] == 1) {
-      return '<img title="white knight" src="http://weihwa.images02.googlepages.com/white-knight.gif" alt="WN"></img>';
+      return '<img title="white knight" src="http://weihwa-puzzles.appspot.com/images/white-knight.gif" alt="WN"></img>';
     }
     if (this.knights[index] == 2) {
-      return '<img title="black knight" src="http://weihwa.images02.googlepages.com/black-knight.gif" alt="BN"></img>';
+      return '<img title="black knight" src="http://weihwa-puzzles.appspot.com/images/black-knight.gif" alt="BN"></img>';
     }
-    return '<img title="blank" src="http://weihwa.images02.googlepages.com/blank.gif" alt="--"></img>';
+    return '<img title="blank" src="http://weihwa-puzzles.appspot.com/images/blank.gif" alt="--"></img>';
   }
 
   ///////////////////////////////////////////////
@@ -660,7 +660,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     var result = "";
     var tw = this.puzzle.width * 36;
     var th = this.puzzle.height * 36;
-    result += '<table border="4" frame="bevel" rules="none" cellpadding="0px" cellspacing="0px" width="' + tw + 'px" height="' + th + 'px" background="http://weihwa.images02.googlepages.com/background-' + puznum + '.gif">';
+    result += '<table border="4" frame="bevel" rules="none" cellpadding="0px" cellspacing="0px" width="' + tw + 'px" height="' + th + 'px" background="http://weihwa-puzzles.appspot.com/images/background-' + puznum + '.gif">';
     for (var row = 0; row < this.puzzle.height; ++row) {
       result += '<tr>';
       for (var col = 0; col < this.puzzle.width; ++col) {
@@ -793,7 +793,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     result += '<table border="0" cellpadding="0px" cellspacing="0px">';
     for (var puznum = 0; puznum < 6; ++puznum) {
       result += '<td align="middle" align="center">';
-      result += '<img title="Click here to try this puzzle" src="http://weihwa.images02.googlepages.com/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="game__MODULE_ID__.action_reset_puzzle(' + puznum + ')"></img>';
+      result += '<img title="Click here to try this puzzle" src="http://weihwa-puzzles.appspot.com/images/select-' + puznum + '.gif" style="cursor:pointer;cursor:hand" onclick="game__MODULE_ID__.action_reset_puzzle(' + puznum + ')"></img>';
       result += '</td>';
     }
     result += '</table>';
@@ -807,15 +807,15 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   var image_cache__MODULE_ID__ = new Array();
   function cache_images__MODULE_ID__() {
-    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[0].src = "http://weihwa.images02.googlepages.com/blank.gif";
-    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[1].src = "http://weihwa.images02.googlepages.com/white-dot.gif";
-    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[2].src = "http://weihwa.images02.googlepages.com/white-knight.gif";
-    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[3].src = "http://weihwa.images02.googlepages.com/white-knight-glow.gif";
-    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[4].src = "http://weihwa.images02.googlepages.com/white-knight-ghost.gif";
-    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[5].src = "http://weihwa.images02.googlepages.com/black-dot.gif";
-    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[6].src = "http://weihwa.images02.googlepages.com/black-knight.gif";
-    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[7].src = "http://weihwa.images02.googlepages.com/black-knight-glow.gif";
-    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[8].src = "http://weihwa.images02.googlepages.com/black-knight-ghost.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[0].src = "http://weihwa-puzzles.appspot.com/images/blank.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[1].src = "http://weihwa-puzzles.appspot.com/images/white-dot.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[2].src = "http://weihwa-puzzles.appspot.com/images/white-knight.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[3].src = "http://weihwa-puzzles.appspot.com/images/white-knight-glow.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[4].src = "http://weihwa-puzzles.appspot.com/images/white-knight-ghost.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[5].src = "http://weihwa-puzzles.appspot.com/images/black-dot.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[6].src = "http://weihwa-puzzles.appspot.com/images/black-knight.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[7].src = "http://weihwa-puzzles.appspot.com/images/black-knight-glow.gif";
+    image_cache__MODULE_ID__.push(new Image()); image_cache__MODULE_ID__[8].src = "http://weihwa-puzzles.appspot.com/images/black-knight-ghost.gif";
   }
 
 // Javascript ends -->

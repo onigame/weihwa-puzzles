@@ -36,11 +36,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   function palette_select__MODULE_ID__(position) {
     if (position == 0) {
-      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/symbol-plusminus-selected.png";
+      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa-puzzles.appspot.com/images/symbol-plusminus-selected.png";
       _gel("palette_" + position + "___MODULE_ID__").alt = "plus or minus (selected)";
       _gel("palette_" + position + "___MODULE_ID__").title = "plus or minus (selected)";
     } else {
-      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/number-" + position + "-selected.png";
+      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa-puzzles.appspot.com/images/number-" + position + "-selected.png";
       _gel("palette_" + position + "___MODULE_ID__").alt = "button " + position + " (selected)";
       _gel("palette_" + position + "___MODULE_ID__").title = "button " + position + " (selected)";
     }
@@ -48,11 +48,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   function palette_deselect__MODULE_ID__(position) {
     if (position == 0) {
-      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/symbol-plusminus.png";
+      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa-puzzles.appspot.com/images/symbol-plusminus.png";
       _gel("palette_" + position + "___MODULE_ID__").alt = "plus or minus";
       _gel("palette_" + position + "___MODULE_ID__").title = "plus or minus";
     } else {
-      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/number-" + position + ".png";
+      _gel("palette_" + position + "___MODULE_ID__").src = "http://weihwa-puzzles.appspot.com/images/number-" + position + ".png";
       _gel("palette_" + position + "___MODULE_ID__").alt = "button " + position;
       _gel("palette_" + position + "___MODULE_ID__").title = "button " + position;
     }
@@ -152,11 +152,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   function maybe_display_congratulations__MODULE_ID__() {
     if (all_correct__MODULE_ID__()) {
-      _gel("result_cell_14___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/distance-result-congratulations.png";
+      _gel("result_cell_14___MODULE_ID__").src = "http://weihwa-puzzles.appspot.com/images/distance-result-congratulations.png";
       _gel("result_cell_14___MODULE_ID__").alt = "Congratulations!  You solved the puzzle!";
       _gel("result_cell_14___MODULE_ID__").title = "Congratulations!  You solved the puzzle!";
     } else {
-      _gel("result_cell_14___MODULE_ID__").src = "http://weihwa.images02.googlepages.com/distance-result-blank.png";
+      _gel("result_cell_14___MODULE_ID__").src = "http://weihwa-puzzles.appspot.com/images/distance-result-blank.png";
       _gel("result_cell_14___MODULE_ID__").alt = "";
       _gel("result_cell_14___MODULE_ID__").title = "";
     }
@@ -168,16 +168,16 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     var srctxt = "";
     var alttxt = "";
     if (distances__MODULE_ID__[result] == -2) {
-      srctxt = "http://weihwa.images02.googlepages.com/distance-result-undefined.png";
+      srctxt = "http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png";
       alttxt = "undefined";
     } else if (distances__MODULE_ID__[result] == -1) {
-      srctxt = "http://weihwa.images02.googlepages.com/distance-result-ambiguous.png";
+      srctxt = "http://weihwa-puzzles.appspot.com/images/distance-result-ambiguous.png";
       alttxt = "ambiguous";
     } else if (distances__MODULE_ID__[result-1] < distances__MODULE_ID__[result]) {
-      srctxt = "http://weihwa.images02.googlepages.com/distance-result-good-" + distances__MODULE_ID__[result] + ".png";
+      srctxt = "http://weihwa-puzzles.appspot.com/images/distance-result-good-" + distances__MODULE_ID__[result] + ".png";
       alttxt = "distance of sqrt(" + distances__MODULE_ID__[result] + "), good";
     } else {
-      srctxt = "http://weihwa.images02.googlepages.com/distance-result-bad-" + distances__MODULE_ID__[result] + ".png";
+      srctxt = "http://weihwa-puzzles.appspot.com/images/distance-result-bad-" + distances__MODULE_ID__[result] + ".png";
       alttxt = "distance of sqrt(" + distances__MODULE_ID__[result] + "), bad";
     }
     _gel("result_cell_" + result + "___MODULE_ID__").src = srctxt;
@@ -194,9 +194,9 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
         var value = cell_contents__MODULE_ID__[x * 5 + y];
         seen_times__MODULE_ID__[value]++;
         if (value == -1) {
-          _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa.images02.googlepages.com/distance-blank.png";
+          _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa-puzzles.appspot.com/images/distance-blank.png";
         } else {
-          _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa.images02.googlepages.com/distance-" + value + ".png";
+          _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa-puzzles.appspot.com/images/distance-" + value + ".png";
         }
       }
     }
@@ -220,9 +220,9 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   function refresh__MODULE_ID__(x, y, old_value, new_value) {
     var value = cell_contents__MODULE_ID__[x * 5 + y];
     if (value == -1) {
-      _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa.images02.googlepages.com/distance-blank.png";
+      _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa-puzzles.appspot.com/images/distance-blank.png";
     } else {
-      _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa.images02.googlepages.com/distance-" + value + ".png";
+      _gel(table_cell_image_id__MODULE_ID__(x,y)).src = "http://weihwa-puzzles.appspot.com/images/distance-" + value + ".png";
     }
    
     calculate_distance__MODULE_ID__(old_value);
@@ -316,7 +316,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   function table_cell_html__MODULE_ID__(x, y) {
     var answer = '<TD><IMG BORDER="0" SRC="';
-    answer += 'http://weihwa.images02.googlepages.com/distance-'
+    answer += 'http://weihwa-puzzles.appspot.com/images/distance-'
     var value = value_at__MODULE_ID__(x, y);
     if (value == -1) {
       answer += 'blank';
@@ -418,60 +418,60 @@ Let's have a big "G" (for Google):
 <table border="0" cellpadding="0px" cellspacing="0px" width="102px">
 
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow1.png"></TD>
-<TD><IMG ID="result_cell_1___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow1.png"></TD>
+<TD><IMG ID="result_cell_1___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow2.png"></TD>
-<TD><IMG ID="result_cell_2___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow2.png"></TD>
+<TD><IMG ID="result_cell_2___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow3.png"></TD>
-<TD><IMG ID="result_cell_3___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow3.png"></TD>
+<TD><IMG ID="result_cell_3___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow4.png"></TD>
-<TD><IMG ID="result_cell_4___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow4.png"></TD>
+<TD><IMG ID="result_cell_4___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow5.png"></TD>
-<TD><IMG ID="result_cell_5___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow5.png"></TD>
+<TD><IMG ID="result_cell_5___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow6.png"></TD>
-<TD><IMG ID="result_cell_6___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow6.png"></TD>
+<TD><IMG ID="result_cell_6___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow7.png"></TD>
-<TD><IMG ID="result_cell_7___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow7.png"></TD>
+<TD><IMG ID="result_cell_7___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow8.png"></TD>
-<TD><IMG ID="result_cell_8___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow8.png"></TD>
+<TD><IMG ID="result_cell_8___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow9.png"></TD>
-<TD><IMG ID="result_cell_9___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow9.png"></TD>
+<TD><IMG ID="result_cell_9___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow10.png"></TD>
-<TD><IMG ID="result_cell_10___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow10.png"></TD>
+<TD><IMG ID="result_cell_10___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow11.png"></TD>
-<TD><IMG ID="result_cell_11___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow11.png"></TD>
+<TD><IMG ID="result_cell_11___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow12.png"></TD>
-<TD><IMG ID="result_cell_12___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow12.png"></TD>
+<TD><IMG ID="result_cell_12___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-arrow13.png"></TD>
-<TD><IMG ID="result_cell_13___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-arrow13.png"></TD>
+<TD><IMG ID="result_cell_13___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-undefined.png" ALT="undefined" TITLE="undefined"></TD>
 </TR>
 <TR>
-<TD><IMG SRC="http://weihwa.images02.googlepages.com/distance-result-blank.png" ALT="" TITLE=""></TD>
-<TD><IMG ID="result_cell_14___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/distance-result-blank.png" ALT="" TITLE=""></TD>
+<TD><IMG SRC="http://weihwa-puzzles.appspot.com/images/distance-result-blank.png" ALT="" TITLE=""></TD>
+<TD><IMG ID="result_cell_14___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-blank.png" ALT="" TITLE=""></TD>
 </TR>
 
 </table>
@@ -480,23 +480,23 @@ Let's have a big "G" (for Google):
 
 <table border="0" cellpadding="0px" cellspacing="0px">
 <TR>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(0)"><IMG BORDER="0" ID="palette_0___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/symbol-plusminus-selected.png"
+<TD><A HREF="javascript:palette_click__MODULE_ID__(0)"><IMG BORDER="0" ID="palette_0___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/symbol-plusminus-selected.png"
      ALT="plus or minus (selected)" TITLE="plus or minus (selected)"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(1)"><IMG BORDER="0" ID="palette_1___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-1.png" ALT="button 1" TITLE="button 1"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(2)"><IMG BORDER="0" ID="palette_2___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-2.png" ALT="button 2" TITLE="button 2"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(3)"><IMG BORDER="0" ID="palette_3___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-3.png" ALT="button 3" TITLE="button 3"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(4)"><IMG BORDER="0" ID="palette_4___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-4.png" ALT="button 4" TITLE="button 4"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(5)"><IMG BORDER="0" ID="palette_5___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-5.png" ALT="button 5" TITLE="button 5"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(6)"><IMG BORDER="0" ID="palette_6___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-6.png" ALT="button 6" TITLE="button 6"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(7)"><IMG BORDER="0" ID="palette_7___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-7.png" ALT="button 7" TITLE="button 7"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(8)"><IMG BORDER="0" ID="palette_8___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-8.png" ALT="button 8" TITLE="button 8"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(9)"><IMG BORDER="0" ID="palette_9___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-9.png" ALT="button 9" TITLE="button 9"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(10)"><IMG BORDER="0" ID="palette_10___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-10.png" ALT="button 10" TITLE="button 10"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(11)"><IMG BORDER="0" ID="palette_11___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-11.png" ALT="button 11" TITLE="button 11"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(12)"><IMG BORDER="0" ID="palette_12___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-12.png" ALT="button 12" TITLE="button 12"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(13)"><IMG BORDER="0" ID="palette_13___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-13.png" ALT="button 13" TITLE="button 13"></A></TD>
-<TD><A HREF="javascript:palette_click__MODULE_ID__(14)"><IMG BORDER="0" ID="palette_14___MODULE_ID__" SRC="http://weihwa.images02.googlepages.com/number-14.png" ALT="button 14" TITLE="button 14"></A></TD>
-<TD><A BORDER="0" HREF="javascript:restart_puzzle__MODULE_ID__()"><IMG BORDER="0" SRC="http://weihwa.images02.googlepages.com/distance-result-restart.png"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(1)"><IMG BORDER="0" ID="palette_1___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-1.png" ALT="button 1" TITLE="button 1"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(2)"><IMG BORDER="0" ID="palette_2___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-2.png" ALT="button 2" TITLE="button 2"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(3)"><IMG BORDER="0" ID="palette_3___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-3.png" ALT="button 3" TITLE="button 3"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(4)"><IMG BORDER="0" ID="palette_4___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-4.png" ALT="button 4" TITLE="button 4"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(5)"><IMG BORDER="0" ID="palette_5___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-5.png" ALT="button 5" TITLE="button 5"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(6)"><IMG BORDER="0" ID="palette_6___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-6.png" ALT="button 6" TITLE="button 6"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(7)"><IMG BORDER="0" ID="palette_7___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-7.png" ALT="button 7" TITLE="button 7"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(8)"><IMG BORDER="0" ID="palette_8___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-8.png" ALT="button 8" TITLE="button 8"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(9)"><IMG BORDER="0" ID="palette_9___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-9.png" ALT="button 9" TITLE="button 9"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(10)"><IMG BORDER="0" ID="palette_10___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-10.png" ALT="button 10" TITLE="button 10"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(11)"><IMG BORDER="0" ID="palette_11___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-11.png" ALT="button 11" TITLE="button 11"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(12)"><IMG BORDER="0" ID="palette_12___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-12.png" ALT="button 12" TITLE="button 12"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(13)"><IMG BORDER="0" ID="palette_13___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-13.png" ALT="button 13" TITLE="button 13"></A></TD>
+<TD><A HREF="javascript:palette_click__MODULE_ID__(14)"><IMG BORDER="0" ID="palette_14___MODULE_ID__" SRC="http://weihwa-puzzles.appspot.com/images/number-14.png" ALT="button 14" TITLE="button 14"></A></TD>
+<TD><A BORDER="0" HREF="javascript:restart_puzzle__MODULE_ID__()"><IMG BORDER="0" SRC="http://weihwa-puzzles.appspot.com/images/distance-result-restart.png"></A></TD>
 </TR>
 </TABLE>
 
