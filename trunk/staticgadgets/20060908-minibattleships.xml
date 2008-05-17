@@ -97,8 +97,8 @@ Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.
 <script type="text/javascript" src="drag.js"></script>
 <script type="text/javascript" src="puzzle-utils3.js"></script>
 --->
-<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/drag.js"></script>
-<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/puzzle-utils3.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/drag.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/puzzle-utils3.js"></script>
 
 <script type="text/javascript">
 <!-- Javascript begins

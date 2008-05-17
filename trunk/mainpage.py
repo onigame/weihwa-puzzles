@@ -21,7 +21,7 @@ puzzle_gadgets = [
   PuzzleGadget(2007,  6,  1, 'Ssudoku', ''),
   PuzzleGadget(2007,  3, 26, 'Memory Lists', 'lists'),
   PuzzleGadget(2007,  2, 26, 'Latin Squares', ''),
-  PuzzleGadget(2007,  2,  9, 'Bridges 3', ''),
+  PuzzleGadget(2007,  2,  9, 'Bridges 3', 'bridges'),
   PuzzleGadget(2007,  1, 26, 'Bridges 2', ''),
   PuzzleGadget(2007,  1, 11, 'Knight Attack', ''),
   PuzzleGadget(2006, 12, 15, 'Holiday Ornaments', 'ornaments'),

@@ -43,8 +43,8 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 <!---
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils4.js"></script>
 --->
-<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/puzzle-utils4.js"></script>
-<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/json2.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/puzzle-utils4.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/json2.js"></script>
 
 <script type="text/javascript">
 <!-- Javascript begins
