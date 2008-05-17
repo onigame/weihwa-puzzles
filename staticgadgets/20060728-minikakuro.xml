@@ -7,8 +7,8 @@
     author_email="weihwa.feedback+ig20060728@gmail.com"
     author_location="Mountain View, CA, USA"
     author_affiliation="Google, Inc."
-    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
-    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    screenshot="http://weihwa-puzzles.appspot.com/images/screenshot.png"
+    thumbnail="http://weihwa-puzzles.appspot.com/images/thumbnail.png"
     height="420"
     render_inline="optional"
   />
@@ -22,7 +22,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
 <span id="debug" style="font-size:16pt;font-weight:bold"></span>
 
-<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/puzzle-utils.js"></script>
 
 <script type="text/javascript">
 <!-- Javascript begins

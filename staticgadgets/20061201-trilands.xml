@@ -5,12 +5,12 @@
     description="Regular Puzzle Challenges from a Google Engineer"
     author="Wei-Hwa Huang and others"
     author_email="weihwa.feedback+ig20061201@gmail.com"
-    author_link="http://weihwa.feedback.googlepages.com/home"
-    title_url="http://weihwa.feedback.googlepages.com/home"
+    author_link="http://weihwa-puzzles.appspot.com/"
+    title_url="http://weihwa-puzzles.appspot.com/"
     author_location="Mountain View, CA, USA"
     author_affiliation="Google, Inc."
-    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
-    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    screenshot="http://weihwa-puzzles.appspot.com/images/screenshot.png"
+    thumbnail="http://weihwa-puzzles.appspot.com/images/thumbnail.png"
     height="100">
     <Require feature='dynamic-height'/>
     <Require feature='setprefs'/>
@@ -29,7 +29,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 </style>
 
 <div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
-<A TARGET="_top" HREF="http://weihwa.feedback.googlepages.com/home"><IMG SRC="http://weihwa-puzzles.appspot.com/images/home.png"
+<A TARGET="_top" HREF="http://weihwa-puzzles.appspot.com/"><IMG SRC="http://weihwa-puzzles.appspot.com/images/home.png"
      STYLE="border:0px"
      ALT="Puzzle Homepage: Play previous puzzles!"
      TITLE="Puzzle Homepage: Play previous puzzles!"
@@ -40,14 +40,14 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 ></A>
 </div>
 
-<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/puzzle-utils5.js"></script>
 <script type="text/javascript" src="http://weihwa.feedback.googlepages.com/igoogle_gridlib.js"></script>
 <!---
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/igoogle_gridlib.js"></script>
 --->
 
-<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/json2.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/json2.js"></script>
 
 <script type="text/javascript">
 <!-- Javascript begins

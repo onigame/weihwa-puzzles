@@ -5,12 +5,12 @@
     description="A networking puzzle from Wei-Hwa Huang"
     author="Wei-Hwa Huang and others"
     author_email="weihwa.feedback+tubes@gmail.com"
-    author_link="http://weihwa.feedback.googlepages.com/home"
+    author_link="http://weihwa-puzzles.appspot.com/"
     title_url="http://weihwa.feedback.googlepages.com/seriesoftubes"
     author_location="Mountain View, CA, USA"
     author_affiliation="Google, Inc."
-    screenshot="http://weihwa.feedback.googlepages.com/tubes-screenshot.png"
-    thumbnail="http://weihwa.feedback.googlepages.com/tubes-thumbnail.png"
+    screenshot="http://weihwa-puzzles.appspot.com/images/tubes-screenshot.png"
+    thumbnail="http://weihwa-puzzles.appspot.com/images/tubes-thumbnail.png"
     height="100">
     <Require feature='dynamic-height'/>
   </ModulePrefs>
@@ -72,8 +72,8 @@ Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/drag.js"></script>
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils3.js"></script>
 --->
-<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/drag.js"></script>
-<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/puzzle-utils3.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/drag.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/images/puzzle-utils3.js"></script>
 
 <script type="text/javascript">
 <!-- Javascript begins
@@ -495,7 +495,7 @@ Make all the users happy!
 <span id="faq" style="display:none;font-size:12">
 <dl>
 <dt><b>What's this from?</b></dt>
-<dd>This gadget is an offshoot of <a target="_top" href="http://weihwa.feedback.googlepages.com/home">Wei-Hwa's Puzzle Gadget</a>.  The idea is pretty old; I can't remember when I last saw it, years ago.
+<dd>This gadget is an offshoot of <a target="_top" href="http://weihwa-puzzles.appspot.com/">Wei-Hwa's Puzzle Gadget</a>.  The idea is pretty old; I can't remember when I last saw it, years ago.
 <dt><b>There are annoying red X image placeholders that flash when I click.</b></dt>
 <dd>This is a known bug, with a fix anticipated soon; however, it only appears in Internet Explorer.
 Use another browser, such as <a target="top" href="http://www.mozilla.org/firefox/">Firefox</a>,

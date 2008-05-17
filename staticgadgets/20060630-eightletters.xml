@@ -7,8 +7,8 @@
     author_email="weihwa.feedback+ig20060630@gmail.com"
     author_location="Mountain View, CA, USA"
     author_affiliation="Google, Inc."
-    screenshot="http://weihwa.feedback.googlepages.com/screenshot.png"
-    thumbnail="http://weihwa.feedback.googlepages.com/thumbnail.png"
+    screenshot="http://weihwa-puzzles.appspot.com/images/screenshot.png"
+    thumbnail="http://weihwa-puzzles.appspot.com/images/thumbnail.png"
     height="390"
     render_inline="optional"
   />
@@ -237,7 +237,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       // blank (grey)
 //      return '<span style="border:thin dashed grey;font-size:8pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
 //    This commented version is the original, which worked fine on Firefox but not in IE.  :-(
- //     return '<span style="font-size:8pt"><img src="http://weihwa.feedback.googlepages.com/dotted.png"/></span>';
+ //     return '<span style="font-size:8pt"><img src="http://weihwa-puzzles.appspot.com/images/dotted.png"/></span>';
       return '<span style="font-size:8pt"></span>';
     }
     return '<span style="background-color:' + this.get_color(index) + ';font-size:8pt">' + this.values[index] + '</span>';
@@ -544,7 +544,7 @@ are anything but textbook!
 </form>
 
 <div id="dummy" align="center"></div>
-<img width="0px" height="0px" src="http://weihwa.feedback.googlepages.com/dotted.png"/>
+<img width="0px" height="0px" src="http://weihwa-puzzles.appspot.com/images/dotted.png"/>
 <div id="debug" align="center"></div>
 
 <SCRIPT LANGUAGE="JavaScript">
