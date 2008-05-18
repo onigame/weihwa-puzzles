@@ -42,7 +42,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 </div>
 
 <script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/puzzle-utils5.js"></script>
-<script type="text/javascript" src="http://weihwa.feedback.googlepages.com/igoogle_gridlib_old.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/igoogle_gridlib_old.js"></script>
 <!---
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/igoogle_gridlib.js"></script>
@@ -374,7 +374,7 @@ Puzzle: <span id="puznum">1</span>
 </form>
 
 <b>Bridges</b>:  Construct bridges on the open sea so that each island has the specified number
-of bridges connected to it.  These are a bit harder than <a target="_top" href="http://weihwa.feedback.googlepages.com/puzzlepage27">last time.</a>
+of bridges connected to it.  These are a bit harder than <a target="_top" href="http://weihwa-puzzles.appspot.com/gadgetpage?g=20061124-bridges">last time.</a>
 <span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
    onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
 <span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
