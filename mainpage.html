@@ -239,7 +239,7 @@ urchinTracker();
 <ul>
   {% for gadget in puzzle_gadgets %}
      <li>{{gadget.date|date:"Y-m-d"}}:
-       <a href="gadgetpage?g={{gadget.date|date:"Ymd"}}-{{gadget.short_name}}">{{gadget.display_name}}</a>
+       <a href="gadgetpage?g={{gadget.date|date:"Ymd"}}-{{gadget.short_name}}&d={{gadget.date}}">{{gadget.display_name}}</a>
        <a href="http://fusion.google.com/add?moduleurl=http%3A//weihwa-puzzles.appspot.com/gadgets/{{gadget.date|date:"Ymd"}}-{{gadget.short_name}}.xml">
          <img style="" alt="Add to Google" src="http://buttons.googlesyndication.com/fusion/add.gif" border="0" height="17" width="104">
        </a>

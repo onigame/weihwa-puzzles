@@ -66,7 +66,11 @@ class MainPage(webapp.RequestHandler):
 
 class GadgetPage(webapp.RequestHandler):
   def get(self):
+    for pg in puzzle_gadgets:
+      if (pg.date.strftime("%Y%m%d") + "-" + pg.short_name == self.request.get('g')):
+         my_pg = pg
     template_values = {
+      'gadget': my_pg,
       'gadget_name': self.request.get('g'),
       }
     path = os.path.join(os.path.dirname(__file__), 'gadgetpage.html')
