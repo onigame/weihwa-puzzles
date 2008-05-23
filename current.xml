@@ -463,11 +463,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   puzzle_data.prototype.blank = function() {
     if (pcborder == "#FFFFFF") return '';
-    return '<img src="' + this.prefix + 'blank.gif" alt="-">';
+    return '<img src="' + this.prefix + 'blank.g'+'if" alt="-">';
   }
 
   puzzle_data.prototype.black = function() {
-    return '<img src="' + this.prefix + 'black.gif" alt="-">';
+    return '<img src="' + this.prefix + 'black.g'+'if" alt="-">';
   }
 
   puzzle_data.prototype.get_background_color = function(index) {
@@ -520,11 +520,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   puzzle_data.prototype.get_src = function (reg) {
     if (reg.completed()) {
-      return this.prefix + "green.png";
+      return this.prefix + "green.p"+"ng";
     } else if (reg.is_bad()) {
-      return this.prefix + "red.png";
+      return this.prefix + "red.p"+"ng";
     } else {
-      return this.prefix + "white.png";
+      return this.prefix + "white.p"+"ng";
     }
   }
 
@@ -922,13 +922,8 @@ Puzzle: <span id="puznum">1</span>
 <input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller.new_puzzle_request()"/>
 </form>
 
-<br>
-<span style="font-size:10">
-Small change here ... this gadget is now hosted on <a href="http://appengine.google.com/">Google App Engine!</a>
-</span>
-<br>
-
-<b>Udoku</b>:I might as well show you the "Udoku" puzzles I was talking about last time.  These are (still) not standard sudoku puzzles!
+<b>Udoku</b>: Blech, has it really been four months since the last update?
+I've simply been too swamped at work to spend much time with this gadget (working on some secret stuff), so I might as well show you the "Udoku" puzzles I was talking about last time.  These are (still) not standard sudoku puzzles!
 <span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
    onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
 <span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
