@@ -356,8 +356,8 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     for (var i=0; i<this.size; ++i) {
       this.box_regions[i] = new sudoku_region(i + this.size + this.size, this.size, false);
     }
-    this.diag_regions[0] = new sudoku_region(i + 3 * this.size, 1, false);
-    this.diag_regions[1] = new sudoku_region(i + 3 * this.size, 1, false);
+    this.diag_regions[0] = new sudoku_region(3 * this.size, this.size, false);
+    this.diag_regions[1] = new sudoku_region(3 * this.size + 1, this.size, false);
 
     this.cells = new Array(this.area);
     for (var i=0; i<this.area; ++i) {
@@ -558,15 +558,13 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
   }
 
-  puzzle_data.prototype.get_mini_image = function (region, value, completed, title) {
+  puzzle_data.prototype.get_mini_image = function (region, value, title) {
     var answer = '';
     var c = region.count(value);
     if (c > 1) {
       answer += '<img src="' + this.prefix + 'sudoku' + (value + 1) + 'red.p' + 'ng' + '"';
     } else if (c == 1) {
       answer += '<img src="' + this.prefix + 'sudokublank.p' + 'ng' + '"';
-    } else if (completed) {
-      answer += '<img src="' + this.prefix + 'sudoku' + (value + 1) + 'green.p' + 'ng' + '"';
     } else {
       answer += '<img src="' + this.prefix + 'sudoku' + (value + 1) + 'black.p' + 'ng' + '"';
     }
@@ -574,16 +572,6 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     answer += ' width="8px" height="8px">';
     answer += '</img>';
     return answer;
-  }
-
-  puzzle_data.prototype.get_src = function (reg) {
-    if (reg.completed()) {
-      return this.prefix + "green.p"+"ng";
-    } else if (reg.is_bad()) {
-      return this.prefix + "red.p"+"ng";
-    } else {
-      return this.prefix + "white.p"+"ng";
-    }
   }
 
   puzzle_data.prototype.get_title = function (reg) {
@@ -599,66 +587,27 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   puzzle_data.prototype.get_region_info = function(region) {
     var answer = '';
     answer += '<td align="middle" valign="center">';
-    answer += '<table cellpadding=0px cellspacing=0px border=0px>';
- 
-    answer += '<tr>';
-    for (var i = 0; i < 3; ++i) {
+    if (region.completed()) {
       answer += '<td align="middle" valign="center">';
-      answer += this.get_mini_image(region, 0, region.completed(), this.get_title(region));
+      answer += '<img src="' + this.prefix + 'green.p' + 'ng"';
+      answer += ' title="' + this.get_title(region) + '"';
+      answer += ' width="24px" height="24px">';
+      answer += '</img>';
       answer += '</td>';
+    } else {
+      answer += '<table cellpadding=0px cellspacing=0px border=0px>';
+ 
+      for (var i = 0; i < 3; ++i) {
+        answer += '<tr>';
+        for (var j = 0; j < 3; ++j) {
+          answer += '<td align="middle" valign="center">';
+          answer += this.get_mini_image(region, i*3+j, this.get_title(region));
+          answer += '</td>';
+        }
+        answer += '</tr>';
+      }
+      answer += '</table>';
     }
-    answer += '</tr>';
-
-    answer += '<tr>';
-    answer += '<td align="middle" valign="center">';
-    answer += '<img src="' + this.get_src(region) + '"';
-    answer += ' title="' + this.get_title(region) + '"';
-    answer += ' width="8px" height="8px">';
-    answer += '</img>';
-    answer += '</td>';
-    answer += '<td align="middle" valign="center">';
-    answer += '<img src="' + this.get_src(region) + '"';
-    answer += ' title="' + this.get_title(region) + '"';
-    answer += ' width="8px" height="8px">';
-    answer += '</img>';
-    answer += '</td>';
-    answer += '<td align="middle" valign="center">';
-    answer += '<img src="' + this.get_src(region) + '"';
-    answer += ' title="' + this.get_title(region) + '"';
-    answer += ' width="8px" height="8px">';
-    answer += '</img>';
-    answer += '</td>';
-    answer += '</tr>';
-
-    answer += '<tr>';
-    answer += '<td align="middle" valign="center">';
-    answer += '<img src="' + this.get_src(region) + '"';
-    answer += ' title="' + this.get_title(region) + '"';
-    answer += ' width="8px" height="8px">';
-    answer += '</img>';
-    answer += '</td>';
-    answer += '<td align="middle" valign="center">';
-    answer += '<img src="' + this.get_src(region) + '"';
-    answer += ' title="' + this.get_title(region) + '"';
-    answer += ' width="8px" height="8px">';
-    answer += '</img>';
-    answer += '</td>';
-    answer += '<td align="middle" valign="center">';
-    answer += '<img src="' + this.get_src(region) + '"';
-    answer += ' title="' + this.get_title(region) + '"';
-    answer += ' width="8px" height="8px">';
-    answer += '</img>';
-    answer += '</td>';
-    answer += '</tr>';
-
-    answer += '</table>';
-    answer += '</td>';
-    return answer;
-    answer += '<td align="middle" valign="center">';
-    answer += '<img src="' + this.get_src(region) + '"';
-    answer += ' title="' + this.get_title(region) + '"';
-    answer += ' width="24px" height="24px">';
-    answer += '</img>';
     answer += '</td>';
     return answer;
   }
@@ -748,7 +697,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   puzzle_data.prototype.get_raw_cell_html = function(title, value, color, is_bold, is_draggable) {
     var bold = (is_bold) ? ";font-weight:bold" : "";
-    var cursor = (is_draggable) ? "cursor:pointer;cursor:hand;" : "";
+    var cursor = (is_draggable) ? "cursor:pointer;cursor:hand;" : "cursor:default;";
     return '<span title="' + title + '" style="text-align:center;' + cursor + 'font-size:16pt;color:' + color + bold + '">' + value + '</span>';
   }
 
@@ -868,11 +817,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
                                                                                                                                                                   
   function start() {
     pref_controller = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_20071015_redux', true);
-    pref_controller.num_puzzles = 500;
-    pref_controller.box_height = 3;
-    pref_controller.box_width = 3;
-    pref_controller.rows = 20;
-    pref_controller.cols = 25;
+    pref_controller.num_puzzles = 20;
+    pref_controller.box_height = 8;
+    pref_controller.box_width = 8;
+    pref_controller.rows = 4;
+    pref_controller.cols = 5;
 
     _gel("game_state_html").innerHTML = pref_controller.getTableHTML();
     pref_controller.getPrefs();
@@ -1057,15 +1006,18 @@ Puzzle: <span id="puznum">1</span>
 <input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller.new_puzzle_request()"/>
 </form>
 
-<b>Diagonal Sudoku</b>: Blech, has it really been four months since the last update?
-I've simply been too swamped at work to spend much time with this gadget (working on some secret stuff), so I might as well show you the "Udoku" puzzles I was talking about last time.  These are (still) not standard sudoku puzzles!
+<span style="font-size:10">
+<b>Diagonal Sudoku</b>: Hey, I'm back, with 20 diagonal sudoku puzzles for you to play with.  I'll be
+adding more features to this gadget over the next few days, so I apologize in advance if I do things
+like kill your puzzle progress.  Stay tuned for a list of features I'm going to add here...
+</span>
 <span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
    onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
 <span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
    onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
 <span id="rules" style="display:none;font-size:x-small">
-   Place letters into the grid such that each letter appears once in each row, once in each column,
-   and at most once in each of the regions.
+   Place letters into the grid such that each letter appears once in each row, once in each column, once along each diagonal,
+   and once in each of the regions.
 </span>
 <span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
    onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
@@ -1091,12 +1043,14 @@ I've simply been too swamped at work to spend much time with this gadget (workin
   </td></tr><tr><td>
     <input id="border" style="font-size:9" type="button" value="Borders"
      onclick="change_border();">
+  </td></tr><tr><td>
+<!--
+    <input id="sizechange" style="font-size:9" type="button" value="Shrink"
+     onclick="puzzle__MODULE_ID__.changeSize();">
+-->
   </td></tr>
   </table>
 
-  <BR>
-    <input id="sizechange" style="font-size:9" type="button" value="Shrink"
-     onclick="puzzle__MODULE_ID__.changeSize();">
   </center>
 </td><td>
   <span id="boxcode"></span>
