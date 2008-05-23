@@ -4,7 +4,7 @@
     title="Wei-Hwa's Puzzles"
     description="Regular Puzzle Challenges from a Google Engineer"
     author="Wei-Hwa Huang and others"
-    author_email="weihwa.feedback+ig20071015@gmail.com"
+    author_email="weihwa.feedback+ig20080523@gmail.com"
     author_link="http://weihwa-puzzles.appspot.com/"
     title_url="http://weihwa-puzzles.appspot.com/"
     author_location="Mountain View, CA, USA"
@@ -19,7 +19,7 @@
     <Require feature='analytics'/>
   </ModulePrefs>
   <UserPref
-      name="puzzle_data_20071015_redux"
+      name="puzzle_data_20080523"
       default_value=""
       datatype="hidden"/>
   <Content type="html">
@@ -43,10 +43,6 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 </div>
 
 <script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/puzzle-utils5.js"></script>
-<!---
-<script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
---->
-
 <script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/json2.js"></script>
 
 <script type="text/javascript">
@@ -61,7 +57,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   function _IG_game_state() {
     this.cur_puz = 0;
-    this.puz_count = 500;
+    this.puz_count = 20;
     this.puz_solved = new Array();
     for (var i=0; i<this.puz_count; ++i) {
       this.puz_solved[i] = 0;
@@ -75,7 +71,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       return "#FF0000";
     }
   }
-                                                                                                                                                                                              
+
   _IG_puzzle_pref_controller.prototype.score = function() {
     var answer = 0;
     for (var i=0; i<this.game_state.puz_count; ++i) {
@@ -83,7 +79,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
     return answer;
   }
-                                                                                                                                                                                              
+
   _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
     var num = this.score();
     if (num == 500) {
@@ -97,7 +93,8 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   ///////////////////////////////////////////////
   ///  Primitive Sudoku classes.
 
-  var letters = new Array('A','B','C','D','E','F','G','H');
+  var letters = new Array('1','2','3','4','5','6','7','8','9');
+  var sudoku_size = 9;
 
   function sudoku_cell(id, size) {
     this.id = id;
@@ -204,6 +201,14 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
   }
 
+  sudoku_region.prototype.has = function (value) {
+    return this.placed.has(value);
+  }
+
+  sudoku_region.prototype.count = function (value) {
+    return this.placed.count(value);
+  }
+
   sudoku_region.prototype.has_dupes = function () {
     if (this.dup_ok) { 
       return false;
@@ -213,7 +218,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   sudoku_region.prototype.has_all = function () {
 //    for (var i = 0; i < this.cells.length; ++i) {
-    for (var i = 0; i < 5; ++i) {
+    for (var i = 0; i < sudoku_size; ++i) {
       if (this.placed.count(i) == 0) return false;
     }
     return true;
@@ -230,7 +235,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   sudoku_region.prototype.is_bad = function () {
     if (this.dup_ok) {
       var dcount = 0;
-      for (var i = 0; i < 5; ++i) {
+      for (var i = 0; i < sudoku_size; ++i) {
         if (this.placed.count(i) > 2) return true;
         if (this.placed.count(i) == 2) dcount++;
       }
@@ -243,7 +248,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   sudoku_region.prototype.allowed_letters = function () {
     var answer = "";
 //    for (var i=0; i<this.size; ++i) {
-    for (var i=0; i<5; ++i) {
+    for (var i=0; i < sudoku_size; ++i) {
       if (!this.placed.has(i)) {
         answer += letters[i];
       }
@@ -281,69 +286,78 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     this.resetPuzzleData(index);
   }
 
-  puzzle_data.prototype.decode_raw_puzzle = function() {
-    this.decoded = new Array();
-    for (var i=0; i < this.raw_puzzle.length; i += 2) {
-      var code1 = (this.raw_puzzle.charCodeAt(i) - 35); if (code1 == 91) code1 = 57;
-      var code2 = (this.raw_puzzle.charCodeAt(i+1) - 35); if (code2 == 91) code2 = 57;
-      var number = code1 + code2 * 89;
-      for (var j=0; j < 4; j++) {
-        this.decoded[i/2*4+j] = number % 7;
-        number = Math.floor(number / 7);
-      }
-    }
-  }
+  var raw_puzzle_data = new Array(
+'7xx4x8xxxxxx1xx4xxxx1x5xxxxx57xxxx2x2xxxxxxx9x4xxxx16xxxxx8x3xxxx2xx1xxxxxx6x9xx2',
+'x3xxxx6xxxx6xxxx52xx8x2xx41xxx4xxx1xx572x349xx6xxx7xxx58xx7x9xx64xxxx2xxxx3xxxx8x',
+'84xxx5x73xxxxx3xxxx93xxxx1xx6xx9xxx1x8xx5xx6x1xxx4xx8xx2xxxx43xxxx1xxxxx93x5xxx26',
+'xxxx52xxxxx5xxxxxx2xx4xxxx8x8x2xxx7xxx9xxx3xxx1xxx5x4x6xxxx8xx3xxxxxx5xxxxx67xxxx',
+'xx1xxxxxxx4x2x3xxxxxx97xxxx1xxxxxxxx398xxx547xxxxxxxx2xxxx28xxxxxx4x6x3xxxxxxx9xx',
+'xxx2xx4x662xxxxxxxxxx1xxxx87xxxxxxxxxx45x37xxxxxxxxxx21xxxx9xxxxxxxxxx599x8xx2xxx',
+'x8xx1xx42x2xxxxxxxxxx7xxxxxx1x6xxxxxx6xxxxx5xxxxxx5x7xxxxxx9xxxxxxxxxx1x39xx2xx6x',
+'8xxxx61x5xxx7xxxx9x3xxx978x7xxxx1xxxxxx4x8xxxxxx3xxxx1x645xxx2x5xxxx2xxx2x38xxxx7',
+'xx49xx7xxxxx82xxxxxx9xxxxx53xxxxx5xxx8xx4xx6xxx1xxxxx45xxxxx6xxxxxx97xxxxx8xx62xx',
+'x793xxxxx6xxxxxxxxx5xxxx4xx8475xx9xxx26xxx58xxx1xx9247xx8xxxx5xxxxxxxxx2xxxxx731x',
+'x3xxxxxx1x5xx2xx431xxx49xxxxxx4x6x2xxxx2x1xxxx7x8x3xxxxxx98xxx589xx3xx6x3xxxxxx9x',
+'xxx2xxx5xxxxx5xx39xxxxxx6x8xx54xxx817x6xxx5x291xxx73xx6x2xxxxxx58xx3xxxxx9xxx6xxx',
+'xxxxx76xxx5xxx3x48xxx8x4xxxxxxxx2x1x7xxxxxxx5x1x3xxxxxxxx2x6xxx97x1xxx3xxx49xxxxx',
+'xxx564xxx9xxxx725xxxxxxxxxxxx83xx57x3xx6x5xx9x19xx26xxxxxxxxxxxx859xxxx6xxx176xxx',
+'x2xx63xxx8x7xxx9xxx319xxx4xxxxxxxx3xxxxxxxxxxx6xxxxxxxx7xxx469xxx9xxx5x1xxx79xx8x',
+'xxxxx8x1x85xx4x3xxx3xxxx4582xx36xxxxxxxxxxxxxxxxx74xx5412xxxx3xxx6x9xx21x9x6xxxxx',
+'xxxx13x8xxx78x5xxxxxx69xxxxx1x78xxxx7xx9x2xx6xxxx34x5xxxxx68xxxxxx5x92xxx4x27xxxx',
+'xxxxx9xxxxxx1xxxxxxx14xx8x3x63x2x7x8xxxxxxxxx7x8x6x95x6x5xx32xxxxxxx7xxxxxx8xxxxx',
+'xx1xx9xx2xxxxx6xxxxxxxxxx46x9xx4xxx76x4xxx8x32xxx5xx6x82xxxxxxxxxx7xxxxx4xx2xx1xx',
+'xxxxxxxx3xxxx75xxxxx38xxx9x6x1x47xxx2x4xxx7x1xxx68x5x4x6xxx29xxxxx43xxxx4xxxxxxxx',
+'xx3xxx54x987xxxxx2xxxx32x9xx9x7xxxxx5xxxxxxx6xxxxx1x8xx3x92xxxx1xxxxx954x49xxx8xx',
+'xxxx12xxx5xxxxx9xxxxxx5xxx84x3xxx7xxxxxxxxxxxxx6xxx3x28xxx6xxxxxx9xxxxx1xxx94xxxx',
+'xxx1x97xxxxxxxx8xxxx54xxx9xxxxxx8x72xxxxxxxxx76x9xxxxxx3xxx24xxxx4xxxxxxxx95x1xxx',
+'xx64xxxxxxxxx9xxxxxxxxx7xxx87x5xx4xx2xxxxxxx3xx4xx3x67xxx3xxxxxxxxx6xxxxxxxxx12xx',
+'xxxxxx31xxxxxx27x6xxx74x5xx3x8xx6xx5xxxxxxxxx7xx3xx8x9xx1x79xxx6x28xxxxxx43xxxxxx',
+'x6xxx49x3x7xx2xxxxx4x6xxxx76xxxxx87xxxxxxxxxxx28xxxxx14xxxx9x1xxxxx7xx4x5x93xxx8x',
+'xx7xx3xxx3xx8xxxxxxx4x5xxx8xxxxx5x62x5x4x8x1x93x2xxxxx5xxx2x8xxxxxxx9xx3xxx7xx4xx',
+'x9xxx2xx3xx6x5xx2x5xx9xxxx6x8xxxxx91xx4xxx8xx25xxxxx4x1xxxx4xx9x7xx1x3xx8xx6xxx5x',
+'xxx35xxxxxxxxx8xx5x9xx728x3xxx5xxx2xx5x7x4x1xx4xxx6xxx1x523xx9x9xx8xxxxxxxxx19xxx',
+'x37xxxxxx6xxx8xx7x2x84xxxxxxxx9x1xx71xx8x7xx37xx5x2xxxxxxxx37x8x4xx1xxx5xxxxxx96x',
+'xxxxxxxxxx6xx58xxx7xxxxxxxxx43xxxxx5621xxx7898xxxxx32xxxxxxxxx6xxx32xx5xxxxxxxxxx',
+'x1xxxxxxxxxxxxxx4x8xx49x7xxxxx9xx5xxx4xxxxx7xxx5xx3xxxxx3x51xx2x8xxxxxxxxxxxxxx6x',
+'5xxxx7x8xxxxxx165xx768xxx2x7xxxx2xx6x6xxxxx4x3xx6xxxx2x3xxx819xx421xxxxxx8x4xxxx3',
+'xxxx3x6xxx5xxx79x2xxxxx1x731xxxx24xxxxxx6xxxxxx69xxxx821x8xxxxx4x87xxx9xxx9x2xxxx',
+'xx843xxxxx4xx5xxxxxxx9xxxxx1xxxx57xxxxx8x7xxxxx46xxxx3xxxxx3xxxxxxx6xx5xxxxx982xx',
+'xx6xxxxx77xx2xxxxxxx13xxx4x6x8xxxx3xxx2xxx1xxx4xxxx7x6x5xxx68xxxxxxx7xx38xxxxx2xx',
+'17xxx49xxxx8xx6x1x3xx1xxxxxxxxxxx3xxx35xxx74xxx4xxxxxxxxxxx2xx8x8x4xx1xxxx97xxx34',
+'x9xx8253xxxxx46xxxxxxxxx6xxxxxx6xxx12x3xxx4x51xxx5xxxxxx7xxxxxxxxx63xxxxx3981xx7x',
+'x42x1x9x76xxxxxxxxxx16xxxxx5xxx2xxxxxx6xxx5xxxxxx3xxx2xxxxx17xxxxxxxxxx39x7x5x14x',
+'xxxxxxxx2xx97xxxxxx7x6xxxxx683xxx25xxxxxxxxxxx47xxx863xxxxx3x2xxxxxx65xx1xxxxxxxx',
+'xxxxx5x7x89xx7x1x64xxxxxxxxx23x9xxx1xxxxxxxxx1xxx3x28xxxxxxxxx36x8x5xx42x5x3xxxxx',
+'xx1x5x7xxxx5x3xxxx9xxxxxx5x5xxxx8x96x46xxx82x82x1xxxx5x1xxxxxx9xxxx2x6xxxx3x6x2xx',
+'3xx6x1xx5xxxx8xxxxxxxxxxxx1xx28x3xx91xxxxxxx39xx7x64xx8xxxxxxxxxxxx7xxxx6xx5x9xx2',
+'x8xx2xxxx1x36xxxxx7x5x89xxxx68x1x4xxxxxxxxxxxxx7x9x35xxxx74x9x8xxxxx57x2xxxx6xx4x',
+'xxxxxxxxxx2xxx35xxx8x7xx9x1xxxx3x1x474xxxxx656x5x4xxxx2x4xx9x5xxx96xxx3xxxxxxxxxx',
+'6xxx417x8x2xxxx4xxx8xx2xx9xxxxxxxxxxxx5xxx9xxxxxxxxxxxx4xx5xx6xxx2xxxx3x9x736xxx1',
+'x7x9x8xxxx4xxxx6xxxxxxxxxx8xxxxxx2xx16xxxxx57xx7xxxxxx3xxxxxxxxxx2xxxx3xxxx5x7x1x',
+'xxxx34152xx518xxxxxxxxxxxxx68xxxxx7xx548x932xx1xxxxx89xxxxxxxxxxxxx438xx53269xxxx',
+'3x2xxx7x47xxx1xx9xx1xxxxx6x571xxxxxxxxxxxxxxxxxxxxx937x3xxxxx2xx5xx2xxx11x6xxx4x9',
+'x4xxxxxxxxx2xx68xx3xx7x8xxx4xxx2xxxx56xxxxx42xxxx6xxx9xxx2x9xx6xx96xx1xxxxxxxxx3x');
 
   puzzle_data.prototype.resetPuzzleData = function(index) {
-    var foo;
-    if (index < 50) {
-      foo = "S'K9:.C,W.x4k0`/8)v4w4R'p9k,n/##r&D);/t#<.{$w0'3G'L9?+q*G,6'/9a'Z0=-J23#L+_.,1y4U.=$,,Q4p'H)/3G4$1S%K0&#m4z3s-O't+x*Z(T%L0Q':,B5?6C#c$/,D%M/)+S%,8-/(*I*e$`,14q3b4E+4,d1;6u$p+G0?%S%N9K2=#i(2,B+6/%1t,T0=9i$V/()W2a3Y.g/70x4p+/+$&18i'H)6%6/T0r.M9;.`(+1P2&#$3u,>%*1.7q(2195&#$,^.B+1)7-c1,9J'$+{$j4*($-S3S0G'q&N1f73-Q4&-e.=%.1K9P0k+N2W'H)U#X28-,1;#w$$5W-17A*b4%1D,J/z4w1-/{'#,I9(#{/+)F4M9.,z,J2A05/)(q02-U%M0#,Y)A6b4H3r0w0L%S%<.g(Z'u34&C#5%#0t,.1b473b(l/)#K9$(H4u,V0;-l5X'Z7w$K#{,T3u,y4L.+&]8'3r&O0>0f.,-y4L.+&]8'3r&O0>024t,G4r4v$*&s6-(:,%(+3i0x4N0%#6)`3^9E9.4w0A)_,P0&*~8Y3)+)#E,T0()D)592(p'?4:0C#C%[3u,+1O0[&d4:+;'59t&i4#1D)M9`'n(v0b3)#T#n/l(U0P0d&%93'b4{+Y.1-b3K$<.80K65&c'H)=%A4u,F4;6?$k,8/F){5Y3x4p0T%4/J'S6<$<-26Y.+18-7-##?4>0/.C9]8;0a/@%2,N&+,R0()X5t6M+N0y0v4R'j826L-:#F0]4F0F4J${+v)U8Q4p1Y.q0w0l(t$2&39k+H)(3Q0Z(W.?0'1x+)3;/Y.T%K9`#$3i0y4x+)3;/Y.T%K9F+^4w0T%M9X0g0Y24$E+]#T0S0S%R%a4G'd1U7<.V3y4#1R%E9m4C(j*&#M0x+Y2g0y43#K$0-Q4G1w6,(,1705'&9,#Z'(0:-{5~3y4h0G)##r-=9H*j4(39%*-D0K/v%`7y,q2L0R'l#L2w0.1";
-    } else if (index < 100) {
-      foo = "i'&5u%O7X,Z.&#m+70>(2,F)49F&^0U.y&r4p0T%N0H(T-#7C#V%o&T0,)n3;#s$,9G+)5a3*(//7-S%k+=#u(N1y6y4f#F0;-D){49,@9R(d.+#b3s.R0T0N0~6]%q5o+O'd*,19)*1g4n'C9m/g*u$J,~3%1U%^#e(?1S7;-26m+h3%1v4F00(p4n%E9;6r/e4w0*1b4Y'4,U.2&48+(73,1*1;-/659t&s$>0b#,1J,z/58R0-)q2u%s+k*B+~,d29/E(d-s9j4##@%M0t,H)D0n+:#t6(*#5:0`3=)n3t-m9k$^/d4(3.#,19-+1##%,^0V*r4(3T(#38-{$S%m45,Y)785/q0~4{,:-s+y659V%H2N0U3#-t,S0z4@$5,Y)485/:%;+Q,c,(#L9M*8-6/F0u+[30-R%M9&,^'h($#z4T#c*U%o(%#-(i-U8A4?2c3H4$1R%Q0K9+#`#.,;-Y(`/v,+1c*o%'7;()5N09%k.3-;-y4:#H0x'p-^9g*+3,1S%#*<6F&<-a3N0:0g2%1x4C#q4^(_/T-K9z,B++-R0u.T%:9U(6,,.~4W.R%:-H9;0-#731(D.u,(,$1v48/5'K%)4;,t-J2B/A)c,2,>%43#*u7L0[2*3n0T%^0&*T&#-H2a3_#f.?%c,{+u4V0l6r&(*=%g/7-R0I9G&Z'l/K2r4x,l+$%T%.1*3_':$$.M9E,o02-{$(*Z7K,w0f5H2a$34t,;-n9B0o'c*S%j4:+o3u,y4D9t4+%U.T'{+c*6)D$t#O'B#P%>4J9$,H,m/#1R%{4U$W-l6&'N05/^.T%>(W'>(1->4)#L9U(&+8-y4O'4#~79._4W5s&%11-$%N06,Y-u6(#z4'3@0&-T%P0J.'9&'@#b4Y.#-U,S0J)%5n%T7X,Z.F,[3+1D)N0E&:+%*S7z4g*i3h0y4k5m#l(i0K669f4{2t,S0%*49s+U.W%A4Y.y'*3G%^,p013G()9@#U.F4w0v4";
-    } else if (index < 150) {
-      foo = "z4`#o'(0h*[,$-M02)J$37I)x(m/h*;#p0w0G%U%G1v6e8d3h*C#f$w08)y4'#v47(K,U/59&3k4p0S%A*9(g,@1;6y49%u,v0F)N9w$F0-(I2b4x,R,+)v4K0)#`+w)]8b4Y#E,k0F){+L2C#489/o',(F00)U%R7p+K#N*b4N0:0q*8%w4L0?%y26'59X7.4;+O0m3K9P04$:+8'j4&-Q2)-.1%,V*Y)<6S0.1%-X2v0w4%,V*Y)<6S0.10/e.T%R%U%/639$(x*>0e*t+:0?3&#b'R0#-Z5T7^4j4g08-{+]0/&l8~'t&o0n/>)m3x47#,0S-o6_'?+I+H4B#y4O0L7F+6&3#e/)3+1D)A*a7#-C4b1'#T3^2t,8-%#2(>-H5$8V0o*K,F,=(x1m'=9y,H2a38/T3#-T%I9B0#3-'>$D.04F0U%7-/(x*e$*1`4K91$t+B4t#P0K9;(u,P2N&,)E0<%;-J9;$'-y21'V0Z({2+1S%s9f4b+i(W.3#`$z21-F4F)`3,.y7Z.$/@024p0U%n'B9f4b*U&F0a/r*4-G4%9D#%5i/D+<.v,l+,1T%R%'3Y)58^0{+/4k.G%T%X0'5&&s6G'%,S3//H4#%q&6#)0T-l8D444J+`$X+;-m2w%_7e(L'H'w05%H4t6s&D#61e3[,`/>07-R%N0V%$5[)J6s+A/r*T,5'0(:.e$,1H2M9L2l.9-T0C,W.B*Z7b4Z5g.`2$1w4/().G#:518.1a/70k0x4N'802#b3>9o8q/s.@);-z4a'_0T->6<$.3@09-S%{+f4{#u)<6N0(-n/8-R0T0F%f3c*R'M9I,D,:0;-K9P0b4t#?*k+~4d*Z(.1K#a-w7v0^3*3U3i0{,*1K#a-w7v0^3*3U3i0&1S%t6e(l0n2z%2,1)#3v0*1a3f*C#9/&*n9d.#3p0v4;6V%)5,.^'F0F,o3u,+1M96$O+R(d.z4[.{+p(I$x4V7U+U($/+#8%#-Y,?(";
-    } else if (index < 200) {
-      foo = "49w+l'W%>460>$X.3-x4*,Y,,#'3Z9E9O,q0+){/*,Y,,#'3Z9E98$t/L0m3~#x)b8)4-0$,6413u,x4'#v47(k,G1#7W3$1?4J$O'O0C.k83#5&H2</y0U%$,+&M8b2_0O'a/M0*-U%M0b3T-w6W%K#O2y*N,*1*,[0m)[6R%`#C,5/Y,I$:0B#=):5#7X7c/C/J%G4N0&+=%l5R7)9b$`,c,f'z4>#^(_/s+K9?+C/7-D)H3])X6?%K0&,i080D)D)O'J9J0q/]4H2#(S070`,=9C4-6>+s&/(/3A4p0*19/p'D9M%a3b*X#1-`$`,{+R8p2_#l(Q0(,44i0;-M9R0m0K2P'$,*4_,T(Y+O'v,X2^&K0M9J'l.R,2,N0W24$W-A9O8.)+1K0m3P0I#-9A+~4e3t*k*~,M/w4_#`((0L-n91$6/4-H)'2U7a'(%95Z4`.e.4-F4;#x$h4d7B+(*//d.D%m3#5'#B0P/&*{+>0+-S(J$S'I9a,w0]4>#Q3A4/)U%g1Z6M%Q3,.E+d*j48-T%B+-'m$:2(9z4l0F07-R%].^#z574o+L9~(k*24;-%#79.,61*3k(q*44,1S%E9V%H#%2u+_'_/T3=)R%E9V%H#%2u+_'_/R20-;-0((,i$U/-6Z4_#U3i0y4M9t$D0x'=-(3,)u/*)?(S'G#%9c,,1'290u/*4w4-/r&;9O,/6j4.#E0?0L$O0y4S-r6&'T$V.8-`(e(<.u(N1K7y2_4r024w0v459p+I#53k(H)y'6/1-{$v4M'/'(%g1{+j0X(.$g(.'s$:5D7;-L.+4>0J,L$;#l$e/[+P)/6X#s.K,y4J578C#H%5,O'%#*-Y,7-Y3E+A9O86#Q0a/s/^(n3>0z#t)i8J2%,k083o0v4o+A#h4785/(*a/70+1R%;-J2m$b1t6I*`#k4g0,1M9.(#-+4U.72/$R2p0x4)+S%39%(^05/`$909)v4q)28=%26b*2,7%i4t,+1";
-    } else if (index < 250) {
-      foo = "$585M6<$a'h(U#$19%T05/r&G$_,j4M9Y'S2p0:-N0Z2L$$.o'%*0){26)$%{+G9=%H3e(Y.=+e2u0H)A*{/%-53u7)9Y#i31-v4O'@6,%32j4*,9%`26)y4O'@6,%32j4*,9%`2o0;-l-k86#.0G'h(P2j4u,:-s+)379<8u1U.[3{/_,T%@#?%53i(&,M9R(r*N%<3;-)3i)28Z.L#h/G4w0w4P'z+^1e8H2f&m*#0S%I/U.3&]7c,h'A**4U3,1T%,,u(N1v6###59%P+7-`,'2b3=9H)K#~#a4T0M%;(H)d5+#U7X,g1R(44p0U%j4p/X0~)<6C64)d4n0T%O'n8)5h*t$F0##`,/)=(2,7-X9>'#&>0r&R,_/3-D+^'F025A6m8(#?4v0v4<0Z6O%U5s+E+%#_2v0w4<0Z6O%U5s+E+%#_2$18-x$H0`7t,,3%*'($-u$`,t61(3,7155;#Z4d.>)8-2,~47#P/(*h(R3r4v0T%2,~47#P/(*h(R3~41-l(t6I)-6P-W.F00(G4#1v4{+(#m'n)28#50$P+0);-v4f*f$=/p'=9`#%1D)+1{5w(~1U8k+g*7%q*1-n(U2_#t#b1U7*,V3X2v0y4v6a'k,w.S%E%<%n/C%y4)5r)>85/###,q&&+F)b,.1-3j)~7c*K#80d.$1;-%#-(l-j8x1^0]4*-G%T%6/0(g-v7H2)5l4`2%1S%9/m'a-{7J2j4a$`,M%x4;0I#:91(8-k5L,#0;-*12,S%q$b1s6_'=#q0F%H)z+p0F3n)y7E#8$o3t,S04$A+'9h.'5{5+3f2v0y4B+q&5#%0u9=9L'80u,G4b'i(`,7-%#J9$(+1#-#%5#.,~4h1t6h(:%34g0x4y+%#R4g1g'@)*-34=)H)h5m2x%V7=05/T3r*h(?)?6D#?-:5?0'2D+a/j0.1^0(9<#=-'3/(i4~3i0.1N9g*>%.37(V0(3m+[,{$n9B0o')+R%<$T#P+j0y4";
-    } else if (index < 300) {
-      foo = "4/J';#m8Z5{+Z#;+E%G4L9q(o0#3>#{+4/1-n/T%d1U7<.,3K'C#)4i0)),1z+N'80Y.y4M9z,<+T0H$M9K'6'I$y+N0&3</J,K0M0b3Z+.)+#M974@08%:-*1K2V&s-u6W'd3]4#-T%C6`#:,9.80z4=+`,R00-t-t9C%Q3_'i(z2s.?)I$o';9d$^/#,#5^4$1u,:-N0u-n6&'D#b4a$+1D,(+P0K9A*R3j*U%04d*G4T0G)p4e$:2%9{+]3W.70+15/5'M%U5X9$,p$b3)-y4L0-#g't,W5f9M+M0K0H)L9h'r4K,r13#d$#3$1H)[4,#Y'`7^,g1F,73w0U%V&e(G'8-Z5T7K'73i0,1O'g8Q4n/)+&#q+]4*-R%A4p/Z+;'6&n%{,Z38-D)T%o4C,g1u6W'.)q0>%T%29T+u(m/]4H27$+3,1*1t-D6d#e(70z45)6/+)y4O0@#d4:+/(M9/4h084z/n/r-k9P(_4(3g.^.$1x4K9w$'2_3G'H)./s.U%:-#,z5V0=%s6%9~(i074.1N0n'y)s93#?$5%/,^$V0H).6T-=63#P0r&J,T0n(O'y+~4?6W0?2R2z+T3M0O'#5:0U.K9{+~(M08-R%Q'(,F0U%Z5;6B%W.:-b,@$',)4f137Q'S'v,E0S%j4v+p#Y)l948:%80@)G4#,t$_1M8U2o'))03i0x4O'f.D$o-X9z4c/83$17-148/%0'.;659t&K/L%7-n+:#D0Z8(3Z5R'03t,G4{4b&q%z64([,~4k4#-7-?6D#%5T-y1F0Y294,1S%?6D#%5T-y1F0u+~4,1*1O'y4]7],2&7#d$T0$1;-D)I2e$)2T7=9`#G0,-$%P0G#p%z6/(#5,)X(5$C$M9<#&%*1X'/(+#L,N,e2<2699(_,[4+#-4J2,1:-P0K9.#t#M*{+d.p3{,T%)#h4v+17a'^0,4V+S%R0b*$&,8?2g'G)c**1:)R0%96#C(K,72,1o/f.N%?(";
-    } else if (index < 350) {
-      foo = "'.:#D0d7I)o'=%%1A)7-F0l/J'<6f4[58/Z3i0y448v.^%A5r+K'i0?4+1F)P'z+]%25[6N0N+13$1H)/(s-X6B%:360J'V.G4+1w4S'S$o-60'2+)Y3i0,1j41(*&s6p1^0l*K/+-U%,3X*E9Y,W.3#K2?41-`,,3X*E9Y,W.3#h/`26)o(L9h'n4f/e*;#>%J28-G)M/G)(,f$d9%99/(,u0U%%96#x3D.?05/[3x40-R%g'F)E0~7g*6&[#`,Y(x4z4Q0k+<'v%t6-)>0=)U%z4c*e$H1d9~7Z.o/+)U%e/=+1'm$w4M9$3/,a$K/#,t$72T8y2(*D,S3i0w4N0x6o'H2>$D.f$D/84K$t6I)'5d-:#N&4/^28-:-P0#*G7c*k5j4X#o48-+1P0#*G7c*k5j4-4`3+1*1%,H#%9G)p4>0;%T06%?(M94/G'T3=.c,+42'z+#0i8h5-+q%6/F0l*l.--H4{+{4p''*$#N004p3t,H)L7U+x(O1z4&#k$v/A)U%P0&*s9=%H2{+*(a/S%V+%,d&<9>4G'H)h0*-/)R%s+F+<2?1>6y4R'v,80x4k970/#`+w)j4a$)3p0x4N0F+P)m2M&L$##g/L%$%1++&]8'3M'O0r&.($0r#p1r&e8Y3b+l-k*7/--U%?269*,S%(3o&U3p4w0T%{+>9r(l0l2^#x'_/G)1,N0,#d#6)26V5X#&1--y4s&E#p4K,g1T76$l.D%{/s&E#p4K,g1T7w,M0R,v4L0^#B(L-59z40#a3v0.1##23?(<.>0J9/#q0+-b,F08,t)M8I2,3o+`/j0.10917;)e39#u$J,+13)J$w4E+Y)=6F0?2,-a/))V0O0f'b45&d9k+i0R,70w4^0695(,.##x4U3D,1-R%60w.?%)3#779b2b3#-_,R'w4K#2&D0r/90].L%c,w4R'_0?1L6<$$(g2#17-{+(#$5[5`'h(P2(,C,=(.1*37(-+6&v%=0-4,1S%";
-    } else if (index < 400) {
-      foo = "J9X'9(D,U.z4M'Z,a$o3K9P08)W3j*t#H2#0i0.11(E.%5o%(760@0j0?4D)6/X'i3G.)9C#l0g/60n(N0S'%5P-Y6N&y2u,[,r#Q00(/,<%y2M944`,^$?(=/>(1-64H9'#?+n/,)y428=0L'q2x%2,z'(,v$s#M9&#~'Y,c4s5e4S,H0e'_'j(G#U5(.2,24n/=%T0B+F)s5b1?6u$b$e4i0,1B+q&E%U5v9N0M2x*x,:-@9I0E(B+~4H2v+#0P(o(@9I0E(B+~4H2f*k.$1;-.609[+*)3#N0k+,1F%z$L9D#Z4U+h(/(^$./S%F)'96#8,e(42b4~,U3+1T%$,A#g0:5v6784)e.K%w4L0Q'3#D7E.)5.#z+D0A)p/:-{5q&G#-9.4W.--V0s+6/4#M%-6Z5f*V.y0G)A0f't4b&39k+S3l.8-T0{5H0`7t,L'%*[4[4%1D){5H0`7t,L'%*[4[4p0*1M9v4M'{*e$n/#,&1:)D)[6A%H3e(q1{+&#`,M,@3T'@#L%74,0t-,4q*i3~,;#t$d9S7S'{4k0>0H){$>#)%M1U7w4S'G,//7%>3z+T'$&48Z4p2~,~3p0T%-#n#s(Q1a7=-S3/,y$r.U%U5%9n/G+h(X(@0,)v4N0%,y##*c5b4+3e.E%=(N0E)k5s-T7##I0Y2#1H)E+f'L%94b1A6f4`/=)G)*,f$?/D)I2M9b.@4u,G4.1C5Y7C,6*l''(S3()o(e.=$M%U5w6i'i$>31-F4Z4Y.27I*t-s+`/E,{$z$#5X,1/&'R$-9B0T08)D)N0N'Z435L9{+](f21-F4j4>$c'Y)l948A%34h0x4U8,3Q4Y.3#*,g4]4v0R%M9@.Z4//1(h(Y,+3,17-%,&5E91*9#>0?%i0J,%0L9{4k+h*M0O'0/`,D)D)V7E.)5]#~'60o/a/9%y4/(c*F&J518m8h.i3u,G)n/A-J5w68'(#^2:4p0,1z4`#j'L-78n/,4t+_$+1";
-    } else if (index < 450) {
-      foo = "&,l'-9.4Y.u.R2q*M%{$p'B9f4X,Y.<$]4r4u0*1N0f#A(7-<6.9?+6)n/s#U.T%r4C+i)N9e$e.$1x4*54&u)V.s+[,x&6/G)7-P0K9D%X3:+Q*%#C+V0Y+(*<64$X,.1s5u+J+--T%(*<64$X,.1s5u+#0&1v4M9e*>#@4W'H)))Y,{$>3W'l3K,.1##K9$(`,F,g2$#r+_',801Z5-4d.@4;(N0?$5,Y)j8k5k0(,Y(%0&#K0h)L7:,z4V(=/M%S%##f(>0[5m8{+V3l+G)*1u1I#=9{,)303j3e4w0*1u1I#=9{,)303j3e4w0*1Z4L#E9q/D+_'m$,4{,y4e*k#^()029z4]3x4w0G)S'I9k+f*x4N09$`,*4=3>08/k-S8X2T$G'=/8-#%D7g*C-@48/i'`$K2o0,1D7g*C-@48/i'`$K2+1:-y4i(%2E7j*5&I'e.U%S072'5q)<6]#%,b*#0{,U%59-,i$P/s&y4V'~3i0H)g(m/V-l6N2)5~3~4#-{$x41(j*#$@960R+U3,1T%C#A%C3&*L0&,80O'U%;-E9m4R$^,4/q&c#Y2w0y4D48/g'>66#:,7%k*I4T0;#t$g)S7k5)5^463+1T%K#4&z/3-64W'D,[4#1v4J2x%d7+.o'N0-$'(83n.#,v$K/()p2-9B%X2%1w42,S%U'r&L0M9I,g/,)>(%,J9E#n0#3_'b/?4t,F)%,)%[1P8^2T'U3^.&-T0U%_3k+U/&*I*y'L0E)l(T-u6m$?2H2r49%#-h$c,k+A#a8Z5`'h())P+F%$%z4T'Q6,%?1{+0/x*^/g(K9=#608)`3k5s&O'H4r#593,*5i(V.+#j0F0w0v4.#u#K)A5T7N0d/`,`$2,M9i(X0=%.3k+,#94w0v4H2x%f7C-^'h(H'K0F)l(59:(k,5/v4&#@%=//)y4K#W-/7*)e3L0@0w0*4b,k5a+w)]8K0(#/$]..1:-O'62r44&T7b*g*o/A)$%";
-    } else {
-      foo = "(#n'A9#-@4F0d/j*'1;--9@/E(3-e5H28/T0*-D))5>9e,U.<$Q'70W21-G4.1b3$+i$l'%9y'(,q0*1#,t$p1='B9b4'-D/*-U%-&i8).-+?06/&#]''1v4Z4I209'79([,~47/?)U%A*S7-9w$U.z4]4./,)#%z+/#R/Y)l8r4)#s.$1;-5/{'z*v%H9z4h*i*S%`,v6j(y.z%k+z4)3x41-R%V0~4''F$p-s6Z#d*L0H)B0T/x)j8q+b*W.+-,)x4P'z+;#>4Z9E9H,R3+1*1L9@._4W.X'7(h0q*e$$%z+P'J%)4g1v9u+?0*1*1L0m5g'v,3#M9P(0/%1S%L0m5g'v,3#M9)4j0w0R%2,u480J6^#(*r++3i0:-2,u480J6^#(*r+^4%17-18<0T2#$1(2,V.k.@4Z+L9{47#4(D,>0$-w01)H4:-_2o$^/I9T'Y#F4v0y4P'i42,[.I#=9i$F0F%G)804#k3G.'*g'))73$1v4J9%,=)/4].t#6$/,R,u.-92/<'W&c,.,Q2p3,1T%M9i'p4J,Y.<$[3`2n0x4v9S%6#(0V-_'70T094q#Z.L#x)e8`3s+Y.S07%c,&,M0D9()p2~#L2/,t/C$<6/#n'n-,1F0q0l.1-w4#5v$-/&'U7-9T2X2$17-z4(27(L-<6u6Y#X.G)=(Y,?0W'25?6o8H,44w0U%J92(1-14p1C#4#f.:4F4L9E.~4e.~#h(y2Q+o$S%K9P0+#:+F)s5S2t/C%R%[,6/A*1&;6z4B0?30-U%Q'l9^0v%.,Z43)80E4I/M9T%o4R(d.s+Z#S0T%n3z4d$-/B*(,M9L,e.>)o3>2B9d4n#^(k+%#%13)c,z4r&;#b-^9T7Y#L0=)2,P'%,G#b1f5r4K'J+:-,1=9x$K#A+e'j4a$^.>)x4S6w$$$g)2,b4S3J2/);-H)r5s+A1>6S6l0h/?)U%^0]1^8X3:+K'W3&+E)T0n9I0G(#-y2J2&-f.G)F)";
-    }
-
-//    if (index < 50) {
-//      this.size = 4; this.chunk = 12;
-//    } else if (index < 100) {
-      this.size = 5; this.chunk = 20;
-//    } else if (index < 150) {
-//      this.size = 6; this.chunk = 22;
-//    }
-    this.raw_puzzle = foo.substring(index % 50 * this.chunk, (index % 50 + 1) * this.chunk);
+    this.raw_puzzle = raw_puzzle_data[index];
+    this.size = sudoku_size;
     this.puznum = index;
-
-    this.decode_raw_puzzle();
 
     this.area = this.size * this.size;
     this.row_regions = new Array(this.size);
     this.col_regions = new Array(this.size);
-    this.box_regions = new Array(this.size+2);
+    this.box_regions = new Array(this.size);
+    this.diag_regions = new Array(2);
 
     for (var i=0; i<this.size; ++i) {
       this.row_regions[i] = new sudoku_region(i, this.size, false);
       this.col_regions[i] = new sudoku_region(i + this.size, this.size, false);
     }
-    for (var i=0; i<this.size+1; ++i) {
-      this.box_regions[i] = new sudoku_region(i + this.size + this.size, (this.size-1), false);
+    for (var i=0; i<this.size; ++i) {
+      this.box_regions[i] = new sudoku_region(i + this.size + this.size, this.size, false);
     }
-    var i = this.size+1;
-    this.box_regions[i] = new sudoku_region(i + this.size + this.size, 1, false);
+    this.diag_regions[0] = new sudoku_region(3 * this.size, this.size, false);
+    this.diag_regions[1] = new sudoku_region(3 * this.size + 1, this.size, false);
 
     this.cells = new Array(this.area);
     for (var i=0; i<this.area; ++i) {
@@ -358,6 +372,12 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       this.cells[i].add_region(this.box_regions[box_num]);
       this.box_regions[box_num].add_cell(this.cells[i]);
     }
+    for (var i=0; i<this.size; ++i) {
+      this.cells[i*10].add_region(this.diag_regions[0]);
+      this.diag_regions[0].add_cell(this.cells[i*10]);
+      this.cells[(i+1)*8].add_region(this.diag_regions[1]);
+      this.diag_regions[1].add_cell(this.cells[(i+1)*8]);
+    }
 
     this.palette_count = new Multiset();
     for (var i=0; i<this.size; ++i) {
@@ -371,9 +391,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       this.palette_count.remove(value);
     }
 
-    for (var i=this.area; i+2<this.decoded.length; i += 3) {
-      var pos = this.decoded[i] * this.size + this.decoded[i+1];
-      this.affix(pos, this.decoded[i+2]);
+    for (var i=0; i<this.size*this.size; i ++) {
+      var val = this.raw_puzzle.substr(i, 1);
+      if (val != 'x') {
+        this.affix(i, val-1);
+      }
     }
 
     var callback_this = this;
@@ -401,10 +423,10 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     for (var i=0; i<this.size; ++i) {
       this.row_regions[i].changed = this.region_changed_callback;
       this.col_regions[i].changed = this.region_changed_callback;
-    }
-    for (var i=0; i<this.size+2; ++i) {
       this.box_regions[i].changed = this.region_changed_callback;
     }
+    this.diag_regions[0].changed = this.region_changed_callback;
+    this.diag_regions[1].changed = this.region_changed_callback;
 
     this.gridsize = this.size*2+2;
     this.gridarea = this.gridsize*this.gridsize;
@@ -412,7 +434,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   }
 
   puzzle_data.prototype.box_num = function (index) {
-    return this.decoded[index];
+    return Math.floor(index/27) * 3 + Math.floor(index % 9 / 3);
   }
   
   puzzle_data.prototype.save_progress = function () {
@@ -447,6 +469,10 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       this._IGG_refreshCell((2*row+2)*this.gridsize - 1); // row
       this._IGG_refreshCell(this.gridarea - this.gridsize + (2*col+1)); // col
       this._IGG_refreshCell(this.gridarea + this.size + box); // box
+      if (index % 10 == 0)
+        this._IGG_refreshCell(this.gridarea + this.size * 2); // diag1
+      if (index % 8 == 0)
+        this._IGG_refreshCell(this.gridarea + this.size * 2 + 1); // diag1
     }
   }
 
@@ -455,8 +481,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       if (!this.row_regions[i].completed()) return false;
       if (!this.col_regions[i].completed()) return false;
     }
-    for (var i = 0; i < this.size+2; ++i) {
+    for (var i = 0; i < this.size; ++i) {
       if (!this.box_regions[i].completed()) return false;
+    }
+    for (var i = 0; i < 2; ++i) {
+      if (!this.diag_regions[i].completed()) return false;
     }
     return true;
   }
@@ -464,16 +493,20 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   puzzle_data.prototype.blank = function() {
     if (pcborder == "#FFFFFF") return '';
     return '<img src="' + this.prefix + 'blank.g'+'if" alt="-">';
+    // Note: "gif" is split because of iGoogle bug, should be fixed by 6/01
   }
 
   puzzle_data.prototype.black = function() {
     return '<img src="' + this.prefix + 'black.g'+'if" alt="-">';
+    // Note: "gif" is split because of iGoogle bug, should be fixed by 6/01
   }
 
   puzzle_data.prototype.get_background_color = function(index) {
-    if (index >= this.gridarea + this.size) {
-      // box light
-      return this.colors[index - this.gridarea - this.size];
+    if (index >= this.gridarea + this.size * 2) {
+      // diag
+      return this.colors[index - this.gridarea - this.size * 2];
+    } else if (index >= this.gridarea + this.size) {
+      return "#FFFFFF";
     } else if (index >= this.gridarea) {
       return "#FFFFFF";
     } else {
@@ -490,23 +523,30 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
         if (reg1 != this.box_num(row * this.size + col+1)) return pcborder;
         if (reg1 != this.box_num((row+1) * this.size + col)) return pcborder;
         if (reg1 != this.box_num((row+1) * this.size + col+1)) return pcborder;
+        return "#FFFFFF";
         return this.colors[reg1];
       } else if (g_row % 2 == 0) {
         var row = g_row / 2 - 1;
         var col = (g_col - 1) / 2;
         var reg1 = this.box_num(row * this.size + col);
         if (reg1 != this.box_num((row+1) * this.size + col)) return pcborder;
+        return "#FFFFFF";
         return this.colors[reg1];
       } else if (g_col % 2 == 0) {
         var row = (g_row - 1)/ 2;
         var col = g_col / 2 - 1;
         var reg1 = this.box_num(row * this.size + col);
         if (reg1 != this.box_num(row * this.size + col+1)) return pcborder;
+        return "#FFFFFF";
         return this.colors[reg1];
       } else {
         var row = (g_row - 1) / 2;
         var col = (g_col - 1) / 2;
         var reg1 = this.box_num(row * this.size + col);
+        if (row == 4 && col == 4) return this.colors[4]; 
+        if (row == col) return this.colors[0]; 
+        if (row + col == 8) return this.colors[1]; 
+        return "#FFFFFF";
         return this.colors[reg1];
       }
     }
@@ -518,55 +558,56 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
   }
 
-  puzzle_data.prototype.get_src = function (reg) {
-    if (reg.completed()) {
-      return this.prefix + "green.p"+"ng";
-    } else if (reg.is_bad()) {
-      return this.prefix + "red.p"+"ng";
+  puzzle_data.prototype.get_mini_image = function (region, value, title) {
+    var answer = '';
+    var c = region.count(value);
+    if (c > 1) {
+      answer += '<img src="' + this.prefix + 'sudoku' + (value + 1) + 'red.p' + 'ng' + '"';
+    } else if (c == 1) {
+      answer += '<img src="' + this.prefix + 'sudokublank.p' + 'ng' + '"';
     } else {
-      return this.prefix + "white.p"+"ng";
+      answer += '<img src="' + this.prefix + 'sudoku' + (value + 1) + 'black.p' + 'ng' + '"';
     }
+    answer += ' title="' + title + '"';
+    answer += ' width="8px" height="8px">';
+    answer += '</img>';
+    return answer;
   }
 
   puzzle_data.prototype.get_title = function (reg) {
     if (reg.completed()) {
       return "Completed";
     } else if (reg.is_bad()) {
-      return "Error: Too many duplicate letters";
+      return "Error: Too many duplicate numbers";
     } else {
-      return "Letters left: " + reg.allowed_letters();
+      return "Numbers left: " + reg.allowed_letters();
     }
   }
 
-  puzzle_data.prototype.get_row_info = function(index) {
+  puzzle_data.prototype.get_region_info = function(region) {
     var answer = '';
     answer += '<td align="middle" valign="center">';
-    answer += '<img src="' + this.get_src(this.row_regions[index]) + '"';
-    answer += ' title="' + this.get_title(this.row_regions[index]) + '"';
-    answer += ' width="24px" height="24px">';
-    answer += '</img>';
-    answer += '</td>';
-    return answer;
-  }
-
-  puzzle_data.prototype.get_col_info = function(index) {
-    var answer = '';
-    answer += '<td align="middle" valign="center">';
-    answer += '<img src="' + this.get_src(this.col_regions[index]) + '"';
-    answer += ' title="' + this.get_title(this.col_regions[index]) + '"';
-    answer += ' width="24px" height="24px">';
-    answer += '</img>';
-    answer += '</td>';
-    return answer;
-  }
-
-  puzzle_data.prototype.get_box_info = function(index) {
-    var answer = '';
-    answer += '<td align="middle" valign="center">';
-    answer += '<img src="' + this.get_src(this.box_regions[index]) + '"';
-    answer += ' title="' + this.get_title(this.box_regions[index]) + '"';
-    answer += ' width="24px" height="24px">';
-    answer += '</img>';
+    if (region.completed()) {
+      answer += '<td align="middle" valign="center">';
+      answer += '<img src="' + this.prefix + 'green.p' + 'ng"';
+      answer += ' title="' + this.get_title(region) + '"';
+      answer += ' width="24px" height="24px">';
+      answer += '</img>';
+      answer += '</td>';
+    } else {
+      answer += '<table cellpadding=0px cellspacing=0px border=0px>';
+ 
+      for (var i = 0; i < 3; ++i) {
+        answer += '<tr>';
+        for (var j = 0; j < 3; ++j) {
+          answer += '<td align="middle" valign="center">';
+          answer += this.get_mini_image(region, i*3+j, this.get_title(region));
+          answer += '</td>';
+        }
+        answer += '</tr>';
+      }
+      answer += '</table>';
+    }
     answer += '</td>';
     return answer;
   }
@@ -585,12 +626,14 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       }
       answer += '</span>';
     } else {
-      answer += '<span style="font-size:16pt" title="' + letter + ' (' + count + ' left)">'
+      // answer += '<span style="font-size:16pt" title="' + letter + ' (' + count + ' left)">';
+      answer += '<span style="font-size:16pt" title="' + letter + ' (' + count + ')">';
       answer += letter;
       if (this.tiny) {
         answer += '<br><div style="align:center;font-size:7pt">(' + count + ')</div>';
       } else {
-        answer += '<br><div style="align:center;font-size:7pt">(' + count + ' left)</div>';
+        // answer += '<br><div style="align:center;font-size:7pt">(' + count + ' left)</div>';
+        answer += '<br><div style="align:center;font-size:7pt">(' + count + ')</div>';
       }
       answer += '</span>';
     }
@@ -598,8 +641,12 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   }
 
   puzzle_data.prototype._IGG_getNormalView = function(index) {
-    if (index >= this.gridarea + this.size) {
-      return this.get_box_info(index - this.gridarea - this.size);
+    if (index == this.gridarea + this.size * 2 + 1) {
+      return this.get_region_info(this.diag_regions[1]);
+    } else if (index == this.gridarea + this.size * 2) {
+      return this.get_region_info(this.diag_regions[0]);
+    } else if (index >= this.gridarea + this.size) {
+      return this.get_region_info(this.box_regions[index - this.gridarea - this.size]);
     } else if (index >= this.gridarea) {
       var number = index - this.gridarea;
       return this.palette_html(number, this.palette_count.count(number));
@@ -611,11 +658,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       } else if (g_row == this.gridsize-1 && g_col % 2 == 0) {
         return "";
       } else if (g_row == this.gridsize-1) {
-        return this.get_col_info((g_col - 1)/2);
+        return this.get_region_info(this.col_regions[(g_col - 1)/2]);
       } else if (g_col == this.gridsize-1 && g_row % 2 == 0) {
         return "";
       } else if (g_col == this.gridsize-1) {
-        return this.get_row_info((g_row - 1)/2);
+        return this.get_region_info(this.row_regions[(g_row - 1)/2]);
       } else if (g_row % 2 == 0 || g_col % 2 == 0) {
         return this.blank();
       } else {
@@ -650,7 +697,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   puzzle_data.prototype.get_raw_cell_html = function(title, value, color, is_bold, is_draggable) {
     var bold = (is_bold) ? ";font-weight:bold" : "";
-    var cursor = (is_draggable) ? "cursor:pointer;cursor:hand;" : "";
+    var cursor = (is_draggable) ? "cursor:pointer;cursor:hand;" : "cursor:default;";
     return '<span title="' + title + '" style="text-align:center;' + cursor + 'font-size:16pt;color:' + color + bold + '">' + value + '</span>';
   }
 
@@ -770,11 +817,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
                                                                                                                                                                   
   function start() {
     pref_controller = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_20071015_redux', true);
-    pref_controller.num_puzzles = 500;
-    pref_controller.box_height = 3;
-    pref_controller.box_width = 3;
-    pref_controller.rows = 20;
-    pref_controller.cols = 25;
+    pref_controller.num_puzzles = 20;
+    pref_controller.box_height = 8;
+    pref_controller.box_width = 8;
+    pref_controller.rows = 4;
+    pref_controller.cols = 5;
 
     _gel("game_state_html").innerHTML = pref_controller.getTableHTML();
     pref_controller.getPrefs();
@@ -795,6 +842,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     grid.getTable().cellSpacing = 0;
     make_palette();
     make_boxcode();
+    make_diagcode();
     puzzle.set_background_colors();
                                                                                                                                                                  
     grid.dragHandler.topMargin = 0;
@@ -832,9 +880,9 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     _gel("palette").appendChild(palette_table);
     palette_table.appendChild(palette);
     palette.appendChild(document.createElement('tr'));
+    var row = document.createElement('tr');
+    palette.appendChild(row);
     for (var digit = 1; digit <= puzzle.size; digit++) {
-      var row = document.createElement('tr');
-      palette.appendChild(row);
       var tabledata = document.createElement('td');
       row.appendChild(tabledata);
       tabledata.align = "center";
@@ -859,18 +907,54 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       var tabledata = document.createElement('td');
       row.appendChild(tabledata);
       tabledata.align = "center";
-      tabledata.style.backgroundColor = puzzle.colors[digit-1];
+      // tabledata.style.backgroundColor = puzzle.colors[digit-1];
       tabledata.appendChild(grid.getCell(digit - 1 + puzzle.size + puzzle.gridarea));
     }
     var row2 = document.createElement('tr');
     boxcode.appendChild(row2);
-    for (var digit = 4; digit <= 7; digit++) {
+    for (var digit = 4; digit <= 6; digit++) {
       var tabledata = document.createElement('td');
       row2.appendChild(tabledata);
       tabledata.align = "center";
-      tabledata.style.backgroundColor = puzzle.colors[digit-1];
+      // tabledata.style.backgroundColor = puzzle.colors[digit-1];
       tabledata.appendChild(grid.getCell(digit - 1 + puzzle.size + puzzle.gridarea));
     }
+    var row3 = document.createElement('tr');
+    boxcode.appendChild(row3);
+    for (var digit = 7; digit <= 9; digit++) {
+      var tabledata = document.createElement('td');
+      row3.appendChild(tabledata);
+      tabledata.align = "center";
+      // tabledata.style.backgroundColor = puzzle.colors[digit-1];
+      tabledata.appendChild(grid.getCell(digit - 1 + puzzle.size + puzzle.gridarea));
+    }
+  }
+
+  function make_diagcode() {
+    var diagcode_table = document.createElement('table');
+    diagcode_table.border = "1";
+    diagcode_table.cellPadding = "3px";
+    diagcode_table.cellSpacing = "0px";
+    diagcode_table.id = "diagcode_table";
+    diagcode_table.width = "40px";
+    var diagcode = document.createElement('tbody');
+    _gel("diagcode").innerHTML = "";
+    _gel("diagcode").appendChild(diagcode_table);
+    diagcode_table.appendChild(diagcode);
+    var row = document.createElement('tr');
+    diagcode.appendChild(row);
+    tabledata = document.createElement('td');
+    row.appendChild(tabledata);
+    tabledata.align = "center";
+    tabledata.style.backgroundColor = puzzle.colors[0];
+    tabledata.appendChild(grid.getCell(2 * puzzle.size + puzzle.gridarea));
+    var row2 = document.createElement('tr');
+    diagcode.appendChild(row2);
+    tabledata = document.createElement('td');
+    row2.appendChild(tabledata);
+    tabledata.align = "center";
+    tabledata.style.backgroundColor = puzzle.colors[1];
+    tabledata.appendChild(grid.getCell(1 + 2 * puzzle.size + puzzle.gridarea));
   }
 
   _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
@@ -917,20 +1001,23 @@ Puzzle: <span id="puznum">1</span>
 <input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="pref_controller.change_level(-1)"/>
 <input style="font-size:10" id="levp10" type="button" value="+10" onclick="pref_controller.change_level(10)"/>
 <input style="font-size:10" disabled id="levm10" type="button" value="-10" onclick="pref_controller.change_level(-10)"/>
-<input style="font-size:10" id="levp50" type="button" value="+50" onclick="pref_controller.change_level(50)"/>
-<input style="font-size:10" disabled id="levm50" type="button" value="-50" onclick="pref_controller.change_level(-50)"/>
+<input style="font-size:10" id="levp5" type="button" value="+5" onclick="pref_controller.change_level(5)"/>
+<input style="font-size:10" disabled id="levm5" type="button" value="-5" onclick="pref_controller.change_level(-5)"/>
 <input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller.new_puzzle_request()"/>
 </form>
 
-<b>Udoku</b>: Blech, has it really been four months since the last update?
-I've simply been too swamped at work to spend much time with this gadget (working on some secret stuff), so I might as well show you the "Udoku" puzzles I was talking about last time.  These are (still) not standard sudoku puzzles!
+<span style="font-size:10">
+<b>Diagonal Sudoku</b>: Hey, I'm back, with 20 diagonal sudoku puzzles for you to play with.  I'll be
+adding more features to this gadget over the next few days, so I apologize in advance if I do things
+like kill your puzzle progress.  Stay tuned for a list of features I'm going to add here...
+</span>
 <span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
    onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
 <span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
    onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
 <span id="rules" style="display:none;font-size:x-small">
-   Place letters into the grid such that each letter appears once in each row, once in each column,
-   and at most once in each of the regions.
+   Place letters into the grid such that each letter appears once in each row, once in each column, once along each diagonal,
+   and once in each of the regions.
 </span>
 <span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
    onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
@@ -943,28 +1030,32 @@ I've simply been too swamped at work to spend much time with this gadget (workin
 </span>
 <BR>
 
-<table border="0"><tr><td rowspan=2 valign=top>
-<span id="palette"></span>
-</td><td>
-<span id="table_html"></span>
+<table border="0"><tr><td colspan=3 valign=top>
+  <span id="palette"></span>
+</td><tr><tr><td colspan=3>
+  <span id="table_html"></span>
 </td><tr><tr><td>
-<center>
-<table>
-<tr><td>
-  <input id="resetbutton3" style="font-size:10" type="button" value="Clear"
-   onclick="clear_board();">
-</td></tr><tr><td>
-  <input id="border" style="font-size:9" type="button" value="Borders"
-   onclick="change_border();">
-</td></tr>
-</table>
+  <center>
+  <table>
+  <tr><td>
+    <input id="resetbutton3" style="font-size:10" type="button" value="Clear"
+     onclick="clear_board();">
+  </td></tr><tr><td>
+    <input id="border" style="font-size:9" type="button" value="Borders"
+     onclick="change_border();">
+  </td></tr><tr><td>
+<!--
+    <input id="sizechange" style="font-size:9" type="button" value="Shrink"
+     onclick="puzzle__MODULE_ID__.changeSize();">
+-->
+  </td></tr>
+  </table>
 
-<!-- <BR>
-  <input id="sizechange" style="font-size:10n" type="button" value="Shrink"
-   onclick="puzzle__MODULE_ID__.changeSize();"> --->
-</center>
+  </center>
 </td><td>
-<span id="boxcode"></span>
+  <span id="boxcode"></span>
+</td><td>
+  <span id="diagcode"></span>
 </td></tr></table>
 
 <HR>
@@ -989,14 +1080,12 @@ I've simply been too swamped at work to spend much time with this gadget (workin
 
 <span id="showversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;font-size:x-small"
    onclick="_gel('version').style.display='inline';_gel('showversion').style.display='none';_gel('hideversion').style.display='inline';_IG_AdjustIFrameHeight()">
-Version 2.0</span>
+Version 1.0</span>
 <span id="hideversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none;font-size:x-small"
    onclick="_gel('version').style.display='none';_gel('showversion').style.display='inline';_gel('hideversion').style.display='none';_IG_AdjustIFrameHeight()">
-Version 2.0</span>
+Version 1.0</span>
 <span id="version" style="display:none;font-size:x-small">
 <BR>   v1.0 : initial release.
-<BR>   v2.0 : fixed bug where "left" number is incorrect. (0b1010011010).  Also, fixed bug where pink region wasn't checked for correctness.
-Incidentally, I've been busy writing a game using the <a href="http://code.google.com/apis/opensocial/">OpenSocial API</a>; that's why I'm so busy now.
 </span>
 
 </FONT>
