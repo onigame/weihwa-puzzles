@@ -280,9 +280,9 @@ Caching to attempt to foil IE's bug.  See: http://www.bazon.net/mishoo/articles.
   puzzle_data__MODULE_ID__.prototype._IGGG_getNormalView = function(index) {
     var bg = (this.marks[index]) ? 'style="background-color:#FFFF00"' : '';
     if (this.green[index])
-      return '<img ' + bg + ' src="' + this.prefix + 'pipeg' + this.nodes[index] + '.gif" alt="' + this.nodes[index] + '" title="pipe">';
+      return '<img ' + bg + ' src="' + this.prefix + 'pipeg' + this.nodes[index] + '.g'+'if" alt="' + this.nodes[index] + '" title="pipe">';
     else
-      return '<img ' + bg + ' src="' + this.prefix + 'pipe' + this.nodes[index] + '.gif" alt="' + this.nodes[index] + '" title="pipe">';
+      return '<img ' + bg + ' src="' + this.prefix + 'pipe' + this.nodes[index] + '.g'+'if" alt="' + this.nodes[index] + '" title="pipe">';
   }
 
   puzzle_data__MODULE_ID__.prototype._IGGG_getSourceView = function(source, target) {

@@ -54,6 +54,8 @@ puzzle_gadgets = [
   PuzzleGadget(2006,  6,  9, 'Distance', ''),
   PuzzleGadget(2006,  6,  2, 'Whyme Rhyme', 'whyme'),
   PuzzleGadget(2005,  5, 26, '3, 3, 8, 8', '3388'),
+  PuzzleGadget(2005,  1,  1, 'Series of Tubes', 'series_of_tubes'),
+  PuzzleGadget(2005,  1,  1, 'Minesweeper', ''),
 ]
 
 class MainPage(webapp.RequestHandler):
@@ -68,6 +70,8 @@ class GadgetPage(webapp.RequestHandler):
   def get(self):
     for pg in puzzle_gadgets:
       if (pg.date.strftime("%Y%m%d") + "-" + pg.short_name == self.request.get('g')):
+         my_pg = pg
+      if (pg.short_name == self.request.get('g')):
          my_pg = pg
     template_values = {
       'gadget': my_pg,

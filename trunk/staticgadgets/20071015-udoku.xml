@@ -272,7 +272,6 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   function puzzle_data() {
     this.prefix = 'http://weihwa-puzzles.appspot.com/images/';
-//    this.prefix = 'http://www.corp.google.com/~whuang/puzzlemodule/20071015-bridges/';
     this.resetPuzzleData(0);
   }
 
@@ -464,11 +463,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   puzzle_data.prototype.blank = function() {
     if (pcborder == "#FFFFFF") return '';
-    return '<img src="' + this.prefix + 'blank.gif" alt="-">';
+    return '<img src="' + this.prefix + 'blank.g'+'if" alt="-">';
   }
 
   puzzle_data.prototype.black = function() {
-    return '<img src="' + this.prefix + 'black.gif" alt="-">';
+    return '<img src="' + this.prefix + 'black.g'+'if" alt="-">';
   }
 
   puzzle_data.prototype.get_background_color = function(index) {
@@ -521,11 +520,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   puzzle_data.prototype.get_src = function (reg) {
     if (reg.completed()) {
-      return this.prefix + "green.png";
+      return this.prefix + "green.p"+"ng";
     } else if (reg.is_bad()) {
-      return this.prefix + "red.png";
+      return this.prefix + "red.p"+"ng";
     } else {
-      return this.prefix + "white.png";
+      return this.prefix + "white.p"+"ng";
     }
   }
 
