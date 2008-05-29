@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    height="100">
+  </ModulePrefs>
+  <Content type="html">
+
+<![CDATA[
+
+<p> host: {{host}}
+<p> name: {{name}}
+<p> port: {{port}}
+
+  ]]> 
+
+  </Content>
+</Module>
+
