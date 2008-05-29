@@ -988,6 +988,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     pref_controller.new_puzzle_request();
   }
 
+
 //////////////////////////
 
 // Javascript ends -->

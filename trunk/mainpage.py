@@ -109,6 +109,10 @@ class GadgetXML(webapp.RequestHandler):
     except TemplateDoesNotExist:
       WriteBadPage('cannot find the xml with name ' + filename)
 
+class CurrentGadgetXML(GadgetXML):
+  def get(self):
+    return GadgetXML.get(self, '20080523-diagonalsudoku.xml');
+
 class TestXML(webapp.RequestHandler):
   def get(self):
     host = os.environ.get('HTTP_HOST')
@@ -128,6 +132,7 @@ class TestXML(webapp.RequestHandler):
 
 def main():
   application = webapp.WSGIApplication([('/', MainPage),
+                                        ('/current.xml', CurrentGadgetXML),
                                         ('/gadgets/test.xml', TestXML),
                                         ('/gadgets/(.*)', GadgetXML),
                                         ('/gadgetpage', GadgetPage),
