@@ -1010,6 +1010,7 @@ Puzzle: <span id="puznum">1</span>
 <b>Diagonal Sudoku</b>: Hey, I'm back, with 20 diagonal sudoku puzzles for you to play with.  I'll be
 adding more features to this gadget over the next few days, so I apologize in advance if I do things
 like kill your puzzle progress.  Stay tuned for a list of features I'm going to add here...
+<!-- secret message for testing: {{server_url}} -->
 </span>
 <span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
    onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>

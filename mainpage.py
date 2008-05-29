@@ -6,6 +6,7 @@ import string
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from datetime import date
+from django.template import TemplateDoesNotExist
 
 class PuzzleGadget:
   def __init__(self, year, month, mdate, display_name, short_name):
@@ -58,6 +59,13 @@ puzzle_gadgets = [
   PuzzleGadget(2005,  1,  1, 'Minesweeper', ''),
 ]
 
+def WriteBadPage(error_message):
+  print 'Content-Type: text/plain'
+  print ''
+  print '404 Error.  That is not a valid URL.  Message: '
+  print error_message
+
+
 class MainPage(webapp.RequestHandler):
   def get(self):
     template_values = {
@@ -68,11 +76,15 @@ class MainPage(webapp.RequestHandler):
 
 class GadgetPage(webapp.RequestHandler):
   def get(self):
+    my_pg = "unknown"
     for pg in puzzle_gadgets:
       if (pg.date.strftime("%Y%m%d") + "-" + pg.short_name == self.request.get('g')):
          my_pg = pg
       if (pg.short_name == self.request.get('g')):
          my_pg = pg
+    if (my_pg == "unknown"):
+      WriteBadPage('cannot find the gadget with name ' + self.request.get('g'))
+      return
     template_values = {
       'gadget': my_pg,
       'gadget_name': self.request.get('g'),
@@ -80,8 +92,44 @@ class GadgetPage(webapp.RequestHandler):
     path = os.path.join(os.path.dirname(__file__), 'gadgetpage.html')
     self.response.out.write(template.render(path, template_values))
 
+class GadgetXML(webapp.RequestHandler):
+  def get(self, filename):
+    host = os.environ.get('SERVER_NAME')
+    port = os.environ.get('SERVER_PORT')
+    if (port == '80'):
+      server_url = 'http://%s/' % host
+    else:
+      server_url = 'http://%s:%s/' % (host, port)
+    template_values = {
+        'server_url': server_url,
+      }
+    try:
+      path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
+      self.response.out.write(template.render(path, template_values))
+    except TemplateDoesNotExist:
+      WriteBadPage('cannot find the xml with name ' + filename)
+
+class TestXML(webapp.RequestHandler):
+  def get(self):
+    host = os.environ.get('HTTP_HOST')
+    name = os.environ.get('SERVER_NAME')
+    port = os.environ.get('SERVER_PORT')
+    template_values = {
+        'host': host,
+        'name': name,
+        'port': port,
+      }
+    try:
+      path = os.path.join(os.path.dirname(__file__), 'staticgadgets/test.xml')
+      self.response.out.write(template.render(path, template_values))
+    except TemplateDoesNotExist:
+      WriteBadPage('cannot find the xml with name ' + filename)
+
+
 def main():
   application = webapp.WSGIApplication([('/', MainPage),
+                                        ('/gadgets/test.xml', TestXML),
+                                        ('/gadgets/(.*)', GadgetXML),
                                         ('/gadgetpage', GadgetPage),
                                        ],
                                        debug=True)
