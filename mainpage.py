@@ -105,6 +105,7 @@ class GadgetXML(webapp.RequestHandler):
       }
     try:
       path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
+      self.response.headers['Content-Type'] = 'text/xml'
       self.response.out.write(template.render(path, template_values))
     except TemplateDoesNotExist:
       WriteBadPage('cannot find the xml with name ' + filename)

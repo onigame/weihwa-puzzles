@@ -7,9 +7,6 @@ handlers:
 - url: /images
   static_dir: images
 
-- url: /staticgadgets
-  static_dir: staticgadgets
-
 - url: /js
   static_dir: js
 

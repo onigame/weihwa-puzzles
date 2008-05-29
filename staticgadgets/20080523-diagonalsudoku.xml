@@ -5,12 +5,12 @@
     description="Regular Puzzle Challenges from a Google Engineer"
     author="Wei-Hwa Huang and others"
     author_email="weihwa.feedback+ig20080523@gmail.com"
-    author_link="http://weihwa-puzzles.appspot.com/"
-    title_url="http://weihwa-puzzles.appspot.com/"
+    author_link="{{server_url}}"
+    title_url="{{server_url}}"
     author_location="Mountain View, CA, USA"
     author_affiliation="Google, Inc."
-    screenshot="http://weihwa-puzzles.appspot.com/images/screenshot.png"
-    thumbnail="http://weihwa-puzzles.appspot.com/images/thumbnail.png"
+    screenshot="{{server_url}}images/screenshot.png"
+    thumbnail="{{server_url}}images/thumbnail.png"
     height="500">
     <Require feature='dynamic-height'/>
     <Require feature='setprefs'/>
@@ -31,19 +31,19 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 </style>
 
 <div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
-<A TARGET="_top" HREF="http://weihwa-puzzles.appspot.com/"><IMG SRC="http://weihwa-puzzles.appspot.com/images/home.png"
+<A TARGET="_top" HREF="{{server_url}}"><IMG SRC="{{server_url}}images/home.png"
      STYLE="border:0px"
      ALT="Puzzle Homepage: Play previous puzzles!"
      TITLE="Puzzle Homepage: Play previous puzzles!"
-></A><A HREF="mailto:weihwa.feedback+20071015@gmail.com"><IMG SRC="http://weihwa-puzzles.appspot.com/images/mail.png"
+></A><A HREF="mailto:weihwa.feedback+20071015@gmail.com"><IMG SRC="{{server_url}}images/mail.png"
      STYLE="border:0px"
      ALT="Click here to send feedback"
      TITLE="Click here to send feedback"
 ></A>
 </div>
 
-<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/puzzle-utils5.js"></script>
-<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/json2.js"></script>
+<script type="text/javascript" src="{{server_url}}js/puzzle-utils5.js"></script>
+<script type="text/javascript" src="{{server_url}}js/json2.js"></script>
 
 <script type="text/javascript">
 <!-- Javascript begins
@@ -276,7 +276,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   ///////////////////////////////////////////////
 
   function puzzle_data() {
-    this.prefix = 'http://weihwa-puzzles.appspot.com/images/';
+    this.prefix = '{{server_url}}images/';
     this.resetPuzzleData(0);
   }
 
