@@ -199,22 +199,48 @@
       </div>
       <!-- /editable --><!-- /wrapper --><!-- /header -->
       <div id="main-content">
-        
         <div class="wrapper">
           <div class="content-item "><div id='g_body'>Want to have this on your Personalized Home Page? Just 
-             <a href="{{server_urls.igoogle}}add?moduleurl=http%3A//weihwa-puzzles.appspot.com/gadgets/{{gadget_name}}.xml">
+             <a href="{{server_urls.igoogle}}add?moduleurl={{server_urls.escaped_server_url}}gadgets/{{gadget_name}}.xml">
                <img alt="Add to Google" src="http://buttons.googlesyndication.com/fusion/add.gif" border="0" height="17" width="104">
              </a>
-             <p class="separator" style="clear: both; text-align: center;">
-                <iframe style="" 
-                        src="{{server_urls.gmodules}}/ig/ifr?url=http%3A%2F%2Fweihwa-puzzles.appspot.com%2Fgadgets%2F{{gadget_name}}.xml&amp;h=434&amp;w=666" 
+             <p class="separator" style="clear: both; text-align: left">
+                <iframe style="border:solid" 
+                        src="{{server_urls.gmodules}}ig/ifr?url={{server_urls.escaped_server_url}}gadgets%2F{{gadget_name}}.xml&amp;h=434&amp;w=666" 
                         allowtransparency="true" class="igm" 
-                        frameborder="0" scrolling="false" height="434" width="666">
+                        frameborder="0" scrolling="false" height="700" width="400">
                 </iframe>
              </p>
           </div>
-          </div>
           <div style="clear: both"></div>
+          <div class="content-item">
+            <h2>TODO List:</h2>
+            Want to see other features on this TODO list?  <a href="mailto:weihwa.feedback+20080530@gmail.com">E-mail me.</a>
+            <UL>
+                <LI>Rebuilding IGoogle locally (needed for testing) -- DONE (will use igoogle.corp instead)
+                <LI>Build sudoku generator -- DONE
+                <LI>Working Gadget with ten diagonal Sudoku Puzzles (requires remastering of encoding) -- DONE
+                <LI>Write wrapper for all gadgets, to handle hostname issues and Django filtering -- DONE
+                <LI>Create summary page with updates, suggestion box, this tasklist -- DONE
+                <LI>Move Gadgets-based API for storing "solved puzzle state" to App Engine
+                <LI>UI Enhancement: Add keyboard shortcuts
+                <LI>Add five puzzles a day (automatically), manual generation for 5 days
+                <LI>Add timer functionality to UI
+                <LI>Set up cron job to automate puzzle-a-day generation
+                <LI>Add timing into general scoring, using Sphinx code if possible (user records will probably be erased)
+                <LI>Create standalone page on appspot.com, just a container for the gadget
+                <LI>Add Global high score list to standalone page
+                <LI>Add Player-global-ranking high score list to standalone page
+                <LI>Add Friend high score list to standalone page (requires Open Social)
+                <LI>Add Player-friend-ranking high score list to standalong page
+                <LI>Deal with necessary speed enhancements (ask Ryan Barrett) if not done already
+                <LI>Add Facebook integration to above
+                <LI>Allow players to rank individual puzzles (maybe also leave comments)?
+                <LI>Allow players to challenge friends
+                <LI>(Suggestion from Zhen Wang): set up GGS for testing
+                <LI>(Suggestion from Zhen Wang): Move to gadgets.* APIs
+            </UL> 
+          </div>
         </div>
       </div>
       <!-- /wrapper --><!-- /main-content -->

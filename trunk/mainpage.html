@@ -209,13 +209,13 @@ urchinTracker();
 <p>Welcome! This is a simple home page I&#39;ve created using 
 <a href="">Google Page Creator
 </a> to help you navigate my Puzzle Gadget (updated weekly every Friday). From here, you can get to past weeks&#39; puzzles, and read any addenda or other comments I&#39;ve added since the puzzle challenge was published. (One advantage is that you won&#39;t have to deal with that reload on the 
-<a href="http://www.google.com/ig">Personalized Google Homepage
+<a href="{{server_urls.igoogle}}ig">Personalized Google Homepage
 </a> that might remove your puzzle progress!)
 </p>
 <p>If you don&#39;t have the gadget (or want to recommend it to others), you can 
-<a href="http://www.google.com/ig/directory?url=http://weihwa-puzzles.appspot.com/current.xml">look at it
+<a href="{{server_urls.igoogle}}ig/directory?url={{server_url}}current.xml">look at it
 </a> in the Homepage Content Directory... or simply just send them to this page and tell them to 
-<a href="http://fusion.google.com/add?moduleurl=http%3A//weihwa-puzzles.appspot.com/current.xml">
+<a href="{{server_urls.igoogle}}add?moduleurl={{server_url_escaped}}current.xml">
 <img alt="Add to Google" src="http://buttons.googlesyndication.com/fusion/add.gif" border="0" height="17" width="104">
 </a>. Enjoy!
 </p>
@@ -240,7 +240,7 @@ urchinTracker();
   {% for gadget in puzzle_gadgets %}
      <li>{{gadget.date|date:"Y-m-d"}}:
        <a href="gadgetpage?g={{gadget.date|date:"Ymd"}}-{{gadget.short_name}}&d={{gadget.date}}">{{gadget.display_name}}</a>
-       <a href="http://fusion.google.com/add?moduleurl=http%3A//weihwa-puzzles.appspot.com/gadgets/{{gadget.date|date:"Ymd"}}-{{gadget.short_name}}.xml">
+       <a href="{{server_urls.igoogle}}add?moduleurl={{server_url_escaped}}gadgets/{{gadget.date|date:"Ymd"}}-{{gadget.short_name}}.xml">
          <img style="" alt="Add to Google" src="http://buttons.googlesyndication.com/fusion/add.gif" border="0" height="17" width="104">
        </a>
      </li>

@@ -8,8 +8,7 @@
 <![CDATA[
 
 <p> host: {{host}}
-<p> name: {{name}}
-<p> port: {{port}}
+<p> <img src="http://enigma.corp.google.com:8080/images/home.png">
 
   ]]> 
 
