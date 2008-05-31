@@ -18,6 +18,7 @@ class PuzzleGadget:
       self.short_name = short_name
 
 puzzle_gadgets = [
+  PuzzleGadget(2008,  5, 23, 'Diagonal Sudoku', ''),
   PuzzleGadget(2007, 10, 15, 'Udoku', ''),
   PuzzleGadget(2007,  6,  1, 'Ssudoku', ''),
   PuzzleGadget(2007,  3, 26, 'Memory Lists', 'lists'),
@@ -65,11 +66,26 @@ def WriteBadPage(error_message):
   print '404 Error.  That is not a valid URL.  Message: '
   print error_message
 
+class ServerUrls:
+  def __init__(self):
+    host = os.environ.get('SERVER_NAME')
+    port = os.environ.get('SERVER_PORT')
+    if (host == 'weihwa-puzzles.appspot.com'):
+      self.server_url = 'http://weihwa-puzzles.appspot.com/'
+      self.escaped_server_url = 'http%3A//weihwa-puzzles.appspot.com/'
+      self.igoogle = 'http://fusion.google.com/'
+      self.gmodules = 'http://gmodules.com/'
+    else:
+      self.server_url = 'http://enigma.corp.google.com:8080/'
+      self.escaped_server_url = 'http%3A//enigma.corp.google.com%3A8080/'
+      self.igoogle = 'http://ig.corp.google.com/'
+      self.gmodules = 'http://igmodules.corp/'
 
 class MainPage(webapp.RequestHandler):
   def get(self):
     template_values = {
-      'puzzle_gadgets': puzzle_gadgets,
+        'puzzle_gadgets': puzzle_gadgets,
+        'server_urls': ServerUrls(),
       }
     path = os.path.join(os.path.dirname(__file__), 'mainpage.html')
     self.response.out.write(template.render(path, template_values))
@@ -86,22 +102,20 @@ class GadgetPage(webapp.RequestHandler):
       WriteBadPage('cannot find the gadget with name ' + self.request.get('g'))
       return
     template_values = {
-      'gadget': my_pg,
-      'gadget_name': self.request.get('g'),
+        'gadget': my_pg,
+        'gadget_name': self.request.get('g'),
+        'server_urls': ServerUrls(),
       }
-    path = os.path.join(os.path.dirname(__file__), 'gadgetpage.html')
+    if (self.request.get('g') == '20080523-diagonalsudoku'):
+      path = os.path.join(os.path.dirname(__file__), 'diagonalsudoku.html')
+    else:
+      path = os.path.join(os.path.dirname(__file__), 'gadgetpage.html')
     self.response.out.write(template.render(path, template_values))
 
 class GadgetXML(webapp.RequestHandler):
   def get(self, filename):
-    host = os.environ.get('SERVER_NAME')
-    port = os.environ.get('SERVER_PORT')
-    if (port == '80'):
-      server_url = 'http://%s/' % host
-    else:
-      server_url = 'http://%s:%s/' % (host, port)
     template_values = {
-        'server_url': server_url,
+        'server_urls': ServerUrls(),
       }
     try:
       path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
