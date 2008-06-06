@@ -22,6 +22,10 @@
       name="puzzle_data_20080523"
       default_value=""
       datatype="hidden"/>
+  <UserPref
+      name="user_id"
+      default_value=""
+      datatype="hidden"/>
   <Content type="html">
 
 <![CDATA[
@@ -42,7 +46,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 ></A>
 </div>
 
-<script type="text/javascript" src="{{server_urls.server_url}}js/puzzle-utils5.js"></script>
+<script type="text/javascript" src="{{server_urls.server_url}}js/puzzle-utils6.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/json2.js"></script>
 
 <script type="text/javascript">
@@ -52,6 +56,68 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   // Copyright 2006 Google, Inc.
   // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  // code to handle user ID and names.
+
+  var curname = '';
+
+  function current_user_ID() {
+    var prefs = new _IG_Prefs();
+    var id = prefs.getString("user_id");
+    if (id == '') {
+      // this user needs a new id.
+      id = '{{random_new_user_id}}';
+      prefs.set("user_id", id);
+    }
+    return id;
+  } 
+
+  function setName() {
+    var name = _gel('name_entry').value;
+    if (name.match(/^[A-Za-z0-9\-\_]+$/)) {
+      var url = '{{server_urls.server_url}}datastore/writename?id=' + current_user_ID() 
+          + '&name=' + name;
+      _IG_FetchContent(url, function() {
+        getName();
+        _gel("name_entry").style.display = "none";
+        _gel("username").style.display = "inline";
+        _gel("name_msg").value = "New name accepted!";
+        _gel("name_button").value = "Change My Nickname";
+        _gel("name_button").onclick = prepareNameChange;
+        var url = '{{server_urls.server_url}}datastore/message-write?message=' +
+             'user_' + current_user_ID() + '_changed_their_name_to_' + curname;
+        _IG_FetchContent(url, function() {});
+      });
+    } else {
+      _gel("name_msg").value = "Only letters and numbers please";
+    }
+  }
+
+  function prepareNameChange() {
+    _gel("username").style.display = "none";
+    _gel("name_msg").value = "";
+    _gel("name_entry").style.display = "inline";
+    _gel("name_entry").value = '{{random_username}}';
+    _gel("name_button").value = "This one's good";
+    _gel("name_button").onclick = setName;
+  }
+
+  function updateName(responseText) {
+    if (responseText == '') {
+      _gel('name_entry').value = '{{random_username}}';
+      setName();
+    } else {
+      curname = responseText;
+      _gel("username").innerHTML = curname;
+    }
+  }
+
+  function getName() {
+    var url = '{{server_urls.server_url}}datastore/getname?id=' + current_user_ID();
+    _IG_FetchContent(url, updateName);
+  }
 
   ///////////////////////////////////////////////
 
@@ -778,6 +844,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     grid.refreshDragSources();
     if (this.isSolved()) {
       pref_controller.game_state.puz_solved[this.puznum] = 1;
+
+      var url = '{{server_urls.server_url}}datastore/message-write?message=' +
+           'user_' + curname + '_SOLVED_puzzle_' + (this.puznum+1);
+      _IG_FetchContent(url, function() {});
+
       this.save_progress();
       pref_controller.updatePrefDisplay();
     }
@@ -814,7 +885,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   var pcborder = "#000000";
 
   _IG_RegisterOnloadHandler(start);
-                                                                                                                                                                  
+
   function start() {
     pref_controller = new _IG_puzzle_pref_controller(__MODULE_ID__, 'puzzle_data_20071015_redux', true);
     pref_controller.num_puzzles = 20;
@@ -825,9 +896,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
     _gel("game_state_html").innerHTML = pref_controller.getTableHTML();
     pref_controller.getPrefs();
-                                                                                                                                                                                              
+
     puzzle = new puzzle_data();
     reset(pref_controller.game_state);
+
+    getName();
 
     _IG_AdjustIFrameHeight();
   }
@@ -844,7 +917,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     make_boxcode();
     make_diagcode();
     puzzle.set_background_colors();
-                                                                                                                                                                 
+
     grid.dragHandler.topMargin = 0;
     grid.dragHandler.bottomMargin = 30;
     grid.dragHandler.leftMargin = 10;
@@ -1011,7 +1084,7 @@ Puzzle: <span id="puznum">1</span>
 <b>Diagonal Sudoku</b>: Hey, I'm back, with 20 diagonal sudoku puzzles for you to play with.  I'll be
 adding more features to this gadget over the next few days, so I apologize in advance if I do things
 like kill your puzzle progress.  Go to <a target="_top" href="{{server_urls.server_url}}/gadgetpage?g=20080523-diagonalsudoku&d=2008-05-23">this
-puzzle's homepage to see my TODO list for this gadget and send suggestions.
+puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 </span>
 <span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
    onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
@@ -1064,7 +1137,7 @@ puzzle's homepage to see my TODO list for this gadget and send suggestions.
 
 <table border=0 cellpadding=3 cellspacing=3><tr><td>
   <center><span id="game_state_html"></span></center>
-                                                                                                                                                                                              
+
 </td><td style="font-size:9pt">
   <span id="numsolved">? puzzles</span> solved
 </td><td style="font-size:9pt">
@@ -1075,20 +1148,33 @@ puzzle's homepage to see my TODO list for this gadget and send suggestions.
     onclick="pref_controller.resetPrefs();puzzle.resetPuzzle(pref_controller.game_state);"/>
 </td></tr></table>
 <span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
-                                                                                                                                                                                              
+
+<HR>
+
+<div style="font-size:10pt">
+  Your Nickname is:
+  <span id="username" style="display:inline">???</span>
+  <input id="name_entry" type="text" size="20" style="display:none"/>
+  <input id="name_button" type="button" value="Change My Nickname" onclick="prepareNameChange();"/>
+  <span id="name_msg"></span>
+</div>
+
+<HR>
+
 <span id="debug1" style="font-size:8pt;font-weight:bold"></span>
 <BR>
 <span id="debug2" style="font-size:8pt;font-weight:bold"></span>
 
 <span id="showversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;font-size:x-small"
    onclick="_gel('version').style.display='inline';_gel('showversion').style.display='none';_gel('hideversion').style.display='inline';_IG_AdjustIFrameHeight()">
-Version 2.0</span>
+Version 3.0</span>
 <span id="hideversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none;font-size:x-small"
    onclick="_gel('version').style.display='none';_gel('showversion').style.display='inline';_gel('hideversion').style.display='none';_IG_AdjustIFrameHeight()">
-Version 2.0</span>
+Version 3.0</span>
 <span id="version" style="display:none;font-size:x-small">
 <BR>   v1.0 : initial release.
 <BR>   v2.0 : Created 'homepage', changed message.
+<BR>   v3.0 : Added simple user authentication and a "name" that can be changed.
 </span>
 
 </FONT>

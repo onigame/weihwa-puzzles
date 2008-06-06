@@ -204,16 +204,27 @@
              <a href="{{server_urls.igoogle}}add?moduleurl={{server_urls.escaped_server_url}}gadgets/{{gadget_name}}.xml">
                <img alt="Add to Google" src="http://buttons.googlesyndication.com/fusion/add.gif" border="0" height="17" width="104">
              </a>
-             <p class="separator" style="clear: both; text-align: left">
-                <iframe style="border:solid" 
-                        src="{{server_urls.gmodules}}ig/ifr?url={{server_urls.escaped_server_url}}gadgets%2F{{gadget_name}}.xml&amp;h=434&amp;w=666" 
-                        allowtransparency="true" class="igm" 
-                        frameborder="0" scrolling="false" height="700" width="400">
-                </iframe>
-             </p>
+             <table>
+                <tr><td>
+                  <iframe style="border:solid" 
+                          src="{{server_urls.gmodules}}ig/ifr?url={{server_urls.escaped_server_url}}gadgets%2F{{gadget_name}}.xml&nocache=2147483647&amp;h=434&amp;w=666" 
+                          allowtransparency="true" class="igm" 
+                          frameborder="0" scrolling="false" height="750" width="400">
+                  </iframe>
+                </td><td>
+                  Last thirty messages (refreshes every 15 seconds):
+                  <iframe style="border:solid" id="lastteniframe"
+                          src="{{server_urls.server_url}}datastore/message-last?count=30" height="630" width=200>
+                  </iframe>
+                </td></tr>
+             </table>
           </div>
           <div style="clear: both"></div>
           <div class="content-item">
+            <h2>Known Bugs:</h2>
+            <UL>
+                <LI>Each time this page is refreshed, the game considers you to be a new user, so records are not persistent.
+            </UL>
             <h2>TODO List:</h2>
             Want to see other features on this TODO list?  <a href="mailto:weihwa.feedback+20080530@gmail.com">E-mail me.</a>
             <UL>
@@ -222,6 +233,10 @@
                 <LI>Working Gadget with ten diagonal Sudoku Puzzles (requires remastering of encoding) -- DONE
                 <LI>Write wrapper for all gadgets, to handle hostname issues and Django filtering -- DONE
                 <LI>Create summary page with updates, suggestion box, this tasklist -- DONE
+                <LI>Deal with all the testing issues caused by test workstation moving to San Francisco -- DONE
+                <LI>Change Gadget so that the whole IFRAME is on app engine, and not just the XML -- will not do, replaced with Google Gadgets <a href="http://code.google.com/apis/gadgets/docs/remote-content.html">Working with Remote Content</a> instead.  but something to think about when doing Facebook integration.
+                <LI>Adding a simple "username" identification to gadget -- DONE
+                <LI>Adding a message log to gadget -- DONE
                 <LI>Move Gadgets-based API for storing "solved puzzle state" to App Engine
                 <LI>UI Enhancement: Add keyboard shortcuts
                 <LI>Add five puzzles a day (automatically), manual generation for 5 days
@@ -257,6 +272,15 @@
 <div id="extraDiv1"><span></span></div><div id="extraDiv2"><span></span></div>
 <div id="extraDiv3"><span></span></div><div id="extraDiv4"><span></span></div>
 <div id="extraDiv5"><span></span></div><div id="extraDiv6"><span></span></div>
+
+<script type="text/javascript">
+  function Reload(id) {
+    var f = document.getElementById(id);
+    f.contentWindow.location.reload(true);
+  }
+
+  setInterval('Reload("lastteniframe")', 15000);
+</script>
 
 </body>
 </html>

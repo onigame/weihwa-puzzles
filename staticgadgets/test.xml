@@ -1,14 +1,44 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
   <ModulePrefs
-    height="100">
+    height="250">
+    <Require feature='setprefs'/>
   </ModulePrefs>
+  <UserPref
+      name="foo"
+      default_value="oldfoo"
+      datatype="hidden"/>
   <Content type="html">
 
 <![CDATA[
 
-<p> host: {{host}}
-<p> <img src="http://enigma.corp.google.com:8080/images/home.png">
+<input type="button" value="Call update_foo" onclick="update_foo();"/>
+<input type="button" value="Call see_foo" onclick="see_foo();"/>
+
+<script type="text/javascript">
+  function update_foo() {
+    var prefs = new _IG_Prefs();
+    prefs.set("foo", "newfoo");
+  }
+  function see_foo() {
+    var prefs = new _IG_Prefs();
+    var foo = prefs.getString("foo");
+    alert("Foo is " + foo);
+  }
+</script>
+
+<xmp>
+  function update_foo() {
+    var prefs = new _IG_Prefs();
+    prefs.set("foo", "newfoo");
+  }
+
+  function see_foo() {
+    var prefs = new _IG_Prefs();
+    var foo = prefs.getString("foo");
+    alert("Foo is " + foo);
+  }
+</xmp>
 
   ]]> 
 
