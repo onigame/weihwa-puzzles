@@ -204,7 +204,7 @@
              <a href="{{server_urls.igoogle}}add?moduleurl={{server_urls.escaped_server_url}}gadgets/{{gadget_name}}.xml">
                <img alt="Add to Google" src="http://buttons.googlesyndication.com/fusion/add.gif" border="0" height="17" width="104">
              </a>
-             <table>
+             <table border=0>
                 <tr><td>
                   <iframe style="border:solid" 
                           src="{{server_urls.gmodules}}ig/ifr?url={{server_urls.escaped_server_url}}gadgets%2F{{gadget_name}}.xml&nocache=2147483647&amp;h=434&amp;w=666" 
@@ -212,18 +212,23 @@
                           frameborder="0" scrolling="false" height="750" width="400">
                   </iframe>
                 </td><td>
+                </td></tr><tr><td>
                   Last thirty messages (refreshes every 15 seconds):
                   <iframe style="border:solid" id="lastteniframe"
-                          src="{{server_urls.server_url}}datastore/message-last?count=30" height="630" width=200>
+                          src="{{server_urls.server_url}}datastore/message-last?count=30" height="530" width="800">
                   </iframe>
                 </td></tr>
              </table>
           </div>
           <div style="clear: both"></div>
           <div class="content-item">
+            <h2>Notes:</h2>
+            <ul>
+                <li>(6/6) Hee hee hee, my crude logging software made my CPU go over quota.  Working on fix now... fixed.
+            </ul>
             <h2>Known Bugs:</h2>
             <UL>
-                <LI>Each time this page is refreshed, the game considers you to be a new user, so records are not persistent.
+                <LI>Each time this page is refreshed, the game considers you to be a new user, so game records aren't saved.  Sorry!  Working on that.... it might be the case that I'll need to get you to log onto a Google Account to play on this page.  Is that okay?  E-mail me.
             </UL>
             <h2>TODO List:</h2>
             Want to see other features on this TODO list?  <a href="mailto:weihwa.feedback+20080530@gmail.com">E-mail me.</a>
@@ -236,7 +241,7 @@
                 <LI>Deal with all the testing issues caused by test workstation moving to San Francisco -- DONE
                 <LI>Change Gadget so that the whole IFRAME is on app engine, and not just the XML -- will not do, replaced with Google Gadgets <a href="http://code.google.com/apis/gadgets/docs/remote-content.html">Working with Remote Content</a> instead.  but something to think about when doing Facebook integration.
                 <LI>Adding a simple "username" identification to gadget -- DONE
-                <LI>Adding a message log to gadget -- DONE
+                <LI>Adding a message log to gadget -- DONE (and now it doesn't suck (as badly))
                 <LI>Move Gadgets-based API for storing "solved puzzle state" to App Engine
                 <LI>UI Enhancement: Add keyboard shortcuts
                 <LI>Add five puzzles a day (automatically), manual generation for 5 days

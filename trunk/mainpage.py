@@ -3,6 +3,7 @@ import os
 import datetime
 import string
 import random
+import logger
 
 from google.appengine.ext import webapp
 from google.appengine.ext import db
@@ -179,43 +180,6 @@ class TestXML(webapp.RequestHandler):
       WriteBadPage('cannot find the xml with name ' + filename)
 
 ##########################################################
-# db stuff
-
-class Message(db.Model):
-  content = db.StringProperty()
-
-class MessageWriter(webapp.RequestHandler):
-  def get(self):
-    message = Message()
-    message.content = self.request.get('message')
-    message.put()
-    self.response.headers['Content-Type'] = 'text/plain'
-    self.response.out.write("Stored %s" % self.request.get('message'))
-
-class MessageReader(webapp.RequestHandler):
-  def get(self):
-    query = Message.all()
-    self.response.headers['Content-Type'] = 'text/plain'
-    for result in query:
-      self.response.out.write("%s\n" % result.content)
-
-def GetLastMessages(num):
-  query = Message.all()
-  result = [''] * num;
-  pos = 0;
-  for message in query:
-    result[pos] = message.content
-    pos = (pos+1) % num;
-  return result[pos:] + result[0:pos]
-
-class MessageReaderLast(webapp.RequestHandler):
-  def get(self):
-    messages = GetLastMessages(int(self.request.get('count')))
-    self.response.headers['Content-Type'] = 'text/plain'
-    for s in messages:
-      self.response.out.write("%s\n" % s)
-
-##########################################################
 
 class User(db.Model):
   name = db.StringProperty()
@@ -223,12 +187,19 @@ class User(db.Model):
 class NameWriter(webapp.RequestHandler):
   def get(self):
     user = User.get_by_key_name(self.request.get('id'))
+    oldname = ''
     if user == None:
       user = User(key_name=self.request.get('id'))
+    else:
+      oldname = user.name;
     user.name = self.request.get('name')
     user.put()
     self.response.headers['Content-Type'] = 'text/plain'
     self.response.out.write("Stored %s with id %s" % (user.name, user.key().name()))
+    if oldname == '':
+      logger.LogOneEntry("Server: User %s acquired name %s" % (user.key().name(), user.name))
+    else:
+      logger.LogOneEntry("Server: User %s changed name from %s to %s" % (user.key().name(), oldname, user.name))
 
 class NameReader(webapp.RequestHandler):
   def get(self):
@@ -236,9 +207,10 @@ class NameReader(webapp.RequestHandler):
     user = User.get_by_key_name(self.request.get('id'))
     if user != None:
       self.response.out.write(user.name)
+      logger.LogOneEntry("Server: User %s asked for name %s" % (user.key().name(), user.name))
     else:
       # Failed!  But we don't have error handling
-      1
+      logger.LogOneEntry("Server: User %s asked for name; user unknown" % (self.request.get('id')))
 
 ##########################################################
 
@@ -248,9 +220,9 @@ def main():
                                         ('/gadgets/test.xml', TestXML),
                                         ('/gadgets/(.*\.xml)', GadgetXML),
                                         ('/gadgets/(.*\.html)', GadgetHTML),
-                                        ('/datastore/message-write', MessageWriter),
-                                        ('/datastore/message-all', MessageReader),
-                                        ('/datastore/message-last', MessageReaderLast),
+                                        ('/datastore/message-write', logger.LogWriter),
+                                        ('/datastore/message-all', logger.LogReader),
+                                        ('/datastore/message-last', logger.LogReaderLast),
                                         ('/datastore/writename', NameWriter),
                                         ('/datastore/getname', NameReader),
                                         ('/gadgetpage', GadgetPage),

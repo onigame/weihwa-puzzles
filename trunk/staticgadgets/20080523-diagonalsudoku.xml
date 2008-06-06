@@ -58,6 +58,15 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   // Author: Wei-Hwa Huang
 
   ///////////////////////////////////////////////
+  // code to handle logging on server
+
+  function logMessage(content) {
+    var url = '{{server_urls.server_url}}datastore/message-write?content='
+              + encodeURIComponent('Client: ' + content);
+    _IG_FetchContent(url, function(result) { });
+  }
+
+  ///////////////////////////////////////////////
 
   // code to handle user ID and names.
 
@@ -79,6 +88,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     if (name.match(/^[A-Za-z0-9\-\_]+$/)) {
       var url = '{{server_urls.server_url}}datastore/writename?id=' + current_user_ID() 
           + '&name=' + name;
+      curname = name;
       _IG_FetchContent(url, function() {
         getName();
         _gel("name_entry").style.display = "none";
@@ -86,9 +96,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
         _gel("name_msg").value = "New name accepted!";
         _gel("name_button").value = "Change My Nickname";
         _gel("name_button").onclick = prepareNameChange;
-        var url = '{{server_urls.server_url}}datastore/message-write?message=' +
-             'user_' + current_user_ID() + '_changed_their_name_to_' + curname;
-        _IG_FetchContent(url, function() {});
+        logMessage('user ' + current_user_ID() + ' changed their name to ' + curname);
       });
     } else {
       _gel("name_msg").value = "Only letters and numbers please";
@@ -845,9 +853,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     if (this.isSolved()) {
       pref_controller.game_state.puz_solved[this.puznum] = 1;
 
-      var url = '{{server_urls.server_url}}datastore/message-write?message=' +
-           'user_' + curname + '_SOLVED_puzzle_' + (this.puznum+1);
-      _IG_FetchContent(url, function() {});
+      logMessage('user ' + curname + ' solved puzzle ' + (this.puznum+1));
 
       this.save_progress();
       pref_controller.updatePrefDisplay();
