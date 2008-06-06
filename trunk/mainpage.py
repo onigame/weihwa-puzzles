@@ -2,11 +2,15 @@ import wsgiref.handlers
 import os
 import datetime
 import string
+import random
 
 from google.appengine.ext import webapp
+from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from datetime import date
 from django.template import TemplateDoesNotExist
+
+random.seed(None)
 
 class PuzzleGadget:
   def __init__(self, year, month, mdate, display_name, short_name):
@@ -76,8 +80,8 @@ class ServerUrls:
       self.igoogle = 'http://fusion.google.com/'
       self.gmodules = 'http://gmodules.com/'
     else:
-      self.server_url = 'http://enigma.corp.google.com:8080/'
-      self.escaped_server_url = 'http%3A//enigma.corp.google.com%3A8080/'
+      self.server_url = 'http://enigma.sfo.corp.google.com:8080/'
+      self.escaped_server_url = 'http%3A//enigma.sfo.corp.google.com%3A8080/'
       self.igoogle = 'http://ig.corp.google.com/'
       self.gmodules = 'http://igmodules.corp/'
 
@@ -116,6 +120,8 @@ class GadgetXML(webapp.RequestHandler):
   def get(self, filename):
     template_values = {
         'server_urls': ServerUrls(),
+        'random_new_user_id': self.RandomUserId(),
+        'random_username': self.RandomUserName(),
       }
     try:
       path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
@@ -123,10 +129,38 @@ class GadgetXML(webapp.RequestHandler):
       self.response.out.write(template.render(path, template_values))
     except TemplateDoesNotExist:
       WriteBadPage('cannot find the xml with name ' + filename)
+  def RandomUserId(self):
+    # This is a temporary placeholder until we can get real OpenSocial stuff
+    # 15 random alphabetic characters should handle about 40 billion users
+    result = ''
+    for x in range(15):
+      result += random.choice(list(string.uppercase))
+    return result
+  def RandomUserName(self):
+    # This is a temporary placeholder until we can get real OpenSocial stuff
+    return (random.choice(('Jordan', 'Alex', 'Jamie', 'Chris', 'Pat', 'Elliot', 'Willie', 'Val', 
+       'Tracy', 'Stacy', 'Skye', 'Robin', 'Nicky', 'Morgan', 'Madison', 'Leslie', 'Jackie',
+       'Glenn', 'Dana', 'Dale', 'Daryl', 'Drew', 'Charlie', 'Corey', 'Bryce', 'Blair'))
+       + random.choice(list(string.uppercase))
+       + random.choice(list(string.digits))
+       + random.choice(list(string.digits))
+    )
+
+class GadgetHTML(webapp.RequestHandler):
+  def get(self, filename):
+    template_values = {
+        'server_urls': ServerUrls(),
+      }
+    try:
+      path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
+      self.response.headers['Content-Type'] = 'text/html'
+      self.response.out.write(template.render(path, template_values))
+    except TemplateDoesNotExist:
+      WriteBadPage('cannot find the html with name ' + filename)
 
 class CurrentGadgetXML(GadgetXML):
   def get(self):
-    return GadgetXML.get(self, '20080523-diagonalsudoku.xml');
+    return GadgetXML.get(self, '20080523-diagonalsudoku.xml')
 
 class TestXML(webapp.RequestHandler):
   def get(self):
@@ -144,13 +178,83 @@ class TestXML(webapp.RequestHandler):
     except TemplateDoesNotExist:
       WriteBadPage('cannot find the xml with name ' + filename)
 
+##########################################################
+# db stuff
+
+class Message(db.Model):
+  content = db.StringProperty()
+
+class MessageWriter(webapp.RequestHandler):
+  def get(self):
+    message = Message()
+    message.content = self.request.get('message')
+    message.put()
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write("Stored %s" % self.request.get('message'))
+
+class MessageReader(webapp.RequestHandler):
+  def get(self):
+    query = Message.all()
+    self.response.headers['Content-Type'] = 'text/plain'
+    for result in query:
+      self.response.out.write("%s\n" % result.content)
+
+def GetLastMessages(num):
+  query = Message.all()
+  result = [''] * num;
+  pos = 0;
+  for message in query:
+    result[pos] = message.content
+    pos = (pos+1) % num;
+  return result[pos:] + result[0:pos]
+
+class MessageReaderLast(webapp.RequestHandler):
+  def get(self):
+    messages = GetLastMessages(int(self.request.get('count')))
+    self.response.headers['Content-Type'] = 'text/plain'
+    for s in messages:
+      self.response.out.write("%s\n" % s)
+
+##########################################################
+
+class User(db.Model):
+  name = db.StringProperty()
+
+class NameWriter(webapp.RequestHandler):
+  def get(self):
+    user = User.get_by_key_name(self.request.get('id'))
+    if user == None:
+      user = User(key_name=self.request.get('id'))
+    user.name = self.request.get('name')
+    user.put()
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write("Stored %s with id %s" % (user.name, user.key().name()))
+
+class NameReader(webapp.RequestHandler):
+  def get(self):
+    self.response.headers['Content-Type'] = 'text/plain'
+    user = User.get_by_key_name(self.request.get('id'))
+    if user != None:
+      self.response.out.write(user.name)
+    else:
+      # Failed!  But we don't have error handling
+      1
+
+##########################################################
 
 def main():
   application = webapp.WSGIApplication([('/', MainPage),
                                         ('/current.xml', CurrentGadgetXML),
                                         ('/gadgets/test.xml', TestXML),
-                                        ('/gadgets/(.*)', GadgetXML),
+                                        ('/gadgets/(.*\.xml)', GadgetXML),
+                                        ('/gadgets/(.*\.html)', GadgetHTML),
+                                        ('/datastore/message-write', MessageWriter),
+                                        ('/datastore/message-all', MessageReader),
+                                        ('/datastore/message-last', MessageReaderLast),
+                                        ('/datastore/writename', NameWriter),
+                                        ('/datastore/getname', NameReader),
                                         ('/gadgetpage', GadgetPage),
+                                        ('/.*', MainPage),
                                        ],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
