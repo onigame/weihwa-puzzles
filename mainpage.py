@@ -70,6 +70,7 @@ def WriteBadPage(error_message):
   print ''
   print '404 Error.  That is not a valid URL.  Message: '
   print error_message
+  print '(Yes, I know this isn\'t a real 404.)'
 
 class ServerUrls:
   def __init__(self):
@@ -116,6 +117,18 @@ class GadgetPage(webapp.RequestHandler):
     else:
       path = os.path.join(os.path.dirname(__file__), 'gadgetpage.html')
     self.response.out.write(template.render(path, template_values))
+
+class Javascript(webapp.RequestHandler):
+  def get(self, filename):
+    template_values = {
+        'server_urls': ServerUrls(),
+      }
+    try:
+      path = os.path.join(os.path.dirname(__file__), 'js/' + filename)
+      self.response.headers['Content-Type'] = 'text/javascript'
+      self.response.out.write(template.render(path, template_values))
+    except TemplateDoesNotExist:
+      WriteBadPage('cannot find the js with name ' + filename)
 
 class GadgetXML(webapp.RequestHandler):
   def get(self, filename):
@@ -179,6 +192,23 @@ class TestXML(webapp.RequestHandler):
     except TemplateDoesNotExist:
       WriteBadPage('cannot find the xml with name ' + filename)
 
+class Test2XML(webapp.RequestHandler):
+  def get(self):
+    host = os.environ.get('HTTP_HOST')
+    name = os.environ.get('SERVER_NAME')
+    port = os.environ.get('SERVER_PORT')
+    template_values = {
+        'host': host,
+        'server_urls': ServerUrls(),
+        'name': name,
+        'port': port,
+      }
+    try:
+      path = os.path.join(os.path.dirname(__file__), 'staticgadgets/test2.xml')
+      self.response.out.write(template.render(path, template_values))
+    except TemplateDoesNotExist:
+      WriteBadPage('cannot find the xml with name ' + filename)
+
 ##########################################################
 
 class User(db.Model):
@@ -212,12 +242,45 @@ class NameReader(webapp.RequestHandler):
       # Failed!  But we don't have error handling
       logger.LogOneEntry("Server: User %s asked for name; user unknown" % (self.request.get('id')))
 
+class UserPuzzleData(db.Model):
+  data = db.StringProperty()    # usually JSON
+
+class PuzzleDataWriter(webapp.RequestHandler):
+  def get(self):
+    userpuzzledata = UserPuzzleData.get_by_key_name(self.request.get('id'))
+    olddata = ''
+    if userpuzzledata == None:
+      userpuzzledata = UserPuzzleData(key_name=self.request.get('id'))
+    else:
+      olddata = userpuzzledata.data;
+    userpuzzledata.data = self.request.get('data')
+    userpuzzledata.put()
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write("Stored %s with id %s" % (userpuzzledata.data, userpuzzledata.key().name()))
+    if olddata == '':
+      logger.LogOneEntry("Server: User %s acquired data %s" % (userpuzzledata.key().name(), userpuzzledata.data))
+    else:
+      logger.LogOneEntry("Server: User %s changed data from %s to %s" % (userpuzzledata.key().data(), olddata, userpuzzledata.data))
+
+class PuzzleDataReader(webapp.RequestHandler):
+  def get(self):
+    self.response.headers['Content-Type'] = 'text/html'
+    userpuzzledata = UserPuzzleData.get_by_key_name(self.request.get('id'))
+    if userpuzzledata != None:
+      self.response.out.write(userpuzzledata.data)
+      logger.LogOneEntry("Server: User %s asked for data %s" % (userpuzzledata.key().name(), userpuzzledata.data))
+    else:
+      # Failed!  But we don't have error handling
+      logger.LogOneEntry("Server: User %s asked for data; userpuzzledata unknown" % (self.request.get('id')))
+
 ##########################################################
 
-def main():
+def real_main():
   application = webapp.WSGIApplication([('/', MainPage),
                                         ('/current.xml', CurrentGadgetXML),
                                         ('/gadgets/test.xml', TestXML),
+                                        ('/gadgets/test2.xml', Test2XML),
+                                        ('/js/(.*\.js)', Javascript),
                                         ('/gadgets/(.*\.xml)', GadgetXML),
                                         ('/gadgets/(.*\.html)', GadgetHTML),
                                         ('/datastore/message-write', logger.LogWriter),
@@ -225,11 +288,35 @@ def main():
                                         ('/datastore/message-last', logger.LogReaderLast),
                                         ('/datastore/writename', NameWriter),
                                         ('/datastore/getname', NameReader),
+                                        ('/datastore/writepuzzledata', PuzzleDataWriter),
+                                        ('/datastore/getpuzzledata', PuzzleDataReader),
                                         ('/gadgetpage', GadgetPage),
                                         ('/.*', MainPage),
                                        ],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
+
+def profile_main():
+  # This is the main function for profiling 
+  # We've renamed our original main() above to real_main()
+  import cProfile, pstats, StringIO
+  prof = cProfile.Profile()
+  prof = prof.runctx("real_main()", globals(), locals())
+  print "<!--"
+  stats = pstats.Stats(prof)
+  stats.sort_stats("time")  # Or cumulative
+  stats.print_stats(800)  # 80 = how many to print
+  # The rest is optional.
+  # stats.print_callees()
+  # stats.print_callers()
+  print "-->"
+
+try:
+  import cProfile
+except ImportError:
+  main = real_main;
+else:
+  main = profile_main;
 
 if __name__ == "__main__":
   main()
