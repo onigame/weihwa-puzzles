@@ -48,6 +48,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
 <script type="text/javascript" src="{{server_urls.server_url}}js/puzzle-utils6.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/json2.js"></script>
+<script type="text/javascript" src="{{server_urls.server_url}}js/general-lib.js"></script>
 
 <script type="text/javascript">
 <!-- Javascript begins
@@ -505,6 +506,8 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     this.gridsize = this.size*2+2;
     this.gridarea = this.gridsize*this.gridsize;
     this.colors = new Array("#A9C5EB", "#FFBBBB", "#FFFF88", "#DDF8CC", "#CEA8F4", "#FFBBFF", "#BBFFFF");
+
+    this.keycursor = -1;
   }
 
   puzzle_data.prototype.box_num = function (index) {
@@ -587,7 +590,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       var g_row = Math.floor(index / this.gridsize);
       var g_col = index % this.gridsize;
       if (g_row == this.gridsize-1 || g_col == this.gridsize-1) {
-        return "#FFFFFF";
+        return "#CCCCCC";
       } else if (g_row == 0 || g_col == 0 || g_row == this.gridsize-2 || g_col == this.gridsize-2) {
         return pcborder;
       } else if (g_row % 2 == 0 && g_col % 2 == 0) {
@@ -754,7 +757,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
     var index = this.gtoi(g_index);
     if (index < 0) return;
-    return this.get_raw_cell_html("", "?", "#FFFFFF", false, !this.cells[index].fixed);
+    return this.get_raw_cell_html("", "?", "#FFFFFF", false, !this.cells[index].fixed, index);
   }
 
   puzzle_data.prototype._IGG_getTargetView = function(target, source) {
@@ -766,13 +769,15 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     if (value < 0 || value >= this.size) {
       value = this.value_at(source);
     }
-    return this.get_raw_cell_html("", letters[value], "#D0D0D0", true, true);
+    return this.get_raw_cell_html("", letters[value], "#D0D0D0", true, true, index);
   }
 
-  puzzle_data.prototype.get_raw_cell_html = function(title, value, color, is_bold, is_draggable) {
+  puzzle_data.prototype.get_raw_cell_html = function(title, value, color, is_bold, is_draggable, index) {
     var bold = (is_bold) ? ";font-weight:bold" : "";
     var cursor = (is_draggable) ? "cursor:pointer;cursor:hand;" : "cursor:default;";
-    return '<span title="' + title + '" style="text-align:center;' + cursor + 'font-size:16pt;color:' + color + bold + '">' + value + '</span>';
+    var background = (index == this.keycursor) ? "background-color:#808080;" : "";
+    return '<span title="' + title + '" style="text-align:center;' + cursor + 'font-size:16pt;color:' + color + bold 
+         + ';' + background + '" onclick="puzzle.handleClick(' + index + ')">' + value + '</span>';
   }
 
   puzzle_data.prototype.get_cell_html = function(index) {
@@ -781,11 +786,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     if (value < 0) {
       var allowed = this.cells[index].allowed_letters();
       var title = (allowed == "") ? "No letters possible!" : ("Could be: " + allowed);
-      return this.get_raw_cell_html(title, "?", "#FFFFFF", false, false);
+      return this.get_raw_cell_html(title, "?", "#FFFFFF", false, false, index);
     } 
     var title = fixed ? "Given at start" : "Placed by you";
     var color = fixed ? "#008000" : pcborder;
-    return this.get_raw_cell_html(title, letters[value], color, true, !fixed);
+    return this.get_raw_cell_html(title, letters[value], color, true, !fixed, index);
   }
 
   puzzle_data.prototype.gtoi = function(g_index) {
@@ -802,6 +807,16 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     return row * this.size + col;
   }
 
+  puzzle_data.prototype.itop = function(index) {
+    return (index + this.gridarea);
+  }
+
+  puzzle_data.prototype.itog = function(index) {
+    var row = Math.floor(index / this.size);
+    var col = index % this.size;
+    return (2*row+1)*this.gridsize + (2*col+1);
+  }
+
   puzzle_data.prototype.value_at = function(g_index) {
     var index = this.gtoi(g_index);
     if (index == -1) return -1;
@@ -814,6 +829,84 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       value = this.value_at(index);
     }
     return '<span style="font-size:18pt">' + letters[value] + '</span>';
+  }
+
+  puzzle_data.prototype.handleClick = function(location) {
+    var old_cursor = this.keycursor;
+    if (location == -1 || location >= this.area || this.cells[location].fixed) {
+      this.keycursor = -1;
+    }
+    this.keycursor = location;
+    this.cell_changed(old_cursor);
+    this.cell_changed(this.keycursor);
+  }
+
+  puzzle_data.prototype.rc_interpret = function (row, col) {
+    while (row < 0) row += this.size;
+    while (row >= this.size) row -= this.size;
+    while (col < 0) col += this.size;
+    while (col >= this.size) col -= this.size;
+    return (row*this.size + col);
+  }
+
+  puzzle_data.prototype.move_cursor_dir = function(dir) {
+    // 0 = up, 1 = right, 2 = down, 3 = left.
+    var old_cursor = this.keycursor;
+    var row = Math.floor(this.keycursor / this.size);
+    var col = this.keycursor % this.size;
+    if (dir % 4 == 0) {
+      row--;
+    } else if (dir % 4 == 1) {
+      col++;
+    } else if (dir % 4 == 2) {
+      row++;
+    } else if (dir % 4 == 3) {
+      col--;
+    } else {
+      return;
+    }
+    this.keycursor = this.rc_interpret(row, col);
+    this.cell_changed(old_cursor);
+    this.cell_changed(this.keycursor);
+  }
+
+  puzzle_data.prototype.handleEraseKey = function() {
+    if (this.cells[this.keycursor].fixed) return;
+    this._IGG_handleDrag(this.itog(this.keycursor), -1);
+  }
+
+  puzzle_data.prototype.handleNumberKey = function(keychar) {
+    if (this.cells[this.keycursor].fixed) return;
+    if (this.palette_count.count(keychar) == 0) return;
+    this._IGG_handleDrag(this.itop(keychar-1), this.itog(this.keycursor));
+  }
+
+  puzzle_data.prototype.handleKeyPress = function(keynum, keychar) {
+    if (this.keycursor == -1) return;
+    if (keynum == 38 || keynum == 104 || keychar == "I") {
+      this.move_cursor_dir(0);
+      return;
+    }
+    if (keynum == 39 || keynum == 102 || keychar == "L") {
+      this.move_cursor_dir(1);
+      return;
+    }
+    if (keynum == 40 || keynum == 98 || keychar == "K") {
+      this.move_cursor_dir(2);
+      return;
+    }
+    if (keynum == 37 || keynum == 100 || keychar == "J") {
+      this.move_cursor_dir(3);
+      return;
+    }
+    if (keynum == 46 || keychar == " " || keychar == "0") {
+      this.handleEraseKey();
+      return;
+    }
+    if (keychar >= 1 && keychar <= this.size) {
+      this.handleNumberKey(keychar);
+      return;
+    }
   }
 
   puzzle_data.prototype._IGG_handleDrag = function(source, target) {
@@ -1070,6 +1163,23 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     pref_controller.new_puzzle_request();
   }
 
+  function pass_key_press(e) {
+    var keynum;
+    if (window.event) {
+      keynum = e.keyCode;
+    } else if (e.which) {
+      keynum = e.which;
+    }
+    keychar = String.fromCharCode(keynum).toUpperCase();
+    puzzle.handleKeyPress(keynum, keychar);
+  }
+
+  if (document.addEventListener) {
+    document.addEventListener("keyup", pass_key_press, false);
+  } else {
+    document.attachEvent("onkeyup", pass_key_press);
+  }
+
 
 //////////////////////////
 
@@ -1110,7 +1220,8 @@ puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 <span id="instructions" style="display:none;font-size:x-small">
    Drag numbers from the palette into the grid.  The lights will
    turn <span style="color:#008000">yellow-green</span> or <span style="color:#FF0000">red</span>
-   depending on whether that row, column, or region is satisfied.
+   depending on whether that row, column, or region is satisfied.  You can also click on a blank space on the grid to pull up a cursor; control
+   the cursor with the arrow keys (or the IJKL keys), write a number in the cursor with the number keys, and erase by typing 0.
 </span>
 <BR>
 
@@ -1130,7 +1241,7 @@ puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
   </td></tr><tr><td>
 <!--
     <input id="sizechange" style="font-size:9" type="button" value="Shrink"
-     onclick="puzzle__MODULE_ID__.changeSize();">
+     onclick="puzzle.changeSize();">
 -->
   </td></tr>
   </table>
@@ -1177,16 +1288,17 @@ puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 
 <span id="showversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;font-size:x-small"
    onclick="_gel('version').style.display='inline';_gel('showversion').style.display='none';_gel('hideversion').style.display='inline';_IG_AdjustIFrameHeight()">
-Version 3.1</span>
+Version 4.0</span>
 <span id="hideversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none;font-size:x-small"
    onclick="_gel('version').style.display='none';_gel('showversion').style.display='inline';_gel('hideversion').style.display='none';_IG_AdjustIFrameHeight()">
-Version 3.1</span>
+Version 4.0</span>
 <span id="version" style="display:none;font-size:x-small">
 <BR>   v1.0 : initial release.
 <BR>   v2.0 : Created 'homepage', changed message.
 <BR>   v3.0 : Added simple user authentication and a "name" that can be changed.
 <BR>   v3.1 : Teeny problem with name not updated due to server lag fixed.
 <BR>   v3.2 : Rachel Emerson sez:  "Numbers are not letters and letters are not numbers. Why are the numbers referred to as letters in the instructions?"  Fixed!
+<BR>   v4.0 : Added keyboard shortcuts.
 </span>
 
 </FONT>
