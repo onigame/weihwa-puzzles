@@ -123,12 +123,16 @@ class Javascript(webapp.RequestHandler):
     template_values = {
         'server_urls': ServerUrls(),
       }
+    self.response.headers['Content-Type'] = 'text/javascript'
     try:
       path = os.path.join(os.path.dirname(__file__), 'js/' + filename)
-      self.response.headers['Content-Type'] = 'text/javascript'
       self.response.out.write(template.render(path, template_values))
     except TemplateDoesNotExist:
-      WriteBadPage('cannot find the js with name ' + filename)
+      path = os.path.join(os.path.dirname(__file__), 'staticjs/' + filename)
+      try:
+        self.response.out.write(open(path, 'r').read())
+      except IOError:
+        WriteBadPage('cannot find the js with name ' + filename)
 
 class GadgetXML(webapp.RequestHandler):
   def get(self, filename):
@@ -137,12 +141,16 @@ class GadgetXML(webapp.RequestHandler):
         'random_new_user_id': self.RandomUserId(),
         'random_username': self.RandomUserName(),
       }
+    self.response.headers['Content-Type'] = 'text/xml'
+    path = os.path.join(os.path.dirname(__file__), 'gadgets/' + filename)
     try:
-      path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
-      self.response.headers['Content-Type'] = 'text/xml'
       self.response.out.write(template.render(path, template_values))
     except TemplateDoesNotExist:
-      WriteBadPage('cannot find the xml with name ' + filename)
+      path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
+      try:
+        self.response.out.write(open(path, 'r').read())
+      except IOError:
+        WriteBadPage('cannot find the xml with name ' + filename)
   def RandomUserId(self):
     # This is a temporary placeholder until we can get real OpenSocial stuff
     # 15 random alphabetic characters should handle about 40 billion users
@@ -260,7 +268,7 @@ class PuzzleDataWriter(webapp.RequestHandler):
     if olddata == '':
       logger.LogOneEntry("Server: User %s acquired data %s" % (userpuzzledata.key().name(), userpuzzledata.data))
     else:
-      logger.LogOneEntry("Server: User %s changed data from %s to %s" % (userpuzzledata.key().data(), olddata, userpuzzledata.data))
+      logger.LogOneEntry("Server: User %s changed data from %s to %s" % (userpuzzledata.key().name(), olddata, userpuzzledata.data))
 
 class PuzzleDataReader(webapp.RequestHandler):
   def get(self):
@@ -302,21 +310,16 @@ def profile_main():
   import cProfile, pstats, StringIO
   prof = cProfile.Profile()
   prof = prof.runctx("real_main()", globals(), locals())
-  print "<!--"
+  print "/* <!--"
   stats = pstats.Stats(prof)
   stats.sort_stats("time")  # Or cumulative
   stats.print_stats(800)  # 80 = how many to print
   # The rest is optional.
   # stats.print_callees()
   # stats.print_callers()
-  print "-->"
+  print " --> */"
 
-try:
-  import cProfile
-except ImportError:
-  main = real_main;
-else:
-  main = profile_main;
+main = real_main;
 
 if __name__ == "__main__":
   main()
