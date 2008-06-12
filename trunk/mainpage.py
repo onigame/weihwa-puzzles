@@ -134,6 +134,15 @@ class Javascript(webapp.RequestHandler):
       except IOError:
         WriteBadPage('cannot find the js with name ' + filename)
 
+class StaticJavascript(webapp.RequestHandler):
+  def get(self, filename):
+    self.response.headers['Content-Type'] = 'text/javascript'
+    try:
+      path = os.path.join(os.path.dirname(__file__), 'staticjs/' + filename)
+      self.response.out.write(open(path, 'r').read())
+    except IOError:
+      WriteBadPage('cannot find the js with name ' + filename)
+
 class GadgetXML(webapp.RequestHandler):
   def get(self, filename):
     template_values = {
@@ -167,6 +176,15 @@ class GadgetXML(webapp.RequestHandler):
        + random.choice(list(string.digits))
        + random.choice(list(string.digits))
     )
+
+class StaticGadgetXML(webapp.RequestHandler):
+  def get(self, filename):
+    self.response.headers['Content-Type'] = 'text/xml'
+    path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
+    try:
+      self.response.out.write(open(path, 'r').read())
+    except IOError:
+      WriteBadPage('cannot find the xml with name ' + filename)
 
 class GadgetHTML(webapp.RequestHandler):
   def get(self, filename):
@@ -289,7 +307,9 @@ def real_main():
                                         ('/gadgets/test.xml', TestXML),
                                         ('/gadgets/test2.xml', Test2XML),
                                         ('/js/(.*\.js)', Javascript),
+                                        ('/staticjs/(.*\.js)', StaticJavascript),
                                         ('/gadgets/(.*\.xml)', GadgetXML),
+                                        ('/staticgadgets/(.*\.xml)', StaticGadgetXML),
                                         ('/gadgets/(.*\.html)', GadgetHTML),
                                         ('/datastore/message-write', logger.LogWriter),
                                         ('/datastore/message-all', logger.LogReader),
