@@ -7,11 +7,5 @@ handlers:
 - url: /images
   static_dir: images
 
-- url: /staticgadgets
-  static_dir: staticgadgets
-
-- url: /staticjs
-  static_dir: staticjs
-
 - url: /.*
   script: mainpage.py
