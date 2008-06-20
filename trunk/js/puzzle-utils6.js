@@ -128,6 +128,104 @@ function Multiset() {
   }
 }
 
+  ///////////////////////////////////////////////
+  // code to handle logging on server
+
+  function _Log_addMessage(content) {
+    var url = '{{server_urls.server_url}}datastore/message-write?content='
+              + encodeURIComponent('Client: ' + content);
+    _IG_FetchContent(url, function(result) { }, { refreshInterval: 0 });
+  }
+
+  ///////////////////////////////////////////////
+
+  // code to handle user ID and names.
+
+  var curname = '';
+
+  function _UserID_current() {
+    var prefs = new _IG_Prefs();
+    var id = prefs.getString("user_id");
+    if (id == '') {
+      // this user needs a new id.
+      id = '{{random_new_user_id}}';
+      prefs.set("user_id", id);
+    }
+    return id;
+  }
+
+  function _UserID_setName() {
+    var name = _gel('name_entry').value;
+    if (name.match(/^[A-Za-z0-9\-\_]+$/)) {
+      var url = '{{server_urls.server_url}}datastore/writename?id=' + _UserID_current()
+          + '&name=' + name;
+      curname = name;
+      _gel("username").innerHTML = curname;
+      _IG_FetchContent(url, function() {
+        _gel("name_entry").style.display = "none";
+        _gel("username").style.display = "inline";
+        _gel("name_msg").innerHTML = "New name accepted!";
+        _gel("name_button").value = "Change My Nickname";
+        _gel("name_button").onclick = _UserID_prepareNameChange;
+        _Log_addMessage('user ' + _UserID_current() + ' changed their name to ' + curname);
+      }, { refreshInterval: 0 });
+    } else {
+      _gel("name_msg").innerHTML = "Only letters and numbers please";
+    }
+  }
+
+  function _UserID_prepareNameChange() {
+    _gel("username").style.display = "none";
+    _gel("name_msg").innerHTML = "";
+    _gel("name_entry").style.display = "inline";
+    _gel("name_entry").value = '{{random_username}}';
+    _gel("name_button").value = "This one's good";
+    _gel("name_button").onclick = _UserID_setName;
+  }
+
+  function _UserID_updateName(responseText) {
+    if (responseText == '') {
+      _gel('name_entry').value = '{{random_username}}';
+      _UserID_setName();
+    } else {
+      curname = responseText;
+      _gel('username').innerHTML = curname;
+    }
+  }
+
+  function _UserID_getName() {
+    var url = '{{server_urls.server_url}}datastore/getname?id=' + _UserID_current();
+    _IG_FetchContent(url, _UserID_updateName, { refreshInterval: 0 });
+  }
+
+  function _UserID_getUI() {
+    var div = document.createElement('div');
+    div.style.fontSize = '10pt';
+    addText(div, 'Your Nickname is:');
+    var tmp = addElement(div, 'span', [
+      'id', 'username',
+    ]);
+    tmp.style.display = 'inline';
+    addText(tmp, '[querying server]');
+    tmp = addElement(div, 'input', [
+      'id', 'name_entry',
+      'type', 'text',
+      'size', '20',
+    ]);
+    tmp.style.display = 'none';
+    addElement(div, 'input', [
+      'id', 'name_button',
+      'type', 'button',
+      'value', 'Change My Nickname',
+      'onclick', '_UserID_prepareNamechange();'
+    ]);
+    addElement(div, 'br');
+    addElement(div, 'span', [
+      'id', 'name_msg'
+    ]);
+    return div;
+  }
+
 ///////////////////////////////////////
 //  This object stores game state.
 //  Right now it uses app engine stuff.
@@ -144,32 +242,32 @@ function Multiset() {
   function _IG_game_state() {
     this.cur_puz = 0;
   }
-                      
-  function _IG_puzzle_pref_controller(module_id, user_id, navigation, callback) {
-    this.user_id = user_id;
+
+  function _IG_puzzle_pref_controller(module_id, navigation, callback) {
+    this.user_id = _UserID_current();
     this.game_state = null;
     this.navigation = navigation;
     this.getPrefs_callback = null;
-                      
+
     this.num_puzzles = 12;
     this.box_height = 5;
     this.box_width = 5;
     this.rows = 3;
     this.cols = 4;
   }
-                      
+
   _IG_puzzle_pref_controller.prototype.get_color = function(puz_num) {
     return "#FF0000";
   }
-                      
+
   _IG_puzzle_pref_controller.prototype.get_current_color = function() {
     return "#0000FF";
   }
-                      
+
   _IG_puzzle_pref_controller.prototype.get_num_solved = function() {
     return 0;
   }
-                      
+
   _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
   }
 
@@ -224,7 +322,7 @@ function Multiset() {
     }
   }
 
-                      
+
   _IG_puzzle_pref_controller.prototype.resetPrefs = function() {
     this.game_state = new _IG_game_state();
     this.setPrefs();
@@ -234,7 +332,7 @@ function Multiset() {
       this.update_navbar();
     }
   }
-                      
+
   _IG_puzzle_pref_controller.prototype.updatePrefDisplay = function() {
     for (var i=0; i<this.num_puzzles; i++) {
       if (_gel("puzzle_status_" + i))
@@ -247,20 +345,199 @@ function Multiset() {
     this.extra_update_state(this.game_state);
     _IG_AdjustIFrameHeight();
   }
-                      
-  _IG_puzzle_pref_controller.prototype.getTableHTML = function() {
-    var answer = "";
-    answer += "<table border=0 cellpadding=0 cellspacing=0>";
+
+  _IG_puzzle_pref_controller.prototype.getTableUI = function() {
+    var table = document.createElement('table');
+    table.border = '0';
+    table.cellPadding = '0';
+    table.cellSpacing = '0';
     for (var row = 0; row < this.rows; row++) {
+      var row_o = addElement(table, 'tr');
+      for (var col = 0; col < this.cols; col++) {
+        var idnum = row * this.cols + col;
+        var col_o = addElement(row_o, 'td', [
+          'id', 'puzzle_status_' + idnum
+        ]);
+        col_o.style.height = this.box_height;
+        col_o.style.width = this.box_width;
+        addElement(col_o, 'img', [
+          'src', 'http://www.google.com/ig/images/cleardot.gif'
+        ]);
+      }
+    }
+    return table;
+  }
+
+  _IG_puzzle_pref_controller.prototype.update_navbar = function() {
+    if (this.game_state.cur_puz == this.nav_puz) {
+      _gel("newp").disabled = true;
+      _gel("newp").value = "On Puzzle " + (this.game_state.cur_puz*1+1) + ((this.game_state.puz_solved[this.game_state.cur_puz] == 1) ? "*" : "");
+    } else {
+      _gel("newp").disabled = false;
+      _gel("newp").value = "Get Puzzle " + (this.nav_puz*1+1) + ((this.game_state.puz_solved[this.nav_puz] == 1) ? "*" : "");
+    }
+    _gel("puznum").innerHTML = (this.game_state.cur_puz*1+1) + ((this.game_state.puz_solved[this.game_state.cur_puz] == 1) ? "*" : "");
+    var possible_vals = new Array(1, 10, 50);
+    for (var i=0; i < possible_vals.length; ++i) {
+      var v = possible_vals[i];
+      if (_gel("levp" + v)) {
+        _gel("levp" + v).disabled = (this.nav_puz >= this.game_state.puz_count - v);
+      }
+      if (_gel("levm" + v)) {
+        _gel("levm" + v).disabled = (this.nav_puz < v);
+      }
+    }
+    _IG_AdjustIFrameHeight();
+  }
+
+  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+    this.nav_puz += amount;
+    if (this.nav_puz < 0) this.nav_puz = 0;
+    if (this.nav_puz > this.game_state.puz_count) this.nav_puz = this.game_state.puz_count;
+    this.update_navbar();
+  }
+
+///////////////////////////////////////
+//  This object stores per-puzzle state (or actually any substate that is keyed
+//  by user and data).
+//  Right now it uses app engine stuff.
+//  It's rather tailored to the puzzle module, but parts of it are generalizable.
+//
+//  To use, you should override _IG_game_state to contain your custom data
+//  (but make sure to keep this.cur_puz if you want navigation!)
+//  also, don't put any heavyweight functions in it, since it will go through JSON.
+//  
+//  Override _IG_puzzle_pref_controller.prototype.get_color = function(puz_num)
+//  as needed for the display color, and also add other functions to manipulate
+//  yadda yadda 
+
+/*
+  function _IG_game_state() {
+    this.cur_puz = 0;
+  }
+
+  function _IG_puzzle_pref_controller(module_id, user_id, navigation, callback) {
+    this.user_id = user_id;
+    this.game_state = null;
+    this.navigation = navigation;
+    this.getPrefs_callback = null;
+
+    this.num_puzzles = 12;
+    this.box_height = 5;
+    this.box_width = 5;
+    this.rows = 3;
+    this.cols = 4;
+  }
+
+  _IG_puzzle_pref_controller.prototype.get_color = function(puz_num) {
+    return "#FF0000";
+  }
+
+  _IG_puzzle_pref_controller.prototype.get_current_color = function() {
+    return "#0000FF";
+  }
+
+  _IG_puzzle_pref_controller.prototype.get_num_solved = function() {
+    return 0;
+  }
+
+  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+  }
+
+  _IG_puzzle_pref_controller.prototype.getPrefs = function() {
+    var url = '{{server_urls.server_url}}datastore/getpuzzledata?id='
+              + this.user_id;
+    _IG_FetchContent(url, _IG_Callback(this.getPrefsCallbackWrapper, this), { refreshInterval: 0 });
+  }
+
+  _IG_puzzle_pref_controller.prototype.getPrefsCallbackWrapper = function(result, original) {
+    original.getPrefsCallback(result);
+  }
+
+  _IG_puzzle_pref_controller.prototype.getPrefsCallback = function(result) {
+    if (result == null || result == "") {
+      this.game_state = new _IG_game_state();
+    } else {
+      this.game_state = result.parseJSON();
+    }
+    if (!this.game_state) {
+      this.game_state = new _IG_game_state();
+    }
+    if (this.navigation) {
+      this.nav_puz = this.game_state.cur_puz;
+      this.update_navbar();
+    }
+    this.updatePrefDisplay();
+    if (this.getPrefs_callback) {
+      this.getPrefs_callback();
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.setPrefs = function() {
+    if (this.navigation) {
+      this.update_navbar();
+    }
+
+    var url = '{{server_urls.server_url}}datastore/writepuzzledata?id='
+              + this.user_id + '&data='
+              + encodeURIComponent(ObjectToJSONString(this.game_state));
+    pref_controller_temp = this;
+    _IG_FetchContent(url, _IG_Callback(this.setPrefsCallbackWrapper, this), { refreshInterval: 0 });
+  }
+
+  _IG_puzzle_pref_controller.prototype.setPrefsCallbackWrapper = function(result, original) {
+    original.setPrefsCallback(result);
+  }
+
+  _IG_puzzle_pref_controller.prototype.setPrefsCallback = function(result) {
+    if (this.navigation) {
+      this.update_navbar();
+    }
+  }
+
+
+  _IG_puzzle_pref_controller.prototype.resetPrefs = function() {
+    this.game_state = new _IG_game_state();
+    this.setPrefs();
+    this.updatePrefDisplay();
+    if (this.navigation) {
+      this.nav_puz = this.game_state.cur_puz;
+      this.update_navbar();
+    }
+  }
+
+  _IG_puzzle_pref_controller.prototype.updatePrefDisplay = function() {
+    for (var i=0; i<this.num_puzzles; i++) {
+      if (_gel("puzzle_status_" + i))
+        _gel("puzzle_status_" + i).style.backgroundColor = this.get_color(i);
+    }
+    if (this.navigation) {
+      if (_gel("puzzle_status_" + i))
+        _gel("puzzle_status_" + i).style.backgroundColor = "#0000FF";
+    }
+    this.extra_update_state(this.game_state);
+    _IG_AdjustIFrameHeight();
+  }
+
+  _IG_puzzle_pref_controller.prototype.getTableUI = function() {
+    var answer = document.createElement('table');
+    answer.border = '0';
+    answer.cellpadding = '0';
+    answer.cellspacing = '0';
+    for (var row = 0; row < this.rows; row++) {
+      var row_o = addElement(answer, 'tr');
       answer += "<tr>";
       for (var col = 0; col < this.cols; col++) {
         var idnum = row * this.cols + col;
-        answer += '<td id="puzzle_status_' + idnum + '" style="height:' + this.box_height + ';width:' + this.box_width
-                + '"><img src="http://www.google.com/ig/images/cleardot.gif"></td>';
+        var col_o = addElement(answer, 'td', [
+          'id', 'puzzle_status_' + idnum,
+          'style', 'height:' + this.box_height + ';width:' + this.box_width
+        ]);
+        addElement(col_o, 'img', [
+          'src', 'http://www.google.com/ig/images/cleardot.gif'
+        ]);
       }
-      answer += "</tr>";
     }
-    answer += "</table>";
     return answer;
   }
 
@@ -285,11 +562,11 @@ function Multiset() {
     }
     _IG_AdjustIFrameHeight();
   }
-                                  
+
   _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
     this.nav_puz += amount;
     if (this.nav_puz < 0) this.nav_puz = 0;
     if (this.nav_puz > this.game_state.puz_count) this.nav_puz = this.game_state.puz_count;
     this.update_navbar();
   }
-
+*/

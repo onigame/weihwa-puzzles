@@ -11,7 +11,9 @@ from google.appengine.ext.webapp import template
 from datetime import date
 from django.template import TemplateDoesNotExist
 
-random.seed(None)
+def hexlify(b):
+  return "%02x"*len(b) % tuple(map(ord, b))
+random.seed(long(hexlify(os.urandom(100)), 16))
 
 class PuzzleGadget:
   def __init__(self, year, month, mdate, display_name, short_name):
