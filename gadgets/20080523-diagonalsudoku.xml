@@ -46,6 +46,8 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 ></A>
 </div>
 
+<script type="text/javascript" src="{{server_urls.server_url}}js/igoogle_draglib.js"></script>
+<script type="text/javascript" src="{{server_urls.server_url}}js/igoogle_gridlib.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/puzzle-utils6.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/json2.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/general-lib.js"></script>
@@ -568,14 +570,19 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   }
 
   puzzle_data.prototype.blank = function() {
-    if (pcborder == "#FFFFFF") return '';
-    return '<img src="' + this.prefix + 'blank.g'+'if" alt="-">';
-    // Note: "gif" is split because of iGoogle bug, should be fixed by 6/01
+    if (pcborder == "#FFFFFF")
+      return document.createTextNode("");
+    var result = new Image();
+    result.alt = '-';
+    result.src = this.prefix + 'blank.gif';
+    return result;
   }
 
   puzzle_data.prototype.black = function() {
-    return '<img src="' + this.prefix + 'black.g'+'if" alt="-">';
-    // Note: "gif" is split because of iGoogle bug, should be fixed by 6/01
+    var result = new Image();
+    result.alt = '-';
+    result.src = this.prefix + 'black.gif';
+    return result;
   }
 
   puzzle_data.prototype.get_background_color = function(index) {
@@ -636,18 +643,16 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   }
 
   puzzle_data.prototype.get_mini_image = function (region, value, title) {
-    var answer = '';
+    var answer = new Image(8, 8);
+    answer.title = title;
     var c = region.count(value);
     if (c > 1) {
-      answer += '<img src="' + this.prefix + 'sudoku' + (value + 1) + 'red.p' + 'ng' + '"';
+      answer.src = this.prefix + 'sudoku' + (value + 1) + 'red.png';
     } else if (c == 1) {
-      answer += '<img src="' + this.prefix + 'sudokublank.p' + 'ng' + '"';
+      answer.src = this.prefix + 'sudokublank.png';
     } else {
-      answer += '<img src="' + this.prefix + 'sudoku' + (value + 1) + 'black.p' + 'ng' + '"';
+      answer.src = this.prefix + 'sudoku' + (value + 1) + 'black.png';
     }
-    answer += ' title="' + title + '"';
-    answer += ' width="8px" height="8px">';
-    answer += '</img>';
     return answer;
   }
 
@@ -662,135 +667,147 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   }
 
   puzzle_data.prototype.get_region_info = function(region) {
-    var answer = '';
-    answer += '<td align="middle" valign="center">';
+    var answer = null;
     if (region.completed()) {
-      answer += '<td align="middle" valign="center">';
-      answer += '<img src="' + this.prefix + 'green.p' + 'ng"';
-      answer += ' title="' + this.get_title(region) + '"';
-      answer += ' width="24px" height="24px">';
-      answer += '</img>';
-      answer += '</td>';
+      img = new Image(24,24);
+      img.src = this.prefix + 'green.p' + 'ng';
+      img.title = this.get_title(region);
+      return img;
     } else {
-      answer += '<table cellpadding=0px cellspacing=0px border=0px>';
- 
+      table = document.createElement('table');
+      table.cellPadding = 0;
+      table.cellSpacing = 0;
+      table.border = 0;
       for (var i = 0; i < 3; ++i) {
-        answer += '<tr>';
+        var tr = addElement(table, 'tr');
         for (var j = 0; j < 3; ++j) {
-          answer += '<td align="middle" valign="center">';
-          answer += this.get_mini_image(region, i*3+j, this.get_title(region));
-          answer += '</td>';
+          td = addElement(tr, 'td', (
+            'align',  'middle',
+            'valign', 'center'
+          ));
+          td.appendChild(this.get_mini_image(region, i*3+j, this.get_title(region)));
         }
-        answer += '</tr>';
       }
-      answer += '</table>';
+      return table;
     }
-    answer += '</td>';
-    return answer;
   }
 
-  puzzle_data.prototype.palette_html = function(value, count) {
-    var answer = '';
+  puzzle_data.prototype.palette_object = function(value, count) {
     var letter = letters[value];
-    if (count == 0) {
-      color = "#C0C0C0";
-      answer += '<span style="cursor:default;font-size:16pt;color:' + color + '" title="' + letter + ' (gone)">';
-      answer += letter;
-      if (this.tiny) {
-        answer += '<br><div style="align:center;font-size:7pt">(0)</div>';
-      } else {
-        answer += '<br><div style="align:center;font-size:7pt">(gone)</div>';
+    var table = document.createElement('table');
+    table.cellPadding = 0;
+    table.cellSpacing = 0;
+    table.border = 0;
+    for (var i = 0; i < 3; ++i) {
+      var tr = addElement(table, 'tr');
+      for (var j = 0; j < 3; ++j) {
+        td = addElement(tr, 'td', (
+          'align',  'middle',
+          'valign', 'center'
+        ));
+        td.appendChild(this.get_mini_image(this.box_regions[i*3+j],
+                                           value, count + " left"));
       }
-      answer += '</span>';
-    } else {
-      // answer += '<span style="font-size:16pt" title="' + letter + ' (' + count + ' left)">';
-      answer += '<span style="font-size:16pt" title="' + letter + ' (' + count + ')">';
-      answer += letter;
-      if (this.tiny) {
-        answer += '<br><div style="align:center;font-size:7pt">(' + count + ')</div>';
-      } else {
-        // answer += '<br><div style="align:center;font-size:7pt">(' + count + ' left)</div>';
-        answer += '<br><div style="align:center;font-size:7pt">(' + count + ')</div>';
-      }
-      answer += '</span>';
     }
-    return answer;
+    return table;
   }
 
   puzzle_data.prototype._IGG_getNormalView = function(index) {
-    if (index == this.gridarea + this.size * 2 + 1) {
+    if (index == this.gridarea + this.size * 2 + 1)
       return this.get_region_info(this.diag_regions[1]);
-    } else if (index == this.gridarea + this.size * 2) {
+    if (index == this.gridarea + this.size * 2)
       return this.get_region_info(this.diag_regions[0]);
-    } else if (index >= this.gridarea + this.size) {
+    if (index >= this.gridarea + this.size) 
       return this.get_region_info(this.box_regions[index - this.gridarea - this.size]);
-    } else if (index >= this.gridarea) {
+    if (index >= this.gridarea) {
       var number = index - this.gridarea;
-      return this.palette_html(number, this.palette_count.count(number));
+      return this.palette_object(number, this.palette_count.count(number));
+    }
+
+    var g_row = Math.floor(index / this.gridsize);
+    var g_col = index % this.gridsize;
+    if (g_row == this.gridsize-1 && g_col == this.gridsize-1)  // corner
+      return document.createTextNode("");
+    if (g_row == this.gridsize-1 && g_col % 2 == 0)
+      return document.createTextNode("");
+    if (g_row == this.gridsize-1)
+      return this.get_region_info(this.col_regions[(g_col - 1)/2]);
+    if (g_col == this.gridsize-1 && g_row % 2 == 0)
+      return document.createTextNode("");
+    if (g_col == this.gridsize-1)
+      return this.get_region_info(this.row_regions[(g_row - 1)/2]);
+
+    if (g_row % 2 == 0 || g_col % 2 == 0)
+      return this.blank();
+
+    var row = (g_row - 1) / 2;
+    var col = (g_col - 1) / 2;
+    var index = row * this.size + col;
+
+    var value = this.cells[index].get_value();
+    var fixed = this.cells[index].fixed;
+    if (value < 0) {
+      var allowed = this.cells[index].allowed_letters();
+      var item = this.get_raw_cell("?", index);
+      item.title = (this.cells[index].allowed_letters() == "") ?
+                   "No letters possible!" :
+                   ("Could be: " + allowed);
+      item.style.color = '#FFFFFF';
+      return item;
     } else {
-      var g_row = Math.floor(index / this.gridsize);
-      var g_col = index % this.gridsize;
-      if (g_row == this.gridsize-1 && g_col == this.gridsize-1) {
-        return "&nbsp;";
-      } else if (g_row == this.gridsize-1 && g_col % 2 == 0) {
-        return "";
-      } else if (g_row == this.gridsize-1) {
-        return this.get_region_info(this.col_regions[(g_col - 1)/2]);
-      } else if (g_col == this.gridsize-1 && g_row % 2 == 0) {
-        return "";
-      } else if (g_col == this.gridsize-1) {
-        return this.get_region_info(this.row_regions[(g_row - 1)/2]);
-      } else if (g_row % 2 == 0 || g_col % 2 == 0) {
-        return this.blank();
-      } else {
-        var row = (g_row - 1) / 2;
-        var col = (g_col - 1) / 2;
-        return this.get_cell_html(row * this.size + col);
-      }
+      var item = this.get_raw_cell(letters[value], index);
+      item.title = fixed ? 'Given at start' : 'Placed by you';
+      item.style.color = fixed ? '#008000' : pcborder;
+      item.style.fontWeight = 'bold';
+      item.style.cursor = fixed ? 'default' : 'pointer,hand';
+      return item;
     }
   }
 
-  puzzle_data.prototype._IGG_getSourceView = function(g_index) {
+  puzzle_data.prototype._IGG_getSourceViewObject = function(g_index) {
     var pos = g_index - this.gridarea;
     if (pos >= 0 && pos < this.size) {
-      return this.palette_html(pos, this.palette_count.count(pos) - 1);
+      return this.palette_object(pos, this.palette_count.count(pos) - 1);
     }
     var index = this.gtoi(g_index);
     if (index < 0) return;
-    return this.get_raw_cell_html("", "?", "#FFFFFF", false, !this.cells[index].fixed, index);
+    var item = this.get_raw_cell('?', index);
+    item.style.color = "#FFFFFF";
+    if (!this.cells[index].fixed) item.style.cursor = 'pointer,hand';
+    return item;
   }
 
   puzzle_data.prototype._IGG_getTargetView = function(target, source) {
     var pos = target - this.gridarea;
     if (pos >= 0 && pos < this.size) {
-      return this.palette_html(pos, this.palette_count.count(pos) + 1);
+      return this.palette_object(pos, this.palette_count.count(pos) + 1);
     }
     var value = source - this.gridarea;
     if (value < 0 || value >= this.size) {
       value = this.value_at(source);
     }
-    return this.get_raw_cell_html("", letters[value], "#D0D0D0", true, true, index);
+    var item = this.get_raw_cell(letters[value], this.gtoi(target));
+    item.style.color = "#D0D0D0";
+    item.style.fontWeight = 'bold';
+    item.style.cursor = 'pointer,hand';
+    return item;
   }
 
-  puzzle_data.prototype.get_raw_cell_html = function(title, value, color, is_bold, is_draggable, index) {
-    var bold = (is_bold) ? ";font-weight:bold" : "";
-    var cursor = (is_draggable) ? "cursor:pointer;cursor:hand;" : "cursor:default;";
-    var background = (index == this.keycursor) ? "background-color:#808080;" : "";
-    return '<span title="' + title + '" style="text-align:center;' + cursor + 'font-size:16pt;color:' + color + bold 
-         + ';' + background + '" onclick="puzzle.handleClick(' + index + ')">' + value + '</span>';
-  }
+  puzzle_data.prototype.get_raw_cell = function(value, index) {
+    var result = document.createElement("span");
+    result.style.textAlign = 'center';
+    result.style.cursor = 'default';
+    result.style.fontSize = '16pt';
+    if (index == this.keycursor) result.style.backgroundColor = '#808080';
+    result.onclick = 'puzzle.handleClick(' + index + ')';
+    if (document.addEventListener) {
+      result.addEventListener('click', function() {puzzle.handleClick(index)}, false);
+    } else {
+      result.attachEvent('onclick', function() {puzzle.handleClick(index)});
+    }
 
-  puzzle_data.prototype.get_cell_html = function(index) {
-    var value = this.cells[index].get_value();
-    var fixed = this.cells[index].fixed;
-    if (value < 0) {
-      var allowed = this.cells[index].allowed_letters();
-      var title = (allowed == "") ? "No letters possible!" : ("Could be: " + allowed);
-      return this.get_raw_cell_html(title, "?", "#FFFFFF", false, false, index);
-    } 
-    var title = fixed ? "Given at start" : "Placed by you";
-    var color = fixed ? "#008000" : pcborder;
-    return this.get_raw_cell_html(title, letters[value], color, true, !fixed, index);
+    addText(result, value);
+    return result;
   }
 
   puzzle_data.prototype.gtoi = function(g_index) {
@@ -828,7 +845,10 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     if (value < 0) {
       value = this.value_at(index);
     }
-    return '<span style="font-size:18pt">' + letters[value] + '</span>';
+    var result = document.createElement('span');
+    result.style.fontSize = '18pt';
+    addText(result, letters[value]);
+    return result;
   }
 
   puzzle_data.prototype.handleClick = function(location) {
@@ -877,7 +897,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   puzzle_data.prototype.handleNumberKey = function(keychar) {
     if (this.cells[this.keycursor].fixed) return;
-    if (this.palette_count.count(keychar) == 0) return;
+    if (this.palette_count.count(keychar-1) == 0) return;
     this._IGG_handleDrag(this.itop(keychar-1), this.itog(this.keycursor));
   }
 
