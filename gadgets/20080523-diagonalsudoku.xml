@@ -46,11 +46,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 ></A>
 </div>
 
+<script type="text/javascript" src="{{server_urls.server_url}}js/general-lib.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/igoogle_draglib.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/igoogle_gridlib.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/puzzle-utils6.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/json2.js"></script>
-<script type="text/javascript" src="{{server_urls.server_url}}js/general-lib.js"></script>
 
 <script type="text/javascript">
 <!-- Javascript begins
@@ -59,76 +59,6 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   // Copyright 2006 Google, Inc.
   // Author: Wei-Hwa Huang
-
-  ///////////////////////////////////////////////
-  // code to handle logging on server
-
-  function logMessage(content) {
-    var url = '{{server_urls.server_url}}datastore/message-write?content='
-              + encodeURIComponent('Client: ' + content);
-    _IG_FetchContent(url, function(result) { }, { refreshInterval: 0 });
-  }
-
-  ///////////////////////////////////////////////
-
-  // code to handle user ID and names.
-
-  var curname = '';
-
-  function current_user_ID() {
-    var prefs = new _IG_Prefs();
-    var id = prefs.getString("user_id");
-    if (id == '') {
-      // this user needs a new id.
-      id = '{{random_new_user_id}}';
-      prefs.set("user_id", id);
-    }
-    return id;
-  } 
-
-  function setName() {
-    var name = _gel('name_entry').value;
-    if (name.match(/^[A-Za-z0-9\-\_]+$/)) {
-      var url = '{{server_urls.server_url}}datastore/writename?id=' + current_user_ID() 
-          + '&name=' + name;
-      curname = name;
-      _gel("username").innerHTML = curname;
-      _IG_FetchContent(url, function() {
-        _gel("name_entry").style.display = "none";
-        _gel("username").style.display = "inline";
-        _gel("name_msg").innerHTML = "New name accepted!";
-        _gel("name_button").value = "Change My Nickname";
-        _gel("name_button").onclick = prepareNameChange;
-        logMessage('user ' + current_user_ID() + ' changed their name to ' + curname);
-      }, { refreshInterval: 0 });
-    } else {
-      _gel("name_msg").innerHTML = "Only letters and numbers please";
-    }
-  }
-
-  function prepareNameChange() {
-    _gel("username").style.display = "none";
-    _gel("name_msg").innerHTML = "";
-    _gel("name_entry").style.display = "inline";
-    _gel("name_entry").value = '{{random_username}}';
-    _gel("name_button").value = "This one's good";
-    _gel("name_button").onclick = setName;
-  }
-
-  function updateName(responseText) {
-    if (responseText == '') {
-      _gel('name_entry').value = '{{random_username}}';
-      setName();
-    } else {
-      curname = responseText;
-      _gel("username").innerHTML = curname;
-    }
-  }
-
-  function getName() {
-    var url = '{{server_urls.server_url}}datastore/getname?id=' + current_user_ID();
-    _IG_FetchContent(url, updateName, { refreshInterval: 0 });
-  }
 
   ///////////////////////////////////////////////
 
@@ -681,10 +611,10 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       for (var i = 0; i < 3; ++i) {
         var tr = addElement(table, 'tr');
         for (var j = 0; j < 3; ++j) {
-          td = addElement(tr, 'td', (
+          td = addElement(tr, 'td', [
             'align',  'middle',
             'valign', 'center'
-          ));
+          ]);
           td.appendChild(this.get_mini_image(region, i*3+j, this.get_title(region)));
         }
       }
@@ -701,10 +631,10 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     for (var i = 0; i < 3; ++i) {
       var tr = addElement(table, 'tr');
       for (var j = 0; j < 3; ++j) {
-        td = addElement(tr, 'td', (
+        td = addElement(tr, 'td', [
           'align',  'middle',
           'valign', 'center'
-        ));
+        ]);
         td.appendChild(this.get_mini_image(this.box_regions[i*3+j],
                                            value, count + " left"));
       }
@@ -966,7 +896,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     if (this.isSolved()) {
       pref_controller.game_state.puz_solved[this.puznum] = 1;
 
-      logMessage('user ' + curname + ' solved puzzle ' + (this.puznum+1));
+      _Log_addMessage('user ' + curname + ' solved puzzle ' + (this.puznum+1));
 
       this.save_progress();
       pref_controller.updatePrefDisplay();
@@ -1006,8 +936,10 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   _IG_RegisterOnloadHandler(start);
 
   function start() {
-    getName();
-    pref_controller = new _IG_puzzle_pref_controller(__MODULE_ID__, current_user_ID(), true, start2);
+    _gel('userid_ui').appendChild(_UserID_getUI());
+    _UserID_getName();
+
+    pref_controller = new _IG_puzzle_pref_controller(__MODULE_ID__, true, start2);
     pref_controller.num_puzzles = 20;
     pref_controller.box_height = 8;
     pref_controller.box_width = 8;
@@ -1015,7 +947,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     pref_controller.cols = 5;
     pref_controller.getPrefs_callback = start2;
 
-    _gel("game_state_html").innerHTML = pref_controller.getTableHTML();
+    _gel("game_state_html").appendChild(pref_controller.getTableUI());
     pref_controller.getPrefs();
   }
   
@@ -1291,14 +1223,7 @@ puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 
 <HR>
 
-<div style="font-size:10pt">
-  Your Nickname is:
-  <span id="username" style="display:inline">[querying server]</span>
-  <input id="name_entry" type="text" size="20" style="display:none"/>
-  <input id="name_button" type="button" value="Change My Nickname" onclick="prepareNameChange();"/>
-  <br>
-  <span id="name_msg"></span>
-</div>
+<span id="userid_ui"></span>
 
 <HR>
 
