@@ -7,5 +7,17 @@ handlers:
 - url: /images
   static_dir: images
 
+- url: /js/puzzle-utils6.js
+  script: mainpage.py
+
+- url: /js
+  static_dir: staticjs
+
+- url: /gadgets/20080523-diagonalsudoku.xml
+  script: mainpage.py
+
+- url: /gadgets
+  static_dir: staticgadgets
+
 - url: /.*
   script: mainpage.py
