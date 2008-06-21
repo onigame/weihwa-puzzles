@@ -143,13 +143,19 @@ function Multiset() {
 
   var curname = '';
 
+  function _UserID_getNewID() {
+    var prefs = new _IG_Prefs();
+    id = '{{random_new_user_id}}';
+    prefs.set("user_id", id);
+    _gel('id_button').disabled = true;
+    setText(_gel('unique_id_msg'),id);
+  }
+
   function _UserID_current() {
     var prefs = new _IG_Prefs();
     var id = prefs.getString("user_id");
     if (id == '') {
-      // this user needs a new id.
-      id = '{{random_new_user_id}}';
-      prefs.set("user_id", id);
+      _UserID_getNewID();
     }
     return id;
   }
@@ -174,6 +180,13 @@ function Multiset() {
     }
   }
 
+  function _UserID_userRequestedNewID() {
+    _gel("name_entry").style.display = "inline";
+    _gel('name_entry').value = _UserID_getName();
+    _UserID_getNewID();
+    _UserID_setName();
+  }
+
   function _UserID_prepareNameChange() {
     _gel("username").style.display = "none";
     _gel("name_msg").innerHTML = "";
@@ -191,6 +204,7 @@ function Multiset() {
       curname = responseText;
       _gel('username').innerHTML = curname;
     }
+    _gel('unique_id_msg').innerHTML = _UserID_current();
   }
 
   function _UserID_getName() {
@@ -217,11 +231,24 @@ function Multiset() {
       'id', 'name_button',
       'type', 'button',
       'value', 'Change My Nickname',
-      'onclick', '_UserID_prepareNamechange();'
+      'onclick', _UserID_prepareNameChange,
     ]);
     addElement(div, 'br');
     addElement(div, 'span', [
       'id', 'name_msg'
+    ]);
+    addElement(div, 'br');
+    addText(div, 'Your Unique ID is:');
+    tmp = addElement(div, 'span', [
+      'id', 'unique_id_msg'
+    ]);
+    addText(tmp, _UserID_current());
+    addElement(div, 'br');
+    addElement(div, 'input', [
+      'id', 'id_button',
+      'type', 'button',
+      'value', 'Change UID to ' + '{{random_new_user_id}}',
+      'onclick', _UserID_userRequestedNewID,
     ]);
     return div;
   }
@@ -243,7 +270,7 @@ function Multiset() {
     this.cur_puz = 0;
   }
 
-  function _IG_puzzle_pref_controller(module_id, navigation, callback) {
+  function _IG_puzzle_pref_controller(module_id, navigation) {
     this.user_id = _UserID_current();
     this.game_state = null;
     this.navigation = navigation;
@@ -271,7 +298,8 @@ function Multiset() {
   _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
   }
 
-  _IG_puzzle_pref_controller.prototype.getPrefs = function() {
+  _IG_puzzle_pref_controller.prototype.getPrefs = function(callback) {
+    this.getPrefs_callback = callback;
     var url = '{{server_urls.server_url}}datastore/getpuzzledata?id='
               + this.user_id;
     _IG_FetchContent(url, _IG_Callback(this.getPrefsCallbackWrapper, this), { refreshInterval: 0 });
@@ -399,174 +427,52 @@ function Multiset() {
 
 ///////////////////////////////////////
 //  This object stores per-puzzle state (or actually any substate that is keyed
-//  by user and data).
-//  Right now it uses app engine stuff.
-//  It's rather tailored to the puzzle module, but parts of it are generalizable.
+//  by user and a string of your choice).
 //
-//  To use, you should override _IG_game_state to contain your custom data
-//  (but make sure to keep this.cur_puz if you want navigation!)
+//  To use, you should override _IGK_state to contain your custom data.
 //  also, don't put any heavyweight functions in it, since it will go through JSON.
-//  
-//  Override _IG_puzzle_pref_controller.prototype.get_color = function(puz_num)
-//  as needed for the display color, and also add other functions to manipulate
-//  yadda yadda 
 
-/*
-  function _IG_game_state() {
-    this.cur_puz = 0;
+  function _IGK_state() {
   }
 
-  function _IG_puzzle_pref_controller(module_id, user_id, navigation, callback) {
-    this.user_id = user_id;
-    this.game_state = null;
-    this.navigation = navigation;
-    this.getPrefs_callback = null;
-
-    this.num_puzzles = 12;
-    this.box_height = 5;
-    this.box_width = 5;
-    this.rows = 3;
-    this.cols = 4;
+  function _IGK_controller() {
+    this.loadState_callback = null;
+    this.saveState_callback = null;
   }
 
-  _IG_puzzle_pref_controller.prototype.get_color = function(puz_num) {
-    return "#FF0000";
+  _IGK_controller.prototype.loadState = function(key, callback) {
+    var url = '{{server_urls.server_url}}datastore/getpuzzledata?'
+              + 'id=' + _UserID_current()
+              + '&key=' + encodeURIComponent(key);
+    this.loadState_callback = callback;
+    _IG_FetchContent(url, _IG_Callback(this.loadStateCallbackWrapper, this), { refreshInterval: 0 });
   }
 
-  _IG_puzzle_pref_controller.prototype.get_current_color = function() {
-    return "#0000FF";
-  }
-
-  _IG_puzzle_pref_controller.prototype.get_num_solved = function() {
-    return 0;
-  }
-
-  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
-  }
-
-  _IG_puzzle_pref_controller.prototype.getPrefs = function() {
-    var url = '{{server_urls.server_url}}datastore/getpuzzledata?id='
-              + this.user_id;
-    _IG_FetchContent(url, _IG_Callback(this.getPrefsCallbackWrapper, this), { refreshInterval: 0 });
-  }
-
-  _IG_puzzle_pref_controller.prototype.getPrefsCallbackWrapper = function(result, original) {
-    original.getPrefsCallback(result);
-  }
-
-  _IG_puzzle_pref_controller.prototype.getPrefsCallback = function(result) {
+  _IGK_controller.prototype.loadStateCallbackWrapper = function(result, original) {
+    var answer = null;
     if (result == null || result == "") {
-      this.game_state = new _IG_game_state();
+      answer = new _IGK_state();
     } else {
-      this.game_state = result.parseJSON();
+      answer = result.parseJSON();
     }
-    if (!this.game_state) {
-      this.game_state = new _IG_game_state();
+    if (!answer) {
+      answer = new _IGK_state();
     }
-    if (this.navigation) {
-      this.nav_puz = this.game_state.cur_puz;
-      this.update_navbar();
-    }
-    this.updatePrefDisplay();
-    if (this.getPrefs_callback) {
-      this.getPrefs_callback();
+    if (original.loadState_callback) {
+      original.loadState_callback(answer);
     }
   }
 
-  _IG_puzzle_pref_controller.prototype.setPrefs = function() {
-    if (this.navigation) {
-      this.update_navbar();
-    }
-
-    var url = '{{server_urls.server_url}}datastore/writepuzzledata?id='
-              + this.user_id + '&data='
-              + encodeURIComponent(ObjectToJSONString(this.game_state));
-    pref_controller_temp = this;
-    _IG_FetchContent(url, _IG_Callback(this.setPrefsCallbackWrapper, this), { refreshInterval: 0 });
+  _IGK_controller.prototype.saveState = function(key, state, callback) {
+    var url = '{{server_urls.server_url}}datastore/writepuzzledata?'
+              + 'id=' + _UserID_current()
+              + '&key=' + encodeURIComponent(key)
+              + '&data=' + encodeURIComponent(ObjectToJSONString(state));
+    this.saveState_callback = callback;
+    _IG_FetchContent(url, _IG_Callback(this.saveStateCallbackWrapper, this), { refreshInterval: 0 });
   }
 
-  _IG_puzzle_pref_controller.prototype.setPrefsCallbackWrapper = function(result, original) {
-    original.setPrefsCallback(result);
+  _IGK_controller.prototype.saveStateCallbackWrapper = function(result, original) {
+    original.saveState_callback(result);
   }
 
-  _IG_puzzle_pref_controller.prototype.setPrefsCallback = function(result) {
-    if (this.navigation) {
-      this.update_navbar();
-    }
-  }
-
-
-  _IG_puzzle_pref_controller.prototype.resetPrefs = function() {
-    this.game_state = new _IG_game_state();
-    this.setPrefs();
-    this.updatePrefDisplay();
-    if (this.navigation) {
-      this.nav_puz = this.game_state.cur_puz;
-      this.update_navbar();
-    }
-  }
-
-  _IG_puzzle_pref_controller.prototype.updatePrefDisplay = function() {
-    for (var i=0; i<this.num_puzzles; i++) {
-      if (_gel("puzzle_status_" + i))
-        _gel("puzzle_status_" + i).style.backgroundColor = this.get_color(i);
-    }
-    if (this.navigation) {
-      if (_gel("puzzle_status_" + i))
-        _gel("puzzle_status_" + i).style.backgroundColor = "#0000FF";
-    }
-    this.extra_update_state(this.game_state);
-    _IG_AdjustIFrameHeight();
-  }
-
-  _IG_puzzle_pref_controller.prototype.getTableUI = function() {
-    var answer = document.createElement('table');
-    answer.border = '0';
-    answer.cellpadding = '0';
-    answer.cellspacing = '0';
-    for (var row = 0; row < this.rows; row++) {
-      var row_o = addElement(answer, 'tr');
-      answer += "<tr>";
-      for (var col = 0; col < this.cols; col++) {
-        var idnum = row * this.cols + col;
-        var col_o = addElement(answer, 'td', [
-          'id', 'puzzle_status_' + idnum,
-          'style', 'height:' + this.box_height + ';width:' + this.box_width
-        ]);
-        addElement(col_o, 'img', [
-          'src', 'http://www.google.com/ig/images/cleardot.gif'
-        ]);
-      }
-    }
-    return answer;
-  }
-
-  _IG_puzzle_pref_controller.prototype.update_navbar = function() {
-    if (this.game_state.cur_puz == this.nav_puz) {
-      _gel("newp").disabled = true;
-      _gel("newp").value = "On Puzzle " + (this.game_state.cur_puz*1+1) + ((this.game_state.puz_solved[this.game_state.cur_puz] == 1) ? "*" : "");
-    } else {
-      _gel("newp").disabled = false;
-      _gel("newp").value = "Get Puzzle " + (this.nav_puz*1+1) + ((this.game_state.puz_solved[this.nav_puz] == 1) ? "*" : "");
-    }
-    _gel("puznum").innerHTML = (this.game_state.cur_puz*1+1) + ((this.game_state.puz_solved[this.game_state.cur_puz] == 1) ? "*" : "");
-    var possible_vals = new Array(1, 10, 50);
-    for (var i=0; i < possible_vals.length; ++i) {
-      var v = possible_vals[i];
-      if (_gel("levp" + v)) {
-        _gel("levp" + v).disabled = (this.nav_puz >= this.game_state.puz_count - v);
-      }
-      if (_gel("levm" + v)) {
-        _gel("levm" + v).disabled = (this.nav_puz < v);
-      }
-    }
-    _IG_AdjustIFrameHeight();
-  }
-
-  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
-    this.nav_puz += amount;
-    if (this.nav_puz < 0) this.nav_puz = 0;
-    if (this.nav_puz > this.game_state.puz_count) this.nav_puz = this.game_state.puz_count;
-    this.update_navbar();
-  }
-*/
