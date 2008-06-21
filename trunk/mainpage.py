@@ -124,6 +124,8 @@ class Javascript(webapp.RequestHandler):
   def get(self, filename):
     template_values = {
         'server_urls': ServerUrls(),
+        'random_new_user_id': self.RandomUserId(),
+        'random_username': self.RandomUserName(),
       }
     self.response.headers['Content-Type'] = 'text/javascript'
     try:
@@ -135,33 +137,6 @@ class Javascript(webapp.RequestHandler):
         self.response.out.write(open(path, 'r').read())
       except IOError:
         WriteBadPage('cannot find the js with name ' + filename)
-
-class StaticJavascript(webapp.RequestHandler):
-  def get(self, filename):
-    self.response.headers['Content-Type'] = 'text/javascript'
-    try:
-      path = os.path.join(os.path.dirname(__file__), 'staticjs/' + filename)
-      self.response.out.write(open(path, 'r').read())
-    except IOError:
-      WriteBadPage('cannot find the js with name ' + filename)
-
-class GadgetXML(webapp.RequestHandler):
-  def get(self, filename):
-    template_values = {
-        'server_urls': ServerUrls(),
-        'random_new_user_id': self.RandomUserId(),
-        'random_username': self.RandomUserName(),
-      }
-    self.response.headers['Content-Type'] = 'text/xml'
-    path = os.path.join(os.path.dirname(__file__), 'gadgets/' + filename)
-    try:
-      self.response.out.write(template.render(path, template_values))
-    except TemplateDoesNotExist:
-      path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
-      try:
-        self.response.out.write(open(path, 'r').read())
-      except IOError:
-        WriteBadPage('cannot find the xml with name ' + filename)
   def RandomUserId(self):
     # This is a temporary placeholder until we can get real OpenSocial stuff
     # 15 random alphabetic characters should handle about 40 billion users
@@ -178,6 +153,31 @@ class GadgetXML(webapp.RequestHandler):
        + random.choice(list(string.digits))
        + random.choice(list(string.digits))
     )
+
+class StaticJavascript(webapp.RequestHandler):
+  def get(self, filename):
+    self.response.headers['Content-Type'] = 'text/javascript'
+    try:
+      path = os.path.join(os.path.dirname(__file__), 'staticjs/' + filename)
+      self.response.out.write(open(path, 'r').read())
+    except IOError:
+      WriteBadPage('cannot find the js with name ' + filename)
+
+class GadgetXML(webapp.RequestHandler):
+  def get(self, filename):
+    template_values = {
+        'server_urls': ServerUrls(),
+      }
+    self.response.headers['Content-Type'] = 'text/xml'
+    path = os.path.join(os.path.dirname(__file__), 'gadgets/' + filename)
+    try:
+      self.response.out.write(template.render(path, template_values))
+    except TemplateDoesNotExist:
+      path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
+      try:
+        self.response.out.write(open(path, 'r').read())
+      except IOError:
+        WriteBadPage('cannot find the xml with name ' + filename)
 
 class StaticGadgetXML(webapp.RequestHandler):
   def get(self, filename):
@@ -275,10 +275,14 @@ class UserPuzzleData(db.Model):
 
 class PuzzleDataWriter(webapp.RequestHandler):
   def get(self):
-    userpuzzledata = UserPuzzleData.get_by_key_name(self.request.get('id'))
+    if (self.request.get('key') == ''):
+      combined_key = self.request.get('id')
+    else:
+      combined_key = self.request.get('id') + '$$' + self.request.get('key')
+    userpuzzledata = UserPuzzleData.get_by_key_name(combined_key)
     olddata = ''
     if userpuzzledata == None:
-      userpuzzledata = UserPuzzleData(key_name=self.request.get('id'))
+      userpuzzledata = UserPuzzleData(key_name=combined_key)
     else:
       olddata = userpuzzledata.data;
     userpuzzledata.data = self.request.get('data')
@@ -293,7 +297,11 @@ class PuzzleDataWriter(webapp.RequestHandler):
 class PuzzleDataReader(webapp.RequestHandler):
   def get(self):
     self.response.headers['Content-Type'] = 'text/html'
-    userpuzzledata = UserPuzzleData.get_by_key_name(self.request.get('id'))
+    if (self.request.get('key') == ''):
+      combined_key = self.request.get('id')
+    else:
+      combined_key = self.request.get('id') + '$$' + self.request.get('key')
+    userpuzzledata = UserPuzzleData.get_by_key_name(combined_key)
     if userpuzzledata != None:
       self.response.out.write(userpuzzledata.data)
       logger.LogOneEntry("Server: User %s asked for data %s" % (userpuzzledata.key().name(), userpuzzledata.data))

@@ -71,6 +71,10 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
   }
 
+  function _IGK_state() {
+    this.d = new Array();
+  }
+
   _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
     if (this.game_state.puz_solved[puznum] == 1) {
       return "#00FF00";
@@ -515,6 +519,53 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     return result;
   }
 
+  puzzle_data.prototype.save_state = function() {
+    var state = new _IGK_state();
+    for (var i=0; i<this.area; ++i) {
+      if(!this.cells[i].fixed && this.cells[i].get_value() != -1) {
+        state.d.push(i, this.cells[i].get_value());
+      }
+    }
+    _gel("resetbutton3").disabled = true;
+    _gel("save_button").disabled = true;
+    _gel("load_button").disabled = true;
+    _gel("save_button").value = "Saving...";
+    var key = 'P' + this.game_state.cur_puz;
+    keyed_state_controller.saveState(key, state, function() {
+      _gel("resetbutton3").disabled = false;
+      _gel("save_button").disabled = false;
+      _gel("load_button").disabled = false;
+      _gel("save_button").value = "Save";
+    });
+  }
+
+  puzzle_data.prototype.load_state = function() {
+    var key = 'P' + this.game_state.cur_puz;
+    _gel("resetbutton3").disabled = true;
+    _gel("save_button").disabled = true;
+    _gel("load_button").disabled = true;
+    _gel("load_button").value = "Loading...";
+    keyed_state_controller.loadState(key, load_state_callback);
+  }
+
+  var load_state_callback = function(state) {
+    puzzle.load_state_callback(state);
+  }
+
+  puzzle_data.prototype.load_state_callback = function(state) {
+    reset(this.game_state);
+    for (var i = 1; i < state.d.length; i += 2) {
+      var digit = state.d[i]; 
+      var pos = state.d[i-1];
+      this.decrement_palette(digit);
+      this.cells[pos].set_value(digit, false);
+    }
+    _gel("resetbutton3").disabled = false;
+    _gel("save_button").disabled = false;
+    _gel("load_button").disabled = false;
+    _gel("load_button").value = "Load";
+  }
+
   puzzle_data.prototype.get_background_color = function(index) {
     if (index >= this.gridarea + this.size * 2) {
       // diag
@@ -931,6 +982,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   var puzzle;
   var grid;
   var pref_controller;
+  var keyed_state_controller;
   var pcborder = "#000000";
 
   _IG_RegisterOnloadHandler(start);
@@ -939,16 +991,17 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     _gel('userid_ui').appendChild(_UserID_getUI());
     _UserID_getName();
 
-    pref_controller = new _IG_puzzle_pref_controller(__MODULE_ID__, true, start2);
+    pref_controller = new _IG_puzzle_pref_controller(__MODULE_ID__, true);
     pref_controller.num_puzzles = 20;
     pref_controller.box_height = 8;
     pref_controller.box_width = 8;
     pref_controller.rows = 4;
     pref_controller.cols = 5;
-    pref_controller.getPrefs_callback = start2;
 
     _gel("game_state_html").appendChild(pref_controller.getTableUI());
-    pref_controller.getPrefs();
+    pref_controller.getPrefs(start2);
+
+    keyed_state_controller = new _IGK_controller();
   }
   
   function start2() {
@@ -1152,9 +1205,11 @@ Puzzle: <span id="puznum">1</span>
 </form>
 
 <span style="font-size:10">
-<b>Diagonal Sudoku</b>: Hey, I'm back, with 20 diagonal sudoku puzzles for you to play with.  I'll be
-adding more features to this gadget over the next few days, so I apologize in advance if I do things
-like kill your puzzle progress.  Go to <a target="_top" href="{{server_urls.server_url}}/gadgetpage?g=20080523-diagonalsudoku&d=2008-05-23">this
+<b>Diagonal Sudoku</b>: Due to popular demand, I've added the ability to save and load the state of your current puzzle.  You can
+find the controls in the lower-left.  Also, I think the nickname thing has been having problems because users are overwriting with
+the same data, because of poor id-generation code on my part.  If you suspect that you've been overlapping with another user's
+data, please click on the "Change UID" button on the bottom.  But please don't do this too many times, because bad stuff could happen.  I'll be removing the Change UID button in a week or so.
+Go to <a target="_top" href="{{server_urls.server_url}}/gadgetpage?g=20080523-diagonalsudoku&d=2008-05-23">this
 puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 </span>
 <span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
@@ -1185,11 +1240,17 @@ puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
   <center>
   <table>
   <tr><td>
-    <input id="resetbutton3" style="font-size:10" type="button" value="Clear"
+    <input id="resetbutton3" style="font-size:8pt" type="button" value="Clear"
      onclick="clear_board();">
   </td></tr><tr><td>
-    <input id="border" style="font-size:9" type="button" value="Borders"
+    <input id="border" style="font-size:8pt" type="button" value="Borders"
      onclick="change_border();">
+  </td></tr><tr><td>
+    <input id="save_button" style="font-size:8pt" type="button" value="Save"
+     onclick="puzzle.save_state();">
+  </td></tr><tr><td>
+    <input id="load_button" style="font-size:8pt" type="button" value="Load"
+     onclick="puzzle.load_state();">
   </td></tr><tr><td>
 <!--
     <input id="sizechange" style="font-size:9" type="button" value="Shrink"
@@ -1244,6 +1305,7 @@ Version 4.0</span>
 <BR>   v3.1 : Teeny problem with name not updated due to server lag fixed.
 <BR>   v3.2 : Rachel Emerson sez:  "Numbers are not letters and letters are not numbers. Why are the numbers referred to as letters in the instructions?"  Fixed!
 <BR>   v4.0 : Added keyboard shortcuts.
+<BR>   v5.0 : Added save and load.
 </span>
 
 </FONT>
