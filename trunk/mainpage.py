@@ -9,6 +9,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from datetime import date
+from datetime import datetime
 from django.template import TemplateDoesNotExist
 
 def hexlify(b):
@@ -241,6 +242,7 @@ class Test2XML(webapp.RequestHandler):
 
 class User(db.Model):
   name = db.StringProperty()
+  modified = db.DateTimeProperty()
 
 class NameWriter(webapp.RequestHandler):
   def get(self):
@@ -251,6 +253,7 @@ class NameWriter(webapp.RequestHandler):
     else:
       oldname = user.name;
     user.name = self.request.get('name')
+    user.modified = datetime.now();
     user.put()
     self.response.headers['Content-Type'] = 'text/plain'
     self.response.out.write("Stored %s with id %s" % (user.name, user.key().name()))
@@ -272,6 +275,7 @@ class NameReader(webapp.RequestHandler):
 
 class UserPuzzleData(db.Model):
   data = db.StringProperty()    # usually JSON
+  modified = db.DateTimeProperty()
 
 class PuzzleDataWriter(webapp.RequestHandler):
   def get(self):
@@ -286,6 +290,7 @@ class PuzzleDataWriter(webapp.RequestHandler):
     else:
       olddata = userpuzzledata.data;
     userpuzzledata.data = self.request.get('data')
+    userpuzzledata.modified = datetime.now();
     userpuzzledata.put()
     self.response.headers['Content-Type'] = 'text/plain'
     self.response.out.write("Stored %s with id %s" % (userpuzzledata.data, userpuzzledata.key().name()))

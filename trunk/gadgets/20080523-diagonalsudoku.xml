@@ -26,6 +26,10 @@
       name="user_id"
       default_value=""
       datatype="hidden"/>
+  <UserPref
+      name="autosave"
+      default_value=""
+      datatype="hidden"/>
   <Content type="html">
 
 <![CDATA[
@@ -288,6 +292,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   function puzzle_data() {
     this.prefix = '{{server_urls.server_url}}images/';
+    this.autosave_id = 0;
     this.resetPuzzleData(0);
   }
 
@@ -518,6 +523,16 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     result.src = this.prefix + 'black.gif';
     return result;
   }
+
+  puzzle_data.prototype.autosave_checkbox = function() {
+    var checked = _gel("autosave").checked;
+    var prefs = new _IG_Prefs();
+    prefs.set("autosave", (checked ? "yes" : ""));
+    clearInterval(this.autosave_id);
+    if (checked) {
+      this.autosave_id = setInterval("puzzle.save_state()", 30000);
+    }
+  };
 
   puzzle_data.prototype.save_state = function() {
     var state = new _IGK_state();
@@ -1010,6 +1025,14 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     reset(pref_controller.game_state);
 
     _IG_AdjustIFrameHeight();
+
+    var prefs = new _IG_Prefs();
+    var as = prefs.getString("autosave");
+    if (as != "") {
+      _gel("autosave").checked = true;
+      puzzle.autosave_checkbox();
+    }
+    puzzle.load_state();
   }
 
   function reset(game_state) {
@@ -1249,6 +1272,9 @@ puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
     <input id="save_button" style="font-size:8pt" type="button" value="Save"
      onclick="puzzle.save_state();">
   </td></tr><tr><td>
+    <input id="autosave" type="checkbox" onclick="puzzle.autosave_checkbox();">
+    <span style="font-size:7pt">30s autosave</span>
+  </td></tr><tr><td>
     <input id="load_button" style="font-size:8pt" type="button" value="Load"
      onclick="puzzle.load_state();">
   </td></tr><tr><td>
@@ -1285,6 +1311,8 @@ puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 <HR>
 
 <span id="userid_ui"></span>
+(Note: getting a new UID will lose all your puzzle data, and will orphan the old UID (unless
+someone else has it).  Use sparingly.)
 
 <HR>
 
@@ -1306,6 +1334,7 @@ Version 4.0</span>
 <BR>   v3.2 : Rachel Emerson sez:  "Numbers are not letters and letters are not numbers. Why are the numbers referred to as letters in the instructions?"  Fixed!
 <BR>   v4.0 : Added keyboard shortcuts.
 <BR>   v5.0 : Added save and load.
+<BR>   v5.1 : Added a 30-second autosave feature.
 </span>
 
 </FONT>
