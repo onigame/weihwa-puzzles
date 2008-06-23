@@ -242,7 +242,7 @@ function Multiset() {
     tmp = addElement(div, 'span', [
       'id', 'unique_id_msg'
     ]);
-    addText(tmp, _UserID_current());
+    addText(tmp, "{Loading...}");
     addElement(div, 'br');
     addElement(div, 'input', [
       'id', 'id_button',
