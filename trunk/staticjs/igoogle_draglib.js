@@ -1,7 +1,8 @@
 /* Copyright 2006 Google Inc. All Rights Reserved.
- * @author Wei-Hwa Huang (whuang@google.com)
- * @author Justin Mattson (jmatt@google.com) - only updateSource, and
+ * @author Wei-Hwa Huang (weihwa.feedback@gmail.com)
+ * @author Justin Mattson - only updateSource, and
  *   addOrUpdateSource methods
+ * @author Aaron Boodman (original concept)
  *
  * A library for game-like dragging in Google Gadgets.
  * See: http://wiki.corp.google.com/twiki/bin/view/Main/RemoteModuleDrag
