@@ -268,6 +268,7 @@ function Multiset() {
 
   function _WHP_game_state() {
     this.cur_puz = 0;
+    this.puz_count = 12;
   }
 
   function _WHP_pref_controller(module_id, navigation) {
@@ -374,7 +375,7 @@ function Multiset() {
     _IG_AdjustIFrameHeight();
   }
 
-  _WHP_pref_controller.prototype.getTableUI = function() {
+  _WHP_pref_controller.prototype.getTableUI = function(num_puzzles) {
     var table = document.createElement('table');
     table.border = '0';
     table.cellPadding = '0';
@@ -383,14 +384,16 @@ function Multiset() {
       var row_o = addElement(table, 'tr');
       for (var col = 0; col < this.cols; col++) {
         var idnum = row * this.cols + col;
-        var col_o = addElement(row_o, 'td', [
-          'id', 'puzzle_status_' + idnum
-        ]);
-        col_o.style.height = this.box_height;
-        col_o.style.width = this.box_width;
-        addElement(col_o, 'img', [
-          'src', 'http://www.google.com/ig/images/cleardot.gif'
-        ]);
+        if (idnum < num_puzzles) {
+          var col_o = addElement(row_o, 'td', [
+            'id', 'puzzle_status_' + idnum
+          ]);
+          col_o.style.height = this.box_height;
+          col_o.style.width = this.box_width;
+          addElement(col_o, 'img', [
+            'src', 'http://www.google.com/ig/images/cleardot.gif'
+          ]);
+        }
       }
     }
     return table;
