@@ -1017,9 +1017,12 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     pref_controller.getPrefs(start2);
 
     keyed_state_controller = new _WHP_puz_controller();
+
+    setTimeout(start3, 1000);
   }
   
   function start2() {
+    loaded_data = true;
     pref_controller.getPrefs_callback = null;
     puzzle = new puzzle_data();
     reset(pref_controller.game_state);
@@ -1033,6 +1036,23 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       puzzle.autosave_checkbox();
     }
     puzzle.load_state();
+  }
+
+  var loaded_data = false;
+  var seconds_to_wait = 20;
+
+  function start3() {
+    if (loaded_data) return;
+    if (seconds_to_wait <= 0) {
+      setText(_gel("numsolved"), "{Server error}");
+      pref_controller.getPrefs_callback = null;
+      puzzle = new puzzle_data();
+      reset(pref_controller.game_state);
+    } else {
+      setText(_gel("numsolved"), "{Loading..." + seconds_to_wait + "}");
+      seconds_to_wait--;
+      setTimeout(start3, 1000);
+    }
   }
 
   function reset(game_state) {
