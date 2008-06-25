@@ -4,11 +4,11 @@
 ///////////////////////////////////////////////
 //  A random number implementation.
 
-function _IG_Random(seed) {
+function _WHP_Random(seed) {
   this.randomize(seed);
 }
 
-_IG_Random.prototype.randomize = function (seed) {
+_WHP_Random.prototype.randomize = function (seed) {
   if (typeof(seed) != 'undefined' && seed != null) {
     this.seed = parseInt(seed);
     this.get(); this.get(); this.get(); this.get(); this.get();
@@ -18,12 +18,12 @@ _IG_Random.prototype.randomize = function (seed) {
   }
 }
 
-_IG_Random.prototype.get = function () {
+_WHP_Random.prototype.get = function () {
   this.seed = (1664525 * this.seed + 1013904223) % 4294967296;
   return (this.seed / 4294967296);
 }
 
-_IG_Random.prototype.getInt = function (max) {
+_WHP_Random.prototype.getInt = function (max) {
   return Math.floor(this.get() * max);
 }
 
@@ -31,20 +31,20 @@ _IG_Random.prototype.getInt = function (max) {
 // rot13
 
 // build a rot13 map.
-var _IG_alphabet_rot13 = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMabcdefghijklmnopqrstuvwxyzabcdefghijklm";
-var _IG_map_rot13 = new Array();
+var _WHP_alphabet_rot13 = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMabcdefghijklmnopqrstuvwxyzabcdefghijklm";
+var _WHP_map_rot13 = new Array();
 for (i = 0; i < 26; ++i)
-  _IG_map_rot13[_IG_alphabet_rot13.charAt(i)] = _IG_alphabet_rot13.charAt(i+13);
+  _WHP_map_rot13[_WHP_alphabet_rot13.charAt(i)] = _WHP_alphabet_rot13.charAt(i+13);
 for (i = 39; i < 65; ++i)
-  _IG_map_rot13[_IG_alphabet_rot13.charAt(i)] = _IG_alphabet_rot13.charAt(i+13);
+  _WHP_map_rot13[_WHP_alphabet_rot13.charAt(i)] = _WHP_alphabet_rot13.charAt(i+13);
 
-function _IG_rot13(text) {
+function _WHP_rot13(text) {
   var result = "";
   for (i = 0; i < text.length; ++i) {
-    if (typeof(_IG_map_rot13[text.charAt(i)]) == 'undefined') {
+    if (typeof(_WHP_map_rot13[text.charAt(i)]) == 'undefined') {
       result += text.charAt(i);
     } else {
-      result += _IG_map_rot13[text.charAt(i)];
+      result += _WHP_map_rot13[text.charAt(i)];
     }
   }
   return result;
@@ -144,7 +144,7 @@ function Multiset() {
   var curname = '';
 
   function _UserID_getNewID() {
-    var prefs = new _IG_Prefs();
+    var prefs = new _WHP_Prefs();
     id = '{{random_new_user_id}}';
     prefs.set("user_id", id);
     _gel('id_button').disabled = true;
@@ -258,19 +258,19 @@ function Multiset() {
 //  Right now it uses app engine stuff.
 //  It's rather tailored to the puzzle module, but parts of it are generalizable.
 //
-//  To use, you should override _IG_game_state to contain your custom data
+//  To use, you should override _WHP_game_state to contain your custom data
 //  (but make sure to keep this.cur_puz if you want navigation!)
 //  also, don't put any heavyweight functions in it, since it will go through JSON.
 //  
-//  Override _IG_puzzle_pref_controller.prototype.get_color = function(puz_num)
+//  Override _WH_pref_controller.prototype.get_color = function(puz_num)
 //  as needed for the display color, and also add other functions to manipulate
 //  yadda yadda 
 
-  function _IG_game_state() {
+  function _WHP_game_state() {
     this.cur_puz = 0;
   }
 
-  function _IG_puzzle_pref_controller(module_id, navigation) {
+  function _WHP_pref_controller(module_id, navigation) {
     this.user_id = _UserID_current();
     this.game_state = null;
     this.navigation = navigation;
@@ -283,40 +283,40 @@ function Multiset() {
     this.cols = 4;
   }
 
-  _IG_puzzle_pref_controller.prototype.get_color = function(puz_num) {
+  _WHP_pref_controller.prototype.get_color = function(puz_num) {
     return "#FF0000";
   }
 
-  _IG_puzzle_pref_controller.prototype.get_current_color = function() {
+  _WHP_pref_controller.prototype.get_current_color = function() {
     return "#0000FF";
   }
 
-  _IG_puzzle_pref_controller.prototype.get_num_solved = function() {
+  _WHP_pref_controller.prototype.get_num_solved = function() {
     return 0;
   }
 
-  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+  _WHP_pref_controller.prototype.extra_update_state = function() {
   }
 
-  _IG_puzzle_pref_controller.prototype.getPrefs = function(callback) {
+  _WHP_pref_controller.prototype.getPrefs = function(callback) {
     this.getPrefs_callback = callback;
     var url = '{{server_urls.server_url}}datastore/getpuzzledata?id='
               + this.user_id;
     _IG_FetchContent(url, _IG_Callback(this.getPrefsCallbackWrapper, this), { refreshInterval: 0 });
   }
 
-  _IG_puzzle_pref_controller.prototype.getPrefsCallbackWrapper = function(result, original) {
+  _WHP_pref_controller.prototype.getPrefsCallbackWrapper = function(result, original) {
     original.getPrefsCallback(result);
   }
 
-  _IG_puzzle_pref_controller.prototype.getPrefsCallback = function(result) {
+  _WHP_pref_controller.prototype.getPrefsCallback = function(result) {
     if (result == null || result == "") {
-      this.game_state = new _IG_game_state();
+      this.game_state = new _WHP_game_state();
     } else {
       this.game_state = result.parseJSON();
     }
     if (!this.game_state) {
-      this.game_state = new _IG_game_state();
+      this.game_state = new _WHP_game_state();
     }
     if (this.navigation) {
       this.nav_puz = this.game_state.cur_puz;
@@ -328,7 +328,7 @@ function Multiset() {
     }
   }
 
-  _IG_puzzle_pref_controller.prototype.setPrefs = function() {
+  _WHP_pref_controller.prototype.setPrefs = function() {
     if (this.navigation) {
       this.update_navbar();
     }
@@ -340,19 +340,19 @@ function Multiset() {
     _IG_FetchContent(url, _IG_Callback(this.setPrefsCallbackWrapper, this), { refreshInterval: 0 });
   }
 
-  _IG_puzzle_pref_controller.prototype.setPrefsCallbackWrapper = function(result, original) {
+  _WHP_pref_controller.prototype.setPrefsCallbackWrapper = function(result, original) {
     original.setPrefsCallback(result);
   }
 
-  _IG_puzzle_pref_controller.prototype.setPrefsCallback = function(result) {
+  _WHP_pref_controller.prototype.setPrefsCallback = function(result) {
     if (this.navigation) {
       this.update_navbar();
     }
   }
 
 
-  _IG_puzzle_pref_controller.prototype.resetPrefs = function() {
-    this.game_state = new _IG_game_state();
+  _WHP_pref_controller.prototype.resetPrefs = function() {
+    this.game_state = new _WHP_game_state();
     this.setPrefs();
     this.updatePrefDisplay();
     if (this.navigation) {
@@ -361,7 +361,7 @@ function Multiset() {
     }
   }
 
-  _IG_puzzle_pref_controller.prototype.updatePrefDisplay = function() {
+  _WHP_pref_controller.prototype.updatePrefDisplay = function() {
     for (var i=0; i<this.num_puzzles; i++) {
       if (_gel("puzzle_status_" + i))
         _gel("puzzle_status_" + i).style.backgroundColor = this.get_color(i);
@@ -374,7 +374,7 @@ function Multiset() {
     _IG_AdjustIFrameHeight();
   }
 
-  _IG_puzzle_pref_controller.prototype.getTableUI = function() {
+  _WHP_pref_controller.prototype.getTableUI = function() {
     var table = document.createElement('table');
     table.border = '0';
     table.cellPadding = '0';
@@ -396,7 +396,7 @@ function Multiset() {
     return table;
   }
 
-  _IG_puzzle_pref_controller.prototype.update_navbar = function() {
+  _WHP_pref_controller.prototype.update_navbar = function() {
     if (this.game_state.cur_puz == this.nav_puz) {
       _gel("newp").disabled = true;
       _gel("newp").value = "On Puzzle " + (this.game_state.cur_puz*1+1) + ((this.game_state.puz_solved[this.game_state.cur_puz] == 1) ? "*" : "");
@@ -418,7 +418,7 @@ function Multiset() {
     _IG_AdjustIFrameHeight();
   }
 
-  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+  _WHP_pref_controller.prototype.change_level = function(amount) {
     this.nav_puz += amount;
     if (this.nav_puz < 0) this.nav_puz = 0;
     if (this.nav_puz > this.game_state.puz_count) this.nav_puz = this.game_state.puz_count;
@@ -429,18 +429,18 @@ function Multiset() {
 //  This object stores per-puzzle state (or actually any substate that is keyed
 //  by user and a string of your choice).
 //
-//  To use, you should override _IGK_state to contain your custom data.
+//  To use, you should override _WHP_puz_state to contain your custom data.
 //  also, don't put any heavyweight functions in it, since it will go through JSON.
 
-  function _IGK_state() {
+  function _WHP_puz_state() {
   }
 
-  function _IGK_controller() {
+  function _WHP_puz_controller() {
     this.loadState_callback = null;
     this.saveState_callback = null;
   }
 
-  _IGK_controller.prototype.loadState = function(key, callback) {
+  _WHP_puz_controller.prototype.loadState = function(key, callback) {
     var url = '{{server_urls.server_url}}datastore/getpuzzledata?'
               + 'id=' + _UserID_current()
               + '&key=' + encodeURIComponent(key);
@@ -448,22 +448,22 @@ function Multiset() {
     _IG_FetchContent(url, _IG_Callback(this.loadStateCallbackWrapper, this), { refreshInterval: 0 });
   }
 
-  _IGK_controller.prototype.loadStateCallbackWrapper = function(result, original) {
+  _WHP_puz_controller.prototype.loadStateCallbackWrapper = function(result, original) {
     var answer = null;
     if (result == null || result == "") {
-      answer = new _IGK_state();
+      answer = new _WHP_puz_state();
     } else {
       answer = result.parseJSON();
     }
     if (!answer) {
-      answer = new _IGK_state();
+      answer = new _WHP_puz_state();
     }
     if (original.loadState_callback) {
       original.loadState_callback(answer);
     }
   }
 
-  _IGK_controller.prototype.saveState = function(key, state, callback) {
+  _WHP_puz_controller.prototype.saveState = function(key, state, callback) {
     var url = '{{server_urls.server_url}}datastore/writepuzzledata?'
               + 'id=' + _UserID_current()
               + '&key=' + encodeURIComponent(key)
@@ -472,7 +472,7 @@ function Multiset() {
     _IG_FetchContent(url, _IG_Callback(this.saveStateCallbackWrapper, this), { refreshInterval: 0 });
   }
 
-  _IGK_controller.prototype.saveStateCallbackWrapper = function(result, original) {
+  _WHP_puz_controller.prototype.saveStateCallbackWrapper = function(result, original) {
     original.saveState_callback(result);
   }
 

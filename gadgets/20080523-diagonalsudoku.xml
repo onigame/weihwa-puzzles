@@ -66,7 +66,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   ///////////////////////////////////////////////
 
-  function _IG_game_state() {
+  function _WHP_game_state() {
     this.cur_puz = 0;
     this.puz_count = 20;
     this.puz_solved = new Array();
@@ -75,11 +75,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
   }
 
-  function _IGK_state() {
+  function _WHP_puz_state() {
     this.d = new Array();
   }
 
-  _IG_puzzle_pref_controller.prototype.get_color = function(puznum) {
+  _WHP_pref_controller.prototype.get_color = function(puznum) {
     if (this.game_state.puz_solved[puznum] == 1) {
       return "#00FF00";
     } else {
@@ -87,7 +87,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
   }
 
-  _IG_puzzle_pref_controller.prototype.score = function() {
+  _WHP_pref_controller.prototype.score = function() {
     var answer = 0;
     for (var i=0; i<this.game_state.puz_count; ++i) {
       answer += this.game_state.puz_solved[i];
@@ -95,7 +95,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     return answer;
   }
 
-  _IG_puzzle_pref_controller.prototype.extra_update_state = function() {
+  _WHP_pref_controller.prototype.extra_update_state = function() {
     var num = this.score();
     if (num == 500) {
       _gel("numsolved").innerHTML = "All puzzles";
@@ -535,7 +535,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   };
 
   puzzle_data.prototype.save_state = function() {
-    var state = new _IGK_state();
+    var state = new _WHP_puz_state();
     for (var i=0; i<this.area; ++i) {
       if(!this.cells[i].fixed && this.cells[i].get_value() != -1) {
         state.d.push(i, this.cells[i].get_value());
@@ -1006,7 +1006,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     _gel('userid_ui').appendChild(_UserID_getUI());
     _UserID_getName();
 
-    pref_controller = new _IG_puzzle_pref_controller(__MODULE_ID__, true);
+    pref_controller = new _WHP_pref_controller(__MODULE_ID__, true);
     pref_controller.num_puzzles = 20;
     pref_controller.box_height = 8;
     pref_controller.box_width = 8;
@@ -1016,7 +1016,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     _gel("game_state_html").appendChild(pref_controller.getTableUI());
     pref_controller.getPrefs(start2);
 
-    keyed_state_controller = new _IGK_controller();
+    keyed_state_controller = new _WHP_puz_controller();
   }
   
   function start2() {
@@ -1160,14 +1160,14 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     tabledata.appendChild(grid.getCell(1 + 2 * puzzle.size + puzzle.gridarea));
   }
 
-  _IG_puzzle_pref_controller.prototype.change_level = function(amount) {
+  _WHP_pref_controller.prototype.change_level = function(amount) {
     this.nav_puz += amount;
     if (this.nav_puz < 0) this.nav_puz = 0;
     if (this.nav_puz >= this.game_state.puz_count) this.nav_puz = this.game_state.puz_count - 1;
     this.update_navbar();
   }
 
-  _IG_puzzle_pref_controller.prototype.new_puzzle_request = function() {
+  _WHP_pref_controller.prototype.new_puzzle_request = function() {
     this.game_state.cur_puz = this.nav_puz;
     reset(this.game_state);
     this.setPrefs();

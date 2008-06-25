@@ -265,16 +265,21 @@ class NameWriter(webapp.RequestHandler):
 class NameReader(webapp.RequestHandler):
   def get(self):
     self.response.headers['Content-Type'] = 'text/plain'
-    user = User.get_by_key_name(self.request.get('id'))
-    if user != None:
-      self.response.out.write(user.name)
-      logger.LogOneEntry("Server: User %s asked for name %s" % (user.key().name(), user.name))
+    given_id = self.request.get('id')
+    if given_id == '':
+      self.response.out.write('UNKNOWN')
+      logger.LogOneEntry("Server: Empty User requested Name")
     else:
-      # Failed!  But we don't have error handling
-      logger.LogOneEntry("Server: User %s asked for name; user unknown" % (self.request.get('id')))
+      user = User.get_by_key_name(given_id)
+      if user != None:
+        self.response.out.write(user.name)
+        logger.LogOneEntry("Server: User %s asked for name %s" % (user.key().name(), user.name))
+      else:
+        # Failed!  But we don't have error handling
+        logger.LogOneEntry("Server: User %s asked for name; user unknown" % (self.request.get('id')))
 
 class UserPuzzleData(db.Model):
-  data = db.StringProperty()    # usually JSON
+  data = db.TextProperty()    # usually JSON
   modified = db.DateTimeProperty()
 
 class PuzzleDataWriter(webapp.RequestHandler):
