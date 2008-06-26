@@ -144,7 +144,7 @@ function Multiset() {
   var curname = '';
 
   function _UserID_getNewID() {
-    var prefs = new _WHP_Prefs();
+    var prefs = new _IG_Prefs();
     id = '{{random_new_user_id}}';
     prefs.set("user_id", id);
     _gel('id_button').disabled = true;
