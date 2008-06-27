@@ -4,7 +4,10 @@ import datetime
 import string
 import random
 import logger
+import urllib
+import re
 
+from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
@@ -380,6 +383,24 @@ class PuzzleDataReader(webapp.RequestHandler):
 
 ##########################################################
 
+class PuzzleLoginPage(webapp.RequestHandler):
+  def get(self):
+    url = urllib.unquote(self.request.get('url'))      # url to redirect to
+    user = users.get_current_user()
+
+    if user and re.search(r'\?', url):
+      self.redirect(url + '&whpemail=' + urllib.quote(user.email()) + '&whpnick=' + urllib.quote(user.nickname()))
+    elif user and url:
+      self.redirect(url)
+    elif user:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write('Hello, ' + user.nickname() + "\n")
+      self.response.out.write('So you logged in.  Whaddaya want, a medal?')
+    else:
+      self.redirect(users.create_login_url(self.request.uri))
+
+##########################################################
+
 def real_main():
   application = webapp.WSGIApplication([('/', MainPage),
                                         ('/current.xml', CurrentGadgetXML),
@@ -397,6 +418,7 @@ def real_main():
                                         ('/datastore/getname', NameReader),
                                         ('/datastore/writepuzzledata', PuzzleDataWriter),
                                         ('/datastore/getpuzzledata', PuzzleDataReader),
+                                        ('/puzzlelogin', PuzzleLoginPage),
                                         ('/gadgetpage', GadgetPage),
                                         ('/.*', MainPage),
                                        ],

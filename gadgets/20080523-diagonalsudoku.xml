@@ -953,6 +953,23 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   _IG_RegisterOnloadHandler(start);
 
   function start() {
+    var whpemail = '';
+    var whpnick = '';
+    var view = '';
+    var my_args = document.URL.split('?')[1].split('&');
+    for (var i=0; i<my_args.length; ++i) {
+      var nvpair = my_args[i].split('='); 
+      if (nvpair[0] == 'whpemail') whpemail = nvpair[1];
+      if (nvpair[0] == 'whpnick') whpnick = nvpair[1];
+      if (nvpair[0] == 'view') view = nvpair[1];
+    }
+    if (whpemail == '') {
+      window.top.location = '{{server_urls.server_url}}puzzlelogin?url=' + encodeURIComponent(document.URL);
+      return;
+    }
+    dprint('I think your e-mail is ' + whpemail);
+    dprint('I think your nickname is ' + whpnick);
+
     _gel('userid_ui').appendChild(_UserID_getUI());
     _UserID_getName();
 
