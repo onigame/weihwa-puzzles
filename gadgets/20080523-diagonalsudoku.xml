@@ -73,6 +73,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     for (var i=0; i<this.puz_count; ++i) {
       this.puz_solved[i] = 0;
     }
+    this.recent_solved = -1;
   }
 
   function _WHP_puz_state() {
@@ -911,6 +912,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     grid.refreshDragSources();
     if (this.isSolved()) {
       pref_controller.game_state.puz_solved[this.puznum] = 1;
+      pref_controller.game_state.recent_solved = this.puznum;
 
       _Log_addMessage('user ' + curname + ' solved puzzle ' + (this.puznum+1));
 
