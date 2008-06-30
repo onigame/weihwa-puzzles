@@ -419,6 +419,8 @@ def real_main():
                                         ('/datastore/message-write', logger.LogWriter),
                                         ('/datastore/message-all', logger.LogReader),
                                         ('/datastore/message-last', logger.LogReaderLast),
+                                        ('/datastore/message-first', logger.LogReaderFirst),
+                                        ('/datastore/message-delete-first', logger.LogDeleterFirst),
                                         ('/datastore/writename', NameWriter),
                                         ('/datastore/getname', NameReader),
                                         ('/datastore/writepuzzledata', PuzzleDataWriter),
