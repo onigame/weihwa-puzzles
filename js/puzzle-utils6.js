@@ -243,6 +243,7 @@ function Multiset() {
       'id', 'unique_id_msg'
     ]);
     addText(tmp, "{Loading...}");
+/*
     addElement(div, 'br');
     addElement(div, 'input', [
       'id', 'id_button',
@@ -250,6 +251,7 @@ function Multiset() {
       'value', 'Change UID to ' + '{{random_new_user_id}}',
       'onclick', _UserID_userRequestedNewID,
     ]);
+*/
     return div;
   }
 
