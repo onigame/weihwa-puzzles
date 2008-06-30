@@ -24,7 +24,7 @@ def GetLastLogs(num):
   return results
 
 class LogEntry(db.Model):
-  content = db.StringProperty()
+  content = db.TextProperty()
   datetime = db.DateTimeProperty()
 
 class LogWriter(webapp.RequestHandler):

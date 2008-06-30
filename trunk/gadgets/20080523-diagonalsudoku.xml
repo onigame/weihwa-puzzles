@@ -963,12 +963,12 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       if (nvpair[0] == 'whpnick') whpnick = nvpair[1];
       if (nvpair[0] == 'view') view = nvpair[1];
     }
-    if (whpemail == '') {
-      window.top.location = '{{server_urls.server_url}}puzzlelogin?url=' + encodeURIComponent(document.URL);
-      return;
-    }
-    dprint('I think your e-mail is ' + whpemail);
-    dprint('I think your nickname is ' + whpnick);
+//    if (whpemail == '') {
+//      window.location = '{{server_urls.server_url}}puzzlelogin?url=' + encodeURIComponent(document.URL);
+//      return;
+//    }
+//    dprint('I think your e-mail is ' + whpemail);
+//    dprint('I think your nickname is ' + whpnick);
 
     _gel('userid_ui').appendChild(_UserID_getUI());
     _UserID_getName();
@@ -1235,9 +1235,7 @@ Puzzle: <span id="puznum">1</span>
 
 <span style="font-size:10">
 <b>Diagonal Sudoku</b>: Due to popular demand, I've added the ability to save and load the state of your current puzzle.  You can
-find the controls in the lower-left.  Also, I think the nickname thing has been having problems because users are overwriting with
-the same data, because of poor id-generation code on my part.  If you suspect that you've been overlapping with another user's
-data, please click on the "Change UID" button on the bottom.  But please don't do this too many times, because bad stuff could happen.  I'll be removing the Change UID button in a week or so.
+find the controls in the lower-left.
 Go to <a target="_top" href="{{server_urls.server_url}}/gadgetpage?g=20080523-diagonalsudoku&d=2008-05-23">this
 puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 </span>
@@ -1317,8 +1315,10 @@ puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 <HR>
 
 <span id="userid_ui"></span>
+<!--
 (Note: getting a new UID will lose all your puzzle data, and will orphan the old UID (unless
 someone else has it).  Use sparingly.)
+-->
 
 <HR>
 
@@ -1341,6 +1341,7 @@ Version 4.0</span>
 <BR>   v4.0 : Added keyboard shortcuts.
 <BR>   v5.0 : Added save and load.
 <BR>   v5.1 : Added a 30-second autosave feature.
+<BR>   v5.2 : Removed UID generator.
 </span>
 
 </FONT>

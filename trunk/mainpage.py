@@ -169,7 +169,7 @@ class StaticJavascript(webapp.RequestHandler):
 
 sudokuTemplateData = {
         'server_urls': ServerUrls(),
-        'num_puzzles': 22,
+        'num_puzzles': 23,
         'puzzle_content': "\
 '7xx4x8xxxxxx1xx4xxxx1x5xxxxx57xxxx2x2xxxxxxx9x4xxxx16xxxxx8x3xxxx2xx1xxxxxx6x9xx2',\
 'x3xxxx6xxxx6xxxx52xx8x2xx41xxx4xxx1xx572x349xx6xxx7xxx58xx7x9xx64xxxx2xxxx3xxxx8x',\
@@ -397,8 +397,13 @@ class PuzzleLoginPage(webapp.RequestHandler):
       self.response.out.write('Hello, ' + user.nickname() + "\n")
       self.response.out.write('So you logged in.  Whaddaya want, a medal?')
     else:
-      self.redirect(users.create_login_url(self.request.uri))
+      self.redirect(users.create_login_url("foo"))
+#      self.redirect(users.create_login_url(self.request.uri))
 
+class PuzzleLogoutPage(webapp.RequestHandler):
+  def get(self):
+    self.redirect(users.create_logout_url("/"))
+    
 ##########################################################
 
 def real_main():
@@ -419,6 +424,7 @@ def real_main():
                                         ('/datastore/writepuzzledata', PuzzleDataWriter),
                                         ('/datastore/getpuzzledata', PuzzleDataReader),
                                         ('/puzzlelogin', PuzzleLoginPage),
+                                        ('/puzzlelogout', PuzzleLogoutPage),
                                         ('/gadgetpage', GadgetPage),
                                         ('/.*', MainPage),
                                        ],
