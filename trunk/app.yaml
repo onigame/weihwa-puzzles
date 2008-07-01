@@ -16,6 +16,9 @@ handlers:
 - url: /gadgets/20080523-diagonalsudoku.xml
   script: mainpage.py
 
+- url: /gadgets/testsol.xml
+  script: mainpage.py
+
 - url: /gadgets
   static_dir: staticgadgets
 
