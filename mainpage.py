@@ -165,7 +165,7 @@ class GadgetXML(webapp.RequestHandler):
     if filename == '20080523-diagonalsudoku.xml':
       template_values = puzzleutils.diagonalsudokuTemplateData
     template_values['server_urls'] = ServerUrls()
-    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.headers['Content-Type'] = 'text/xml'
     path = os.path.join(os.path.dirname(__file__), 'gadgets/' + filename)
     try:
       self.response.out.write(template.render(path, template_values))

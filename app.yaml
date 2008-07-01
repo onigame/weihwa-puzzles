@@ -22,5 +22,8 @@ handlers:
 - url: /gadgets
   static_dir: staticgadgets
 
+- url: /staticgadgets
+  static_dir: staticgadgets
+
 - url: /.*
   script: mainpage.py
