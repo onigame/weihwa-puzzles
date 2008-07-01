@@ -9,6 +9,47 @@ from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from django.template import TemplateDoesNotExist
 
+##########################################################
+
+class User(db.Model):
+  name = db.StringProperty()
+  modified = db.DateTimeProperty()
+
+class NameWriter(webapp.RequestHandler):
+  def get(self):
+    user = User.get_by_key_name(self.request.get('id'))
+    oldname = ''
+    if user == None:
+      user = User(key_name=self.request.get('id'))
+    else:
+      oldname = user.name;
+    user.name = self.request.get('name')
+    user.modified = datetime.now();
+    user.put()
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write("Stored %s with id %s" % (user.name, user.key().name()))
+#    if oldname == '':
+#      logger.LogOneEntry("Server: User %s acquired name %s" % (user.key().name(), user.name))
+#    else:
+#      logger.LogOneEntry("Server: User %s changed name from %s to %s" % (user.key().name(), oldname, user.name))
+
+class NameReader(webapp.RequestHandler):
+  def get(self):
+    self.response.headers['Content-Type'] = 'text/plain'
+    given_id = self.request.get('id')
+    if given_id == '':
+      self.response.out.write('UNKNOWN')
+      # logger.LogOneEntry("Server: Empty User requested Name")
+    else:
+      user = User.get_by_key_name(given_id)
+      if user != None:
+        self.response.out.write(user.name)
+        # logger.LogOneEntry("Server: User %s asked for name %s" % (user.key().name(), user.name))
+      else:
+        # Failed!  But we don't have error handling
+        logger.LogOneEntry("Server: User %s asked for name; user unknown" % (self.request.get('id')))
+
+
 ###############################
 
 class UserPuzzleData(db.Model):
@@ -68,6 +109,7 @@ def GetSolves():
   for item in query:
     if (not re.search(r'\$\$', item.key().name())):
       item.name = item.key().name()
+      item.nickname = User.get_by_key_name(item.name).name
       results.append(item)
       if len(results) >= 10:
         break;
@@ -86,7 +128,7 @@ class DiagonalSudokuSubPage(webapp.RequestHandler):
       WriteBadPage('cannot find the file with name ' + filename)
 
 diagonalsudokuTemplateData = {
-        'num_puzzles': 23,
+        'num_puzzles': 24,
         'puzzle_content': "\
 '7xx4x8xxxxxx1xx4xxxx1x5xxxxx57xxxx2x2xxxxxxx9x4xxxx16xxxxx8x3xxxx2xx1xxxxxx6x9xx2',\
 'x3xxxx6xxxx6xxxx52xx8x2xx41xxx4xxx1xx572x349xx6xxx7xxx58xx7x9xx64xxxx2xxxx3xxxx8x',\

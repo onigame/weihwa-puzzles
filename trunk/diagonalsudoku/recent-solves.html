@@ -20,10 +20,15 @@
     names.push('{{line.name}}');
   {% endfor %}
 
+  var nicknames = [];
+  {% for line in solves %}
+    nicknames.push('{{line.nickname}}');
+  {% endfor %}
+
   var list = document.createElement("ul");
   for (var i=0; i<names.length; ++i) {
     var li = addElement(list, "li");
-    setText(li, "UID " + names[i] + " solved puzzle " + (items[i].recent_solved+1));
+    setText(li, "UID " + nicknames[i] + " solved puzzle " + (items[i].recent_solved+1));
   }
 
   _gel("display").appendChild(list);
