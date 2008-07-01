@@ -47,9 +47,9 @@ class PuzzleDataReader(webapp.RequestHandler):
     if userpuzzledata != None:
       self.response.out.write(userpuzzledata.data)
 #      logger.LogOneEntry("Server: User %s asked for data %s" % (userpuzzledata.key().name(), userpuzzledata.data))
-    else:
-      # Failed!  But we don't have error handling
-      logger.LogOneEntry("Server: User %s asked for data; userpuzzledata unknown" % (self.request.get('id')))
+#    else:
+#      # Failed!  But we don't have error handling
+#      logger.LogOneEntry("Server: User %s asked for data; userpuzzledata unknown" % (self.request.get('id')))
 
 def GetLastData(num):
   query = UserPuzzleData.all()
