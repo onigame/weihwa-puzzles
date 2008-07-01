@@ -215,46 +215,6 @@ class Test2XML(webapp.RequestHandler):
 
 ##########################################################
 
-class User(db.Model):
-  name = db.StringProperty()
-  modified = db.DateTimeProperty()
-
-class NameWriter(webapp.RequestHandler):
-  def get(self):
-    user = User.get_by_key_name(self.request.get('id'))
-    oldname = ''
-    if user == None:
-      user = User(key_name=self.request.get('id'))
-    else:
-      oldname = user.name;
-    user.name = self.request.get('name')
-    user.modified = datetime.now();
-    user.put()
-    self.response.headers['Content-Type'] = 'text/plain'
-    self.response.out.write("Stored %s with id %s" % (user.name, user.key().name()))
-#    if oldname == '':
-#      logger.LogOneEntry("Server: User %s acquired name %s" % (user.key().name(), user.name))
-#    else:
-#      logger.LogOneEntry("Server: User %s changed name from %s to %s" % (user.key().name(), oldname, user.name))
-
-class NameReader(webapp.RequestHandler):
-  def get(self):
-    self.response.headers['Content-Type'] = 'text/plain'
-    given_id = self.request.get('id')
-    if given_id == '':
-      self.response.out.write('UNKNOWN')
-      # logger.LogOneEntry("Server: Empty User requested Name")
-    else:
-      user = User.get_by_key_name(given_id)
-      if user != None:
-        self.response.out.write(user.name)
-        # logger.LogOneEntry("Server: User %s asked for name %s" % (user.key().name(), user.name))
-      else:
-        # Failed!  But we don't have error handling
-        logger.LogOneEntry("Server: User %s asked for name; user unknown" % (self.request.get('id')))
-
-##########################################################
-
 class PuzzleLoginPage(webapp.RequestHandler):
   def get(self):
     url = urllib.unquote(self.request.get('url'))      # url to redirect to
@@ -288,8 +248,8 @@ def real_main():
                                         ('/datastore/message-last', logger.LogReaderLast),
                                         ('/datastore/message-first', logger.LogReaderFirst),
                                         ('/datastore/message-delete-first', logger.LogDeleterFirst),
-                                        ('/datastore/writename', NameWriter),
-                                        ('/datastore/getname', NameReader),
+                                        ('/datastore/writename', puzzleutils.NameWriter),
+                                        ('/datastore/getname', puzzleutils.NameReader),
                                         ('/puzzlelogin', PuzzleLoginPage),
                                         ('/puzzlelogout', PuzzleLogoutPage),
                                         ('/gadgetpage', GadgetPage),
