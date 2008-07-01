@@ -159,21 +159,13 @@ class Javascript(webapp.RequestHandler):
        + random.choice(list(string.digits))
     )
 
-class StaticJavascript(webapp.RequestHandler):
-  def get(self, filename):
-    self.response.headers['Content-Type'] = 'text/javascript'
-    try:
-      path = os.path.join(os.path.dirname(__file__), 'staticjs/' + filename)
-      self.response.out.write(open(path, 'r').read())
-    except IOError:
-      WriteBadPage('cannot find the js with name ' + filename)
-
 class GadgetXML(webapp.RequestHandler):
   def get(self, filename):
+    template_values = {};
     if filename == '20080523-diagonalsudoku.xml':
       template_values = puzzleutils.diagonalsudokuTemplateData
     template_values['server_urls'] = ServerUrls()
-    self.response.headers['Content-Type'] = 'text/xml'
+    self.response.headers['Content-Type'] = 'text/plain'
     path = os.path.join(os.path.dirname(__file__), 'gadgets/' + filename)
     try:
       self.response.out.write(template.render(path, template_values))
@@ -183,27 +175,6 @@ class GadgetXML(webapp.RequestHandler):
         self.response.out.write(open(path, 'r').read())
       except IOError:
         WriteBadPage('cannot find the xml with name ' + filename)
-
-class StaticGadgetXML(webapp.RequestHandler):
-  def get(self, filename):
-    self.response.headers['Content-Type'] = 'text/xml'
-    path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
-    try:
-      self.response.out.write(open(path, 'r').read())
-    except IOError:
-      WriteBadPage('cannot find the xml with name ' + filename)
-
-class GadgetHTML(webapp.RequestHandler):
-  def get(self, filename):
-    template_values = {
-        'server_urls': ServerUrls(),
-      }
-    try:
-      path = os.path.join(os.path.dirname(__file__), 'staticgadgets/' + filename)
-      self.response.headers['Content-Type'] = 'text/html'
-      self.response.out.write(template.render(path, template_values))
-    except TemplateDoesNotExist:
-      WriteBadPage('cannot find the html with name ' + filename)
 
 class CurrentGadgetXML(GadgetXML):
   def get(self):
@@ -310,13 +281,8 @@ class PuzzleLogoutPage(webapp.RequestHandler):
 def real_main():
   application = webapp.WSGIApplication([('/', MainPage),
                                         ('/current.xml', CurrentGadgetXML),
-                                        ('/gadgets/test.xml', TestXML),
-                                        ('/gadgets/test2.xml', Test2XML),
                                         ('/js/(.*\.js)', Javascript),
-                                        ('/staticjs/(.*\.js)', StaticJavascript),
                                         ('/gadgets/(.*\.xml)', GadgetXML),
-                                        ('/staticgadgets/(.*\.xml)', StaticGadgetXML),
-                                        ('/gadgets/(.*\.html)', GadgetHTML),
                                         ('/datastore/message-write', logger.LogWriter),
                                         ('/datastore/message-all', logger.LogReader),
                                         ('/datastore/message-last', logger.LogReaderLast),
