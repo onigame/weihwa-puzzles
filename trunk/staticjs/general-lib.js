@@ -10,6 +10,10 @@
  * repurposed for non-Woshambo uses.
  */
 
+function _gel(o) {
+  return document.getElementById(o);
+}
+
 ///////////////////////////////////////////////
 // TEXT MANIPULATION
 ////////////////////////////////////////////////////

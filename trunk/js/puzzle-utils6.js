@@ -147,7 +147,7 @@ function Multiset() {
     var prefs = new _IG_Prefs();
     id = '{{random_new_user_id}}';
     prefs.set("user_id", id);
-    _gel('id_button').disabled = true;
+    // _gel('id_button').disabled = true;
     setText(_gel('unique_id_msg'),id);
   }
 
