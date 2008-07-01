@@ -1,0 +1,35 @@
+<HTML>
+<HEAD>
+<TITLE>Recent Solves</TITLE>
+</HEAD>
+<BODY>
+
+<div id="display"></div>
+
+<script type="text/javascript" src="/js/json2.js"></script>
+<script type="text/javascript" src="/js/general-lib.js"></script>
+<script type="text/javascript">
+
+  var items = []; 
+  {% for line in solves %}
+    items.push('{{line.data}}'.parseJSON());
+  {% endfor %}
+
+  var names = [];
+  {% for line in solves %}
+    names.push('{{line.name}}');
+  {% endfor %}
+
+  var list = document.createElement("ul");
+  for (var i=0; i<names.length; ++i) {
+    var li = addElement(list, "li");
+    setText(li, "UID " + names[i] + " solved puzzle " + (items[i].recent_solved+1));
+  }
+
+  _gel("display").appendChild(list);
+
+</script>
+
+
+</BODY>
+</HTML>
