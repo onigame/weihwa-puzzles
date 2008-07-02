@@ -106,6 +106,9 @@ class PuzzleSolveTimes(db.Model):
   last_solve_time = db.DateTimeProperty()
   best_solve_time = db.DateTimeProperty()
   modified_timestamp = db.DateTimeProperty()
+  uid = db.StringProperty()
+  puzzletype = db.StringProperty()
+  puzzleid = db.StringProperty()
 
 class ReportPuzzleSolved(webapp.RequestHandler):
   def get(self):
@@ -131,6 +134,9 @@ class ReportPuzzleSolved(webapp.RequestHandler):
         pst.best_solve_time = solvetime
       if pst.best_solve_time > solvetime:
         pst.best_solve_time = solvetime
+      pst.uid = uid
+      pst.puzzletype = puzzletype
+      pst.puzzleid = "%d" % puznum
       pst.put()
 
       self.response.headers['Content-Type'] = 'text/plain'
