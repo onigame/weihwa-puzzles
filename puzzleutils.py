@@ -159,7 +159,11 @@ def GetLastSolves(count):
   results = query.fetch(count)
   for item in results:
     (item.uid, item.puzzletype, item.puznum) = item.key().name().split('$$')  
-    item.nickname = User.get_by_key_name(item.uid).name
+    user = User.get_by_key_name(item.uid)
+    if user:
+      item.nickname = User.get_by_key_name(item.uid).name
+    else:
+      item.nickname = '<unknown user>'
     if len(item.solve_times) > 1 :
       item.extra_message = "(for the %s time)" % OrdinalFormat(len(item.solve_times))
   return results
