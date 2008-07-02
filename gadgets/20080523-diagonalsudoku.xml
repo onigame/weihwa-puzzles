@@ -532,6 +532,10 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     _gel("load_button").value = "Load";
   }
 
+  puzzle_data.prototype.reportSolutionToServer = function() {
+    _WHP_reportPuzzleSolved(this.puznum+1);
+  }
+
   puzzle_data.prototype.get_background_color = function(index) {
     if (index >= this.gridarea + this.size * 2) {
       // diag
@@ -914,7 +918,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       pref_controller.game_state.puz_solved[this.puznum] = 1;
       pref_controller.game_state.recent_solved = this.puznum;
 
-      _Log_addMessage('user ' + curname + ' solved puzzle ' + (this.puznum+1));
+      this.reportSolutionToServer();
 
       this.save_progress();
       pref_controller.updatePrefDisplay();

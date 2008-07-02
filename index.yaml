@@ -26,3 +26,8 @@ indexes:
   properties:
   - name: date
     direction: desc
+
+- kind: PuzzleSolveTimes
+  properties:
+  - name: modified_timestamp
+    direction: desc

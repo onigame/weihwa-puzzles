@@ -9,32 +9,16 @@
 <script type="text/javascript" src="/js/json2.js"></script>
 <script type="text/javascript" src="/js/general-lib.js"></script>
 <script type="text/javascript">
-
-  var items = []; 
-  {% for line in solves %}
-    items.push('{{line.data}}'.parseJSON());
-  {% endfor %}
-
-  var names = [];
-  {% for line in solves %}
-    names.push('{{line.name}}');
-  {% endfor %}
-
-  var nicknames = [];
-  {% for line in solves %}
-    nicknames.push('{{line.nickname}}');
-  {% endfor %}
-
-  var list = document.createElement("ul");
-  for (var i=0; i<names.length; ++i) {
-    var li = addElement(list, "li");
-    setText(li, "UID " + nicknames[i] + " solved puzzle " + (items[i].recent_solved+1));
-  }
-
-  _gel("display").appendChild(list);
-
 </script>
 
+  {% for line in solves %}
+    <BR>
+    <!-- {{line.uid}} -->
+    {{line.modified_timestamp|date:"H:i:s"}} : {{line.nickname}} solved puzzle {{line.puznum}}
+    {% if line.extra_message %}
+      {{line.extra_message}}
+    {% endif %}
+  {% endfor %}
 
 </BODY>
 </HTML>
