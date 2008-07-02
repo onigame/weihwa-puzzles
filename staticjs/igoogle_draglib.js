@@ -481,12 +481,3 @@ _IG_Drag.prototype.makeCallbackFunctions = function() {
   };
 };
 
-_exportClass('google.gadgets', 'Drag', _IG_Drag, [
-  'isDragging', function() { return this.isDragging; },
-  'hasDragged', function() { return this.hasDragged; },
-  'getSurrogate', function() { return this.surrogate; },
-  'getSurrogateInitialX', function() { return this.surrogateInitialX; },
-  'getSurrogateInitialY', function() { return this.surrogateInitialY; },
-  'getCurrentSource', function() { return this.curSource; },
-  'getCurrentTargetId', function() { return this.curTargetId; }
-]);

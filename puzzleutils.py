@@ -199,19 +199,23 @@ class ReportPuzzleSolved(webapp.RequestHandler):
         upr.total_best_solvetime += solvetime
       else:
         # already solved
-        upr.total_last_solvetime -= dt2td(upr.when_puzzles_last_solvetime[pnum]) + solvetime
+        upr.total_last_solvetime += solvetime - dt2td(upr.when_puzzles_last_solvetime[pnum]) 
         upr.when_puzzles_last_solvetime[pnum] = solvetime_dt
         if (dt2td(upr.when_puzzles_best_solvetime[pnum]) > solvetime):
-          upr.total_best_solvetime -= dt2td(upr.when_puzzles_best_solvetime[pnum]) + solvetime
+          upr.total_best_solvetime += solvetime - dt2td(upr.when_puzzles_best_solvetime[pnum])
           upr.when_puzzles_best_solvetime[pnum] = solvetime_dt
 
-      upr.mean_first_solvetime = td2dt(dt2td(upr.total_first_solvetime) / upr.num_puzzles_solved)
-      upr.mean_last_solvetime = td2dt(dt2td(upr.total_last_solvetime) / upr.num_puzzles_solved)
-      upr.mean_best_solvetime = td2dt(dt2td(upr.total_best_solvetime) / upr.num_puzzles_solved)
+      upr.mean_first_solvetime = td2dt(dt2td(upr.total_first_solvetime) // upr.num_puzzles_solved)
+      upr.mean_last_solvetime = td2dt(dt2td(upr.total_last_solvetime) // upr.num_puzzles_solved)
+      upr.mean_best_solvetime = td2dt(dt2td(upr.total_best_solvetime) // upr.num_puzzles_solved)
 
       upr.put()
 
       self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write("%d\n" % upr.num_puzzles_solved)
+      self.response.out.write("%s\n" % solvetime)
+      self.response.out.write("%s\n" % (dt2td(upr.total_last_solvetime) // upr.num_puzzles_solved))
+      self.response.out.write("%s\n" % upr.mean_last_solvetime)
       self.response.out.write("Thank you.")
 
 ###############################
@@ -241,9 +245,23 @@ def GetLastSolves(count):
     if user:
       item.nickname = User.get_by_key_name(item.uid).name
     else:
-      item.nickname = '<unknown user>'
+      item.nickname = '[unknown user]'
     if len(item.solvetimes) > 1 :
       item.extra_message = "(for the %s time)" % OrdinalFormat(len(item.solvetimes))
+  return results
+
+def GetByNumPuzzlesSolved(count):
+  query = UserPuzzleRecord.all()
+  query.order("-num_puzzles_solved")
+  query.order("-modified_timestamp")
+  results = query.fetch(count)
+  for item in results:
+    (item.uid, item.puzzletype) = item.key().name().split('$$')  
+    user = User.get_by_key_name(item.uid)
+    if user:
+      item.nickname = User.get_by_key_name(item.uid).name
+    else:
+      item.nickname = '[unknown user]'
   return results
 
 
@@ -253,6 +271,7 @@ class DiagonalSudokuSubPage(webapp.RequestHandler):
   def get(self, filename):
     template_values = {
         'solves' : GetLastSolves(10),
+        'top100' : GetByNumPuzzlesSolved(100),
       }
     self.response.headers['Content-Type'] = 'text/html'
     path = os.path.join(os.path.dirname(__file__), 'diagonalsudoku/' + filename)

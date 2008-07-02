@@ -1,0 +1,24 @@
+<HTML>
+<HEAD>
+<TITLE>Top 100 Players</TITLE>
+</HEAD>
+<BODY>
+
+<div id="display"></div>
+
+<script type="text/javascript" src="/js/json2.js"></script>
+<script type="text/javascript" src="/js/general-lib.js"></script>
+<script type="text/javascript">
+</script>
+
+  {% for line in top100 %}
+    <BR>
+    <!-- {{line.uid}} -->
+    {{line.nickname}} has solved {{line.num_puzzles_solved}} puzzle{{line.num_puzzles_solved|pluralize}}!
+    {% if line.extra_message %}
+      {{line.extra_message}}
+    {% endif %}
+  {% endfor %}
+
+</BODY>
+</HTML>
