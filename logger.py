@@ -2,7 +2,6 @@ from datetime import datetime
 from datetime import timedelta
 from google.appengine.ext import webapp
 from google.appengine.ext import db
-from google.appengine.runtime import DeadlineExceededError
 
 ###############################
 # A simple logging API
@@ -78,9 +77,7 @@ class LogDeleterFirst(webapp.RequestHandler):
         if s:
           self.response.out.write("%s %s\n" % (s.datetime.isoformat(' '), s.content))
           db.delete(s)
-    except DeadlineExceededError:
-      self.response.out.write("Oops, DeadlineExceededError.")
-    except Timeout:
-      self.response.out.write("Oops, Timeout.")
+    except:
+      self.response.out.write("Oops, Some error happened.")
     self.response.out.write("Deleted.")
 

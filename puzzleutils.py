@@ -102,42 +102,114 @@ def GetLastData(num):
 ###############################
 
 class PuzzleSolveTimes(db.Model):
-  solve_times = db.ListProperty(datetime)
-  last_solve_time = db.DateTimeProperty()
-  best_solve_time = db.DateTimeProperty()
-  modified_timestamp = db.DateTimeProperty()
   uid = db.StringProperty()
   puzzletype = db.StringProperty()
   puzzleid = db.StringProperty()
+  modified_timestamp = db.DateTimeProperty()
+  solvetimes = db.ListProperty(datetime)
+  last_solvetime = db.DateTimeProperty()
+  best_solvetime = db.DateTimeProperty()
+
+class UserPuzzleRecord(db.Model):
+  uid = db.StringProperty()
+  puzzletype = db.StringProperty()
+  modified_timestamp = db.DateTimeProperty()
+  num_puzzles_solved = db.IntegerProperty()
+  which_puzzles_solved = db.ListProperty(int)   # 0 = not solved, 1 = solved (future values might be added)
+  when_puzzles_first_solvetime = db.ListProperty(datetime)
+  when_puzzles_last_solvetime = db.ListProperty(datetime)
+  when_puzzles_best_solvetime = db.ListProperty(datetime)
+  total_first_solvetime = db.DateTimeProperty()    # really a big timedelta
+  total_last_solvetime = db.DateTimeProperty()    # really a big timedelta
+  total_best_solvetime = db.DateTimeProperty()    # really a big timedelta
+  mean_first_solvetime = db.DateTimeProperty()     # really an average timedelta
+  mean_last_solvetime = db.DateTimeProperty()     # really an average timedelta
+  mean_best_solvetime = db.DateTimeProperty()     # really an average timedelta
+
+###############################
+# Conversions to/from timedelta.
+
+def td2dt(td):
+  return datetime(1970,1,1) + td;
+
+def dt2td(dt):
+  return dt - datetime(1970,1,1);
+
+###############################
 
 class ReportPuzzleSolved(webapp.RequestHandler):
+  _PUZZLE_START_TIME = datetime(2008,07,01)   # puzzle solve time is delta from this.
   def get(self):
     puzzletype = "DS01"
     uid = self.request.get('id')
     password = self.request.get('password')
     puznum = self.request.get('puznum')
     curtime = datetime.now()
-    solvetime = curtime       # in the future, might be curtime - puzzle release time
+    solvetime = curtime - self._PUZZLE_START_TIME
     if uid == '' or password == '' or puznum == '':
-      logger.LogOneEntry("Server: cheating attempt? " % (curtime.isoformat(' '), self.request.url))
+      logger.LogOneEntry("Server: cheating attempt? %s %s" % (curtime.isoformat(' '), self.request.url))
       self.response.headers['Content-Type'] = 'text/plain'
       self.response.out.write("Hey!  No hacking the server!")
     else:
-      combined_key = uid + '$$' + puzzletype + '$$' + puznum
 
       ## Update the PuzzleSolveTime object.
+      combined_key = uid + '$$' + puzzletype + '$$' + puznum
       pst = PuzzleSolveTimes.get_or_insert(combined_key)
-      pst.solve_times.append(solvetime)
-      pst.last_solve_time = solvetime
-      pst.modified_timestamp = curtime
-      if len(pst.solve_times) == 1:
-        pst.best_solve_time = solvetime
-      if pst.best_solve_time > solvetime:
-        pst.best_solve_time = solvetime
       pst.uid = uid
       pst.puzzletype = puzzletype
-      pst.puzzleid = "%d" % puznum
+      pst.puzzleid = puznum
+      pst.modified_timestamp = curtime
+      solvetime_dt = td2dt(solvetime)
+      pst.solvetimes.append(solvetime_dt)
+      pst.last_solvetime = solvetime_dt
+      if len(pst.solvetimes) == 1:
+        pst.best_solvetime = solvetime_dt
+      if pst.best_solvetime > solvetime_dt:
+        pst.best_solvetime = solvetime_dt
+
       pst.put()
+
+      ## Update the UserPuzzleRecord object.
+      combined_key = uid + '$$' + puzzletype
+      pnum = int(puznum)
+      upr = UserPuzzleRecord.get_or_insert(combined_key)
+      upr.uid = uid
+      upr.puzzletype = puzzletype
+      upr.modified_timestamp = curtime
+      solvetime_dt = td2dt(solvetime)
+      if upr.num_puzzles_solved == None:
+        upr.num_puzzles_solved = 0
+        upr.total_first_solvetime = td2dt(timedelta())
+        upr.total_last_solvetime = td2dt(timedelta())
+        upr.total_best_solvetime = td2dt(timedelta())
+      if len(upr.which_puzzles_solved) < pnum + 1 or not upr.which_puzzles_solved[pnum]:
+        # newly solved
+        upr.num_puzzles_solved += 1
+        while (len(upr.which_puzzles_solved) < pnum + 1):
+          upr.which_puzzles_solved.append(0)
+          upr.when_puzzles_first_solvetime.append(td2dt(timedelta()))
+          upr.when_puzzles_last_solvetime.append(td2dt(timedelta()))
+          upr.when_puzzles_best_solvetime.append(td2dt(timedelta()))
+        upr.which_puzzles_solved[pnum] = 1
+        upr.when_puzzles_first_solvetime[pnum] = solvetime_dt
+        upr.when_puzzles_last_solvetime[pnum] = solvetime_dt
+        upr.when_puzzles_best_solvetime[pnum] = solvetime_dt
+        upr.total_first_solvetime += solvetime
+        upr.total_last_solvetime += solvetime
+        upr.total_best_solvetime += solvetime
+      else:
+        # already solved
+        upr.total_last_solvetime -= dt2td(upr.when_puzzles_last_solvetime[pnum]) + solvetime
+        upr.when_puzzles_last_solvetime[pnum] = solvetime_dt
+        if (dt2td(upr.when_puzzles_best_solvetime[pnum]) > solvetime):
+          upr.total_best_solvetime -= dt2td(upr.when_puzzles_best_solvetime[pnum]) + solvetime
+          upr.when_puzzles_best_solvetime[pnum] = solvetime_dt
+
+      upr.mean_first_solvetime = td2dt(dt2td(upr.total_first_solvetime) / upr.num_puzzles_solved)
+      upr.mean_last_solvetime = td2dt(dt2td(upr.total_last_solvetime) / upr.num_puzzles_solved)
+      upr.mean_best_solvetime = td2dt(dt2td(upr.total_best_solvetime) / upr.num_puzzles_solved)
+
+      upr.put()
 
       self.response.headers['Content-Type'] = 'text/plain'
       self.response.out.write("Thank you.")
@@ -174,6 +246,9 @@ def GetLastSolves(count):
       item.extra_message = "(for the %s time)" % OrdinalFormat(len(item.solve_times))
   return results
 
+
+##################################
+
 class DiagonalSudokuSubPage(webapp.RequestHandler):
   def get(self, filename):
     template_values = {
@@ -186,8 +261,10 @@ class DiagonalSudokuSubPage(webapp.RequestHandler):
     except TemplateDoesNotExist:
       WriteBadPage('cannot find the file with name ' + filename)
 
+###############################
+
 diagonalsudokuTemplateData = {
-        'num_puzzles': 24,
+        'num_puzzles': 25,
         'puzzle_content': "\
 '7xx4x8xxxxxx1xx4xxxx1x5xxxxx57xxxx2x2xxxxxxx9x4xxxx16xxxxx8x3xxxx2xx1xxxxxx6x9xx2',\
 'x3xxxx6xxxx6xxxx52xx8x2xx41xxx4xxx1xx572x349xx6xxx7xxx58xx7x9xx64xxxx2xxxx3xxxx8x',\
