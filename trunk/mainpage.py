@@ -255,6 +255,7 @@ def real_main():
                                         ('/gadgetpage', GadgetPage),
                                         ('/datastore/writepuzzledata', puzzleutils.PuzzleDataWriter),
                                         ('/datastore/getpuzzledata', puzzleutils.PuzzleDataReader),
+                                        ('/datastore/rps', puzzleutils.ReportPuzzleSolved),
                                         ('/diagonalsudoku/(.*\.html)', puzzleutils.DiagonalSudokuSubPage),
                                         ('/.*', MainPage),
                                        ],

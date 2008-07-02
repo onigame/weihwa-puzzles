@@ -100,25 +100,74 @@ def GetLastData(num):
   return results
 
 ###############################
+
+class PuzzleSolveTimes(db.Model):
+  solve_times = db.ListProperty(datetime)
+  last_solve_time = db.DateTimeProperty()
+  best_solve_time = db.DateTimeProperty()
+  modified_timestamp = db.DateTimeProperty()
+
+class ReportPuzzleSolved(webapp.RequestHandler):
+  def get(self):
+    puzzletype = "DS01"
+    uid = self.request.get('id')
+    password = self.request.get('password')
+    puznum = self.request.get('puznum')
+    curtime = datetime.now()
+    solvetime = curtime       # in the future, might be curtime - puzzle release time
+    if uid == '' or password == '' or puznum == '':
+      logger.LogOneEntry("Server: cheating attempt? " % (curtime.isoformat(' '), self.request.url))
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write("Hey!  No hacking the server!")
+    else:
+      combined_key = uid + '$$' + puzzletype + '$$' + puznum
+
+      ## Update the PuzzleSolveTime object.
+      pst = PuzzleSolveTimes.get_or_insert(combined_key)
+      pst.solve_times.append(solvetime)
+      pst.last_solve_time = solvetime
+      pst.modified_timestamp = curtime
+      if len(pst.solve_times) == 1:
+        pst.best_solve_time = solvetime
+      if pst.best_solve_time > solvetime:
+        pst.best_solve_time = solvetime
+      pst.put()
+
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write("Thank you.")
+
 ###############################
 
-def GetSolves():
-  query = UserPuzzleData.all()
-  query.order("-modified")
-  results = []
-  for item in query:
-    if (not re.search(r'\$\$', item.key().name())):
-      item.name = item.key().name()
-      item.nickname = User.get_by_key_name(item.name).name
-      results.append(item)
-      if len(results) >= 10:
-        break;
-  return results    
+def OrdinalFormat(number):
+  if number % 100 == 11:
+    return "%dth" % number
+  if number % 100 == 12:
+    return "%dth" % number
+  if number % 100 == 13:
+    return "%dth" % number
+  if number % 10 == 1:
+    return "%dst" % number
+  if number % 10 == 2:
+    return "%dnd" % number
+  if number % 10 == 3:
+    return "%drd" % number
+  return "%dth" % number
+
+def GetLastSolves(count):
+  query = PuzzleSolveTimes.all()
+  query.order("-modified_timestamp")
+  results = query.fetch(count)
+  for item in results:
+    (item.uid, item.puzzletype, item.puznum) = item.key().name().split('$$')  
+    item.nickname = User.get_by_key_name(item.uid).name
+    if len(item.solve_times) > 1 :
+      item.extra_message = "(for the %s time)" % OrdinalFormat(len(item.solve_times))
+  return results
 
 class DiagonalSudokuSubPage(webapp.RequestHandler):
   def get(self, filename):
     template_values = {
-        'solves' : GetSolves(),
+        'solves' : GetLastSolves(10),
       }
     self.response.headers['Content-Type'] = 'text/html'
     path = os.path.join(os.path.dirname(__file__), 'diagonalsudoku/' + filename)

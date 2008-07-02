@@ -4,10 +4,6 @@
 ///////////////////////////////////////////////
 //  A random number implementation.
 
-function _WHP_Random(seed) {
-  this.randomize(seed);
-}
-
 _WHP_Random.prototype.randomize = function (seed) {
   if (typeof(seed) != 'undefined' && seed != null) {
     this.seed = parseInt(seed);
@@ -25,6 +21,10 @@ _WHP_Random.prototype.get = function () {
 
 _WHP_Random.prototype.getInt = function (max) {
   return Math.floor(this.get() * max);
+}
+
+function _WHP_Random(seed) {
+  this.randomize(seed);
 }
 
 ///////////////////////////////////////////////
@@ -481,3 +481,14 @@ function Multiset() {
     original.saveState_callback(result);
   }
 
+////////////////////////////////////////////////////
+// Reports a puzzle solved to the server.
+
+  _WHP_reportPuzzleSolved = function(puzNum) {
+    var passgen = new _WHP_Random((new Date()).getTime());
+    var url = '{{server_urls.server_url}}datastore/rps?'
+              + 'id=' + _UserID_current()
+              + '&puznum=' + puzNum
+              + '&password=' + passgen.getInt(100000000);
+    _IG_FetchContent(url, null, { refreshInterval: 0 });
+  }
