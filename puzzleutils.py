@@ -242,7 +242,7 @@ def GetLastSolves(count):
       item.nickname = User.get_by_key_name(item.uid).name
     else:
       item.nickname = '<unknown user>'
-    if len(item.solve_times) > 1 :
+    if len(item.solvetimes) > 1 :
       item.extra_message = "(for the %s time)" % OrdinalFormat(len(item.solve_times))
   return results
 
