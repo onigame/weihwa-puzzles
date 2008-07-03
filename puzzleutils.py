@@ -273,6 +273,7 @@ class DiagonalSudokuSubPage(webapp.RequestHandler):
         'solves' : GetLastSolves(10),
         'top100' : GetByNumPuzzlesSolved(100),
       }
+    template_values.update(diagonalsudokuTemplateData)
     self.response.headers['Content-Type'] = 'text/html'
     path = os.path.join(os.path.dirname(__file__), 'diagonalsudoku/' + filename)
     try:

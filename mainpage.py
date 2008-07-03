@@ -229,12 +229,17 @@ class PuzzleLoginPage(webapp.RequestHandler):
       self.response.out.write('Hello, ' + user.nickname() + "\n")
       self.response.out.write('So you logged in.  Whaddaya want, a medal?')
     else:
-      self.redirect(users.create_login_url("foo"))
-#      self.redirect(users.create_login_url(self.request.uri))
+      self.redirect(users.create_login_url(self.request.uri))
 
 class PuzzleLogoutPage(webapp.RequestHandler):
   def get(self):
-    self.redirect(users.create_logout_url("/"))
+    url = urllib.unquote(self.request.get('url'))      # url to redirect to
+    if url: 
+      self.redirect(users.create_logout_url(url))
+    else:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write('Logged out, no URL given.')
+     
     
 ##########################################################
 

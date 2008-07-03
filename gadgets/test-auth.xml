@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20080523@gmail.com"
+    author_link="{{server_urls.server_url}}"
+    title_url="{{server_urls.server_url}}"
+    author_location="Mountain View, CA, USA"
+    height="400"
+    author_affiliation="Google, Inc."
+    screenshot="{{server_urls.server_url}}images/screenshot.png"
+    thumbnail="{{server_urls.server_url}}images/thumbnail.png"
+    >
+    <Require feature='setprefs'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_20080523"
+      default_value=""
+      datatype="hidden"/>
+  <UserPref
+      name="user_id"
+      default_value=""
+      datatype="hidden"/>
+  <UserPref
+      name="autosave"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="html">
+
+<![CDATA[
+
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<script type="text/javascript" src="{{server_urls.server_url}}js/general-lib.js"></script>
+<script type="text/javascript" src="{{server_urls.server_url}}js/puzzle-utils6.js"></script>
+<script type="text/javascript" src="{{server_urls.server_url}}js/json2.js"></script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  _IG_Analytics("UA-1247731-2", "/puzzlegadget");
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  var pref_controller;
+
+  _IG_RegisterOnloadHandler(start);
+
+  function start() {
+    var whpemail = '';
+    var whpnick = '';
+    var view = '';
+    var my_args = document.URL.split('?')[1].split('&');
+    for (var i=0; i<my_args.length; ++i) {
+      var nvpair = my_args[i].split('='); 
+      if (nvpair[0] == 'whpemail') whpemail = nvpair[1];
+      if (nvpair[0] == 'whpnick') whpnick = nvpair[1];
+      if (nvpair[0] == 'view') view = nvpair[1];
+    }
+    if (whpemail == '') {
+      window.location = '{{server_urls.server_url}}puzzlelogin?url=' + encodeURIComponent(document.URL);
+      return;
+    }
+    dprint('I think your e-mail is ' + whpemail);
+    dprint('I think your nickname is ' + whpnick);
+
+    _gel("logout").href = '{{server_urls.server_url}}puzzlelogout?url=' + encodeURIComponent(document.URL);
+
+    _gel('userid_ui').appendChild(_UserID_getUI());
+    _UserID_getName();
+  }
+  
+  function dprint(s) {
+    _gel("debug1").innerHTML += "DEBUG " + s + "<BR>";
+  }
+
+//////////////////////////
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<span id="userid_ui"></span>
+
+<HR>
+
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+
+<HR>
+
+<a id=logout>Logout</a>
+
+
+</FONT>
+
+  ]]> 
+
+  </Content>
+</Module>
+
