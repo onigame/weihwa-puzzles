@@ -3,12 +3,14 @@ import os
 import datetime
 import string
 import random
+import logging
 import logger
 import urllib
 import re
 import puzzleutils
 
 from google.appengine.api import users
+from google.appengine.api import memcache
 from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
@@ -48,7 +50,7 @@ puzzle_gadgets = [
   PuzzleGadget(2006, 10, 27, 'Hidden Insults', ''),
   PuzzleGadget(2006, 10, 20, 'Mini Battleships 2', ''),
   PuzzleGadget(2006, 10, 13, 'Basic WPC Puzzle', 'wpc2006'),
-  PuzzleGadget(2006, 10,  6, 'Mister Mind', ''),
+  PuzzleGadget(2006, 10,  4, 'Mister Mind', ''),
   PuzzleGadget(2006,  9, 29, 'Word Wreck Tangle', 'wordtangle'),
   PuzzleGadget(2006,  9, 22, 'Last Chessman Standing', 'chesselimination'),
   PuzzleGadget(2006,  9, 15, 'Pipe Spin', 'pipes'),
@@ -217,34 +219,84 @@ class Test2XML(webapp.RequestHandler):
 
 class PuzzleLoginPage(webapp.RequestHandler):
   def get(self):
-    url = urllib.unquote(self.request.get('url'))      # url to redirect to
+    return self.post()
+  def post(self):
+    url = self.request.get('url')         # url to redirect to
+    explain = self.request.get('explain') # show a explanatory screen to the user
+    key = self.request.get('key')         # key for the memcache
+    arg = self.request.arguments()
     user = users.get_current_user()
 
-    if user and re.search(r'\?', url):
-      self.redirect(url + '&whpemail=' + urllib.quote(user.email()) + '&whpnick=' + urllib.quote(user.nickname()))
-    elif user and url:
-      self.redirect(url)
+    if key and not url:
+      url = memcache.get(key)
+
+    if user and url:
+      dest = (url + (re.search(r'\?', url) and '&' or '?') +
+                    'whpemail=' + urllib.quote(user.email()) +
+                    '&whpnick=' + urllib.quote(user.nickname()))
+      logging.debug('login: url is %s and dest is %s and user is %s' % (url, dest, user.nickname()))
+      self.redirect(dest)
     elif user:
-      self.response.headers['Content-Type'] = 'text/plain'
+      logging.debug('login: no url, user is %s' % user.nickname())
+      self.response.headers['Content-Type'] = 'text/html'
       self.response.out.write('Hello, ' + user.nickname() + "\n")
-      self.response.out.write('So you logged in.  Whaddaya want, a medal?')
+      for ar in arg:
+        self.response.out.write('<br>' + ar + "\n")
+      self.response.out.write('<br>You have already logged in!')
+      self.response.out.write('<br><a href="logout">logout</a>');
+    elif url and not explain:
+      memcache_key = "MEM_";
+      for x in range(10):
+        memcache_key += random.choice(list(string.uppercase))
+      memcache.set(memcache_key, url, 60*60)  # key expires in one hour
+      dest = (users.create_login_url("/puzzlelogin?key=" + memcache_key))
+      logging.debug('login: no user, url is %s and memcache key is %s \n' % (url, memcache_key))
+      self.redirect(dest)
+    elif url and explain:
+      self.response.headers['Content-Type'] = 'text/html'
+      self.response.out.write("""
+Hi.  If you're seeing this, it means that Wei-Hwa has implemented user logins on App
+Engine (but hasn't implemented automatic login) and you're not logged in.
+Please <a href="/puzzlelogin?url=%s">click here</a> to start the login process.
+""" % url)
     else:
-      self.redirect(users.create_login_url(self.request.uri))
+      logging.debug('login: no user, no url')
+      self.redirect(users.create_login_url("/confirm-login.html"))
+
+class ConfirmLoginHTML(webapp.RequestHandler):
+  def get(self):
+    self.response.headers['Content-Type'] = 'text/html'
+    self.response.out.write('Thanks for logging in, %s.  Please refresh the page to play your puzzles.' % users.get_current_user().nickname() )
+
+class LoginTestPage(webapp.RequestHandler):
+  def post(self, text):
+    dest = self.request.get("dest")
+    logging.debug('logintest: no user, dest is %s \n' %  dest)
+    self.redirect(dest)
 
 class PuzzleLogoutPage(webapp.RequestHandler):
   def get(self):
+    return self.post()
+  def post(self):
     url = urllib.unquote(self.request.get('url'))      # url to redirect to
     if url: 
       self.redirect(users.create_logout_url(url))
     else:
-      self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write('Logged out, no URL given.')
+      self.redirect(users.create_logout_url("puzzleloggedout"))    # should be a "confirm logout" page
+
+class PuzzleLoggedoutPage(webapp.RequestHandler):
+  def get(self):
+    return self.post()
+  def post(self):
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write('You have logged out of Wei-Hwa\'s puzzles.')
      
     
 ##########################################################
 
 def real_main():
   application = webapp.WSGIApplication([('/', MainPage),
+                                        ('/confirm-login.html', ConfirmLoginHTML),
                                         ('/current.xml', CurrentGadgetXML),
                                         ('/js/(.*\.js)', Javascript),
                                         ('/gadgets/(.*\.xml)', GadgetXML),
@@ -257,11 +309,13 @@ def real_main():
                                         ('/datastore/getname', puzzleutils.NameReader),
                                         ('/puzzlelogin', PuzzleLoginPage),
                                         ('/puzzlelogout', PuzzleLogoutPage),
+                                        ('/puzzleloggedout', PuzzleLoggedoutPage),
                                         ('/gadgetpage', GadgetPage),
                                         ('/datastore/writepuzzledata', puzzleutils.PuzzleDataWriter),
                                         ('/datastore/getpuzzledata', puzzleutils.PuzzleDataReader),
                                         ('/datastore/rps', puzzleutils.ReportPuzzleSolved),
                                         ('/diagonalsudoku/(.*\.html)', puzzleutils.DiagonalSudokuSubPage),
+                                        ('/logintest(.*)', LoginTestPage),
                                         ('/.*', MainPage),
                                        ],
                                        debug=True)

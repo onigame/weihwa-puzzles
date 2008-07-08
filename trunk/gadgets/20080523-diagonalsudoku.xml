@@ -970,7 +970,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       if (nvpair[0] == 'view') view = nvpair[1];
     }
 //    if (whpemail == '') {
-//      window.location = '{{server_urls.server_url}}puzzlelogin?url=' + encodeURIComponent(document.URL);
+//      window.location = '{{server_urls.server_url}}puzzlelogin?url=' + encodeURIComponent(document.URL) + '&explain=1';
 //      return;
 //    }
 //    dprint('I think your e-mail is ' + whpemail);
@@ -1240,11 +1240,14 @@ Puzzle: <span id="puznum">1</span>
 </form>
 
 <span style="font-size:10">
-<b>Diagonal Sudoku</b>: Due to popular demand, I've added the ability to save and load the state of your current puzzle.  You can
-find the controls in the lower-left.
+<b>Diagonal Sudoku</b>: I've added the ability to log into App Engine so that you can access your puzzle data when this
+gadget is hosted elsewhere.
 Go to <a target="_top" href="{{server_urls.server_url}}/gadgetpage?g=20080523-diagonalsudoku&d=2008-05-23">this
 puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 </span>
+
+<span id="login_wrapper">
+
 <span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
    onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
 <span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
@@ -1328,6 +1331,8 @@ someone else has it).  Use sparingly.)
 
 <HR>
 
+</span> <!--- Ends loginwrapper --->
+
 <span id="debug1" style="font-size:8pt;font-weight:bold"></span>
 <BR>
 <span id="debug2" style="font-size:8pt;font-weight:bold"></span>
@@ -1348,6 +1353,7 @@ Version 4.0</span>
 <BR>   v5.0 : Added save and load.
 <BR>   v5.1 : Added a 30-second autosave feature.
 <BR>   v5.2 : Removed UID generator.
+<BR>   v6.0 : Added login wrapper.
 </span>
 
 </FONT>
