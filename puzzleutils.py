@@ -4,6 +4,7 @@ import logger
 
 from datetime import datetime
 from datetime import timedelta
+from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
@@ -11,27 +12,37 @@ from django.template import TemplateDoesNotExist
 
 ##########################################################
 
+# Google User: reverse mapping.
+class GoogleUser(db.Model):
+  whp_uid = db.StringProperty()
+  modified = db.DateTimeProperty()
+
 class User(db.Model):
   name = db.StringProperty()
+  google_id = db.StringProperty()
   modified = db.DateTimeProperty()
 
 class NameWriter(webapp.RequestHandler):
   def get(self):
-    user = User.get_by_key_name(self.request.get('id'))
-    oldname = ''
-    if user == None:
-      user = User(key_name=self.request.get('id'))
-    else:
-      oldname = user.name;
+    user = User.get_or_insert(self.request.get('id'))
+
     user.name = self.request.get('name')
-    user.modified = datetime.now();
+    user.modified = datetime.now()
+
+    google_user = users.get_current_user()
+    if (google_user):
+      user.google_id = google_user.email()
+
     user.put()
+
+    if (google_user):
+      gu = GoogleUser.get_or_insert(google_user.email())
+      gu.whp_uid = self.request.get('id')
+      gu.modified = user.modified
+      gu.put()
+
     self.response.headers['Content-Type'] = 'text/plain'
     self.response.out.write("Stored %s with id %s" % (user.name, user.key().name()))
-#    if oldname == '':
-#      logger.LogOneEntry("Server: User %s acquired name %s" % (user.key().name(), user.name))
-#    else:
-#      logger.LogOneEntry("Server: User %s changed name from %s to %s" % (user.key().name(), oldname, user.name))
 
 class NameReader(webapp.RequestHandler):
   def get(self):
@@ -49,8 +60,7 @@ class NameReader(webapp.RequestHandler):
         # Failed!  But we don't have error handling
         logger.LogOneEntry("Server: User %s asked for name; user unknown" % (self.request.get('id')))
 
-
-###############################
+##########################################################
 
 class UserPuzzleData(db.Model):
   data = db.TextProperty()    # usually JSON
@@ -284,7 +294,7 @@ class DiagonalSudokuSubPage(webapp.RequestHandler):
 ###############################
 
 diagonalsudokuTemplateData = {
-        'num_puzzles': 25,
+        'num_puzzles': 26,
         'puzzle_content': "\
 '7xx4x8xxxxxx1xx4xxxx1x5xxxxx57xxxx2x2xxxxxxx9x4xxxx16xxxxx8x3xxxx2xx1xxxxxx6x9xx2',\
 'x3xxxx6xxxx6xxxx52xx8x2xx41xxx4xxx1xx572x349xx6xxx7xxx58xx7x9xx64xxxx2xxxx3xxxx8x',\

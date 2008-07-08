@@ -36,16 +36,40 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 </style>
 
 <script type="text/javascript" src="{{server_urls.server_url}}js/general-lib.js"></script>
+<!--
 <script type="text/javascript" src="{{server_urls.server_url}}js/puzzle-utils6.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/json2.js"></script>
+-->
 
 <script type="text/javascript">
 <!-- Javascript begins
 
-  _IG_Analytics("UA-1247731-2", "/puzzlegadget");
-
   // Copyright 2006 Google, Inc.
   // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function redirectHTTPpost(form_id, action_string, url, postdata, submit) {
+    var form = addElement(_gel(form_id), "form");
+    form.method = "POST";
+    form.action = url;
+    //form.style.visibility = "hidden";
+    form.onSubmit = function() { return false };
+    for (var i = 1; i < postdata.length; i+= 2) {
+      addElement(form, 'input', [
+        'type', 'hidden',
+        'name', postdata[i-1],
+        'value', postdata[i],
+      ]);
+    }
+    addElement(form, 'input', [
+      'type', 'submit',
+      'value', action_string,
+    ]);
+    if (submit)
+      form.submit();
+  }
+
 
   ///////////////////////////////////////////////
 
@@ -64,17 +88,17 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       if (nvpair[0] == 'whpnick') whpnick = nvpair[1];
       if (nvpair[0] == 'view') view = nvpair[1];
     }
+    dprint('Cookies: ' + document.cookie);
     if (whpemail == '') {
-      window.location = '{{server_urls.server_url}}puzzlelogin?url=' + encodeURIComponent(document.URL);
-      return;
+      redirectHTTPpost('login', 'Log In', '{{server_urls.server_url}}puzzlelogin', ['url', document.URL], false);
+    } else {
+      dprint('I think your e-mail is ' + whpemail);
+      dprint('I think your nickname is ' + whpnick);
+      redirectHTTPpost('logout', 'Log Out', '{{server_urls.server_url}}puzzlelogout', [], false);
     }
-    dprint('I think your e-mail is ' + whpemail);
-    dprint('I think your nickname is ' + whpnick);
 
-    _gel("logout").href = '{{server_urls.server_url}}puzzlelogout?url=' + encodeURIComponent(document.URL);
-
-    _gel('userid_ui').appendChild(_UserID_getUI());
-    _UserID_getName();
+//    _gel('userid_ui').appendChild(_UserID_getUI());
+//    _UserID_getName();
   }
   
   function dprint(s) {
@@ -96,7 +120,8 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
 <HR>
 
-<a id=logout>Logout</a>
+<span id="login"></span>
+<span id="logout"></span>
 
 
 </FONT>

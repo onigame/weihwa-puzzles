@@ -7,7 +7,10 @@ handlers:
 - url: /images
   static_dir: images
 
-- url: /js/puzzle-utils.*\.js
+- url: /js/puzzle-utils6\.js
+  script: mainpage.py
+
+- url: /js/puzzle-utils7\.js
   script: mainpage.py
 
 - url: /js
