@@ -122,7 +122,7 @@ function Multiset() {
   }
   this.has_dupes = function() {
     for (var x in this.items) {
-      if (this.items[x] != 1) return true;
+      if (typeof this.items[x] != "function" && this.items[x] != 1) return true;
     }
     return false;
   }
@@ -143,10 +143,11 @@ function Multiset() {
 
   // Annoyingly, we can't pass cookies via _IG_FetchContent, so we have to pass an id around.
 
-  function _UserID_controller_(email, nickname, not_logged_in_callback) {
+  function _UserID_controller_(email, nickname, not_logged_in_callback, id_loaded_callback) {
     this.google_email = email;
     this.google_nickname = nickname;
     this.not_logged_in_callback = not_logged_in_callback;
+    this.id_loaded_callback = id_loaded_callback;      // will be called when the id is stable.
 
     var prefs = new _IG_Prefs();
     this.whp_uid = prefs.getString("user_id");
@@ -174,6 +175,7 @@ function Multiset() {
     this.check_response(responseText);
     this.set_whp_uid(responseText);
     this.load_whp_name();
+    this.id_loaded_callback();
   }
 
   _UserID_controller_.prototype.register_whp_uid = function() {
@@ -189,6 +191,7 @@ function Multiset() {
     var prefs = new _IG_Prefs();
     prefs.set("user_id", this.whp_uid);
     this.load_whp_name();
+    this.id_loaded_callback();
   }
 
   _UserID_controller_.prototype.load_whp_name = function() {
