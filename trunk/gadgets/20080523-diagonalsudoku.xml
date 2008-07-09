@@ -964,37 +964,41 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 
   function start() {
     if (typeof opensocial == null) {
-      var oreq = opensocial.newDataRequest();
-      oreq.add(oreq.newFetchPersonRequest('VIEWER'), 'viewer');
-      oreq.send(otest);
+//      var oreq = opensocial.newDataRequest();
+//      oreq.add(oreq.newFetchPersonRequest('VIEWER'), 'viewer');
+//      oreq.send(otest);
+      otest(null);
     } else {
       oldstart();
     }
   }
 
   function otest(data) {
-    var viewer = data.get('viewer').getData()
-
-/*
     var whpemail = '';
     var whpnick = '';
-    var view = '';
-    var my_args = document.URL.split('?')[1].split('&');
-    for (var i=0; i<my_args.length; ++i) {
-      var nvpair = my_args[i].split('='); 
-      if (nvpair[0] == 'whpemail') whpemail = nvpair[1];
-      if (nvpair[0] == 'whpnick') whpnick = nvpair[1];
-      if (nvpair[0] == 'view') view = nvpair[1];
+  
+    if (data != null) {
+      var viewer = data.get('viewer').getData()
+      whpemail = viewer.getId();
+      whpnick = viewer.getDisplayName();
+    } else {
+
+      var view = '';
+      var my_args = document.URL.split('?')[1].split('&');
+      for (var i=0; i<my_args.length; ++i) {
+        var nvpair = my_args[i].split('='); 
+        if (nvpair[0] == 'whpemail') whpemail = nvpair[1];
+        if (nvpair[0] == 'whpnick') whpnick = nvpair[1];
+        if (nvpair[0] == 'view') view = nvpair[1];
+      }
+      if (whpemail == '') {
+        server_login();
+        return;
+      }
+      whpemail = decodeURIComponent(whpemail);
+      whpnick = decodeURIComponent(whpnick).match(/^(\w+)/)[0];
     }
-    if (whpemail == '') {
-      server_login();
-      return;
-    }
-    whpemail = decodeURIComponent(whpemail);
-    whpnick = decodeURIComponent(whpnick).match(/^(\w+)/)[0];
-*/
-    whpemail = viewer.getId();
-    whpnick = viewer.getDisplayName();
+
 
     uidc = new _UserID_controller_(whpemail, whpnick, server_login, start2);
     _gel('userid_ui').appendChild(uidc.getUI());
