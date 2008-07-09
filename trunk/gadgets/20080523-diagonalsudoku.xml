@@ -12,10 +12,11 @@
     screenshot="{{server_urls.server_url}}images/screenshot.png"
     thumbnail="{{server_urls.server_url}}images/thumbnail.png"
     height="500">
-    <Require feature='dynamic-height'/>
     <Require feature='setprefs'/>
     <Require feature='drag'/>
     <Require feature='grid'/>
+    <Require feature='opensocial-0.8'/>
+    <Require feature='dynamic-height'/>
     <Require feature='analytics'/>
   </ModulePrefs>
   <UserPref
@@ -960,7 +961,21 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     window.location = '{{server_urls.server_url}}puzzlelogin?url=' + encodeURIComponent(document.URL) + '&explain=1';
   }
 
+
   function start() {
+    if (typeof opensocial == null) {
+      var oreq = opensocial.newDataRequest();
+      oreq.add(oreq.newFetchPersonRequest('VIEWER'), 'viewer');
+      oreq.send(otest);
+    } else {
+      oldstart();
+    }
+  }
+
+  function otest(data) {
+    var viewer = data.get('viewer').getData()
+
+/*
     var whpemail = '';
     var whpnick = '';
     var view = '';
@@ -977,10 +992,41 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     }
     whpemail = decodeURIComponent(whpemail);
     whpnick = decodeURIComponent(whpnick).match(/^(\w+)/)[0];
+*/
+    whpemail = viewer.getId();
+    whpnick = viewer.getDisplayName();
 
     uidc = new _UserID_controller_(whpemail, whpnick, server_login, start2);
     _gel('userid_ui').appendChild(uidc.getUI());
 
+  }
+
+  function oldstart() {
+    _gel('userid_ui').appendChild(_UserID_getUI());
+    _UserID_getName();
+
+    pref_controller = new _WHP_pref_controller(__MODULE_ID__, null, function() {});
+    pref_controller.num_puzzles = {{num_puzzles}};
+    var r = 1;
+    var c = 1;
+    while (r*c < {{num_puzzles}}) {
+      if (r < c) {
+        r++;
+      } else {
+        c++;
+      }
+    }
+    pref_controller.rows = r;
+    pref_controller.cols = c;
+    pref_controller.box_height = Math.floor(50/r)+1;
+    pref_controller.box_width = Math.floor(50/c)+1;
+
+    removeAllChildren(_gel("game_state_html"));
+    _gel("game_state_html").appendChild(pref_controller.getTableUI({{num_puzzles}}));
+    pref_controller.getPrefs(start2);
+
+    keyed_state_controller = new _WHP_puz_controller( null );
+    setTimeout(start4, 1000);
   }
 
   function start2() {
@@ -1000,6 +1046,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     pref_controller.box_height = Math.floor(50/r)+1;
     pref_controller.box_width = Math.floor(50/c)+1;
 
+    removeAllChildren(_gel("game_state_html"));
     _gel("game_state_html").appendChild(pref_controller.getTableUI({{num_puzzles}}));
 
     keyed_state_controller = new _WHP_puz_controller(uidc);
@@ -1248,7 +1295,7 @@ Puzzle: <span id="puznum">1</span>
 
 <span style="font-size:10">
 <b>Diagonal Sudoku</b>: I've added the ability to log into App Engine so that you can access your puzzle data when this
-gadget is hosted elsewhere.
+gadget is hosted elsewhere.... but then I reverted the change because OpenSocial doesn't run on iGoogle yet.
 Go to <a target="_top" href="{{server_urls.server_url}}/gadgetpage?g=20080523-diagonalsudoku&d=2008-05-23">this
 puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 </span>
@@ -1331,10 +1378,6 @@ puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 <HR>
 
 <span id="userid_ui"></span>
-<!--
-(Note: getting a new UID will lose all your puzzle data, and will orphan the old UID (unless
-someone else has it).  Use sparingly.)
--->
 
 <HR>
 
@@ -1361,6 +1404,10 @@ Version 6.0</span>
 <BR>   v5.1 : Added a 30-second autosave feature.
 <BR>   v5.2 : Removed UID generator.
 <BR>   v6.0 : Added login wrapper, added prototype.js library.
+<BR>   v6.1 : Did a rollback of login wrapper, problems with appengine bugs.
+</span>
+
+<span style="visibility:hidden" id="opensocialtest">
 </span>
 
 </FONT>

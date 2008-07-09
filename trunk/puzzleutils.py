@@ -106,18 +106,25 @@ class UIDPut(webapp.RequestHandler):
 
 class NameGet(webapp.RequestHandler):
   def get(self):
-    gid = self.request.get('gid')
-    if not gid:
+    id = self.request.get('id')
+    if not id:
       self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write('NOT_LOGGED_IN')
-      return
-    gu = GoogleUser.get_by_key_name(gid)
-    if not gu:
-      self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write('NOT_LOGGED_IN')
-      return
-
-    u = GetUser(gu)
+      self.response.out.write("SomeDude")
+      return;
+    u = User.get_by_key_name(self.request.get('id'))
+########### uncomment when OpenSocial works
+#    gid = self.request.get('gid')
+#    if not gid:
+#      self.response.headers['Content-Type'] = 'text/plain'
+#      self.response.out.write('NOT_LOGGED_IN')
+#      return
+#    gu = GoogleUser.get_by_key_name(gid)
+#    if not gu:
+#      self.response.headers['Content-Type'] = 'text/plain'
+#      self.response.out.write('NOT_LOGGED_IN')
+#      return
+#
+#    u = GetUser(gu)
 
     if not u.name:
       u.name = re.match("([A-Za-z0-9_])+", guser.nickname()).group(1)
@@ -131,18 +138,25 @@ class NameGet(webapp.RequestHandler):
 
 class NamePut(webapp.RequestHandler):
   def get(self):
-    gid = self.request.get('gid')
-    if not gid:
+    id = self.request.get('id')
+    if not id:
       self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write('NOT_LOGGED_IN')
-      return
-    gu = GoogleUser.get_by_key_name(gid)
-    if not gu:
-      self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write('NOT_LOGGED_IN')
-      return
-
-    u = GetUser(gu)
+      self.response.out.write("SomeDude")
+      return;
+    u = User.get_by_key_name(self.request.get('id'))
+########### uncomment when OpenSocial works
+#    gid = self.request.get('gid')
+#    if not gid:
+#      self.response.headers['Content-Type'] = 'text/plain'
+#      self.response.out.write('NOT_LOGGED_IN')
+#      return
+#    gu = GoogleUser.get_by_key_name(gid)
+#    if not gu:
+#      self.response.headers['Content-Type'] = 'text/plain'
+#      self.response.out.write('NOT_LOGGED_IN')
+#      return
+#
+#    u = GetUser(gu)
 
     u.name = self.request.get('name')
     u.modified = datetime.now()
