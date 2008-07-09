@@ -54,6 +54,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 <script type="text/javascript" src="{{server_urls.server_url}}js/igoogle_draglib.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/igoogle_gridlib.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/puzzle-utils6.js"></script>
+<script type="text/javascript" src="{{server_urls.server_url}}js/prototype.js"></script>
 <script type="text/javascript" src="{{server_urls.server_url}}js/json2.js"></script>
 
 <script type="text/javascript">
@@ -954,9 +955,14 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   var grid;
   var pref_controller;
   var keyed_state_controller;
+  var uidc;
   var pcborder = "#000000";
 
   _IG_RegisterOnloadHandler(start);
+
+  function server_login() {
+    window.location = '{{server_urls.server_url}}puzzlelogin?url=' + encodeURIComponent(document.URL) + '&explain=1';
+  }
 
   function start() {
     var whpemail = '';
@@ -969,17 +975,17 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
       if (nvpair[0] == 'whpnick') whpnick = nvpair[1];
       if (nvpair[0] == 'view') view = nvpair[1];
     }
-//    if (whpemail == '') {
-//      window.location = '{{server_urls.server_url}}puzzlelogin?url=' + encodeURIComponent(document.URL) + '&explain=1';
-//      return;
-//    }
-//    dprint('I think your e-mail is ' + whpemail);
-//    dprint('I think your nickname is ' + whpnick);
+    if (whpemail == '') {
+      server_login();
+      return;
+    }
+    whpemail = decodeURIComponent(whpemail);
+    whpnick = decodeURIComponent(whpnick).match(/^(\w+)/)[0];
 
-    _gel('userid_ui').appendChild(_UserID_getUI());
-    _UserID_getName();
+    uidc = new _UserID_controller_(whpemail, whpnick, server_login);
+    _gel('userid_ui').appendChild(uidc.getUI());
 
-    pref_controller = new _WHP_pref_controller(__MODULE_ID__, true);
+    pref_controller = new _WHP_pref_controller(__MODULE_ID__, true, uidc, server_login);
     pref_controller.num_puzzles = {{num_puzzles}};
     var r = 1;
     var c = 1;
@@ -996,9 +1002,11 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
     pref_controller.box_width = Math.floor(50/c)+1;
 
     _gel("game_state_html").appendChild(pref_controller.getTableUI({{num_puzzles}}));
+
+    keyed_state_controller = new _WHP_puz_controller(uidc);
+
     pref_controller.getPrefs(start2);
 
-    keyed_state_controller = new _WHP_puz_controller();
 
     setTimeout(start3, 1000);
   }
@@ -1353,7 +1361,7 @@ Version 4.0</span>
 <BR>   v5.0 : Added save and load.
 <BR>   v5.1 : Added a 30-second autosave feature.
 <BR>   v5.2 : Removed UID generator.
-<BR>   v6.0 : Added login wrapper.
+<BR>   v6.0 : Added login wrapper, added prototype.js library.
 </span>
 
 </FONT>
