@@ -294,6 +294,125 @@ function Multiset() {
   }
 
 ///////////////////////////////////////
+//   Older UserID code (before opensocial and user authentication)
+
+var curname = '';
+
+ function _UserID_getNewID() {
+   var prefs = new _IG_Prefs();
+   id = '{{random_new_user_id}}';
+   prefs.set("user_id", id);
+   // _gel('id_button').disabled = true;
+   setText(_gel('unique_id_msg'),id);
+ }
+
+ function _UserID_current() {
+   var prefs = new _IG_Prefs();
+   var id = prefs.getString("user_id");
+   if (id == '') {
+     _UserID_getNewID();
+   }
+   return id;
+ }
+
+ function _UserID_setName() {
+   var name = _gel('name_entry').value;
+   if (name.match(/^[A-Za-z0-9\-\_]+$/)) {
+     var url = '{{server_urls.server_url}}datastore/put_name?id=' + _UserID_current()
+         + '&name=' + name;
+     curname = name;
+     _gel("username").innerHTML = curname;
+     _IG_FetchContent(url, function() {
+       _gel("name_entry").style.display = "none";
+       _gel("username").style.display = "inline";
+       _gel("name_msg").innerHTML = "New name accepted!";
+       _gel("name_button").value = "Change My Nickname";
+       _gel("name_button").onclick = _UserID_prepareNameChange;
+       _Log_addMessage('user ' + _UserID_current() + ' changed their name to ' + curname);
+     }, { refreshInterval: 0 });
+   } else {
+     _gel("name_msg").innerHTML = "Only letters and numbers please";
+   }
+ }
+
+ function _UserID_userRequestedNewID() {
+   _gel("name_entry").style.display = "inline";
+   _gel('name_entry').value = _UserID_getName();
+   _UserID_getNewID();
+   _UserID_setName();
+ }
+
+ function _UserID_prepareNameChange() {
+   _gel("username").style.display = "none";
+   _gel("name_msg").innerHTML = "";
+   _gel("name_entry").style.display = "inline";
+   _gel("name_entry").value = '{{random_username}}';
+   _gel("name_button").value = "This one's good";
+   _gel("name_button").onclick = _UserID_setName;
+ }
+
+ function _UserID_updateName(responseText) {
+   if (responseText == '') {
+     _gel('name_entry').value = '{{random_username}}';
+     _UserID_setName();
+   } else {
+     curname = responseText;
+     _gel('username').innerHTML = curname;
+   }
+   _gel('unique_id_msg').innerHTML = _UserID_current();
+ }
+
+
+ function _UserID_getName() {
+   var url = '{{server_urls.server_url}}datastore/get_name?id=' + _UserID_current();
+   _IG_FetchContent(url, _UserID_updateName, { refreshInterval: 0 });
+ }
+
+ function _UserID_getUI() {
+   var div = document.createElement('div');
+   div.style.fontSize = '10pt';
+   addText(div, 'Your Nickname is:');
+   var tmp = addElement(div, 'span', [
+     'id', 'username',
+   ]);
+   tmp.style.display = 'inline';
+   addText(tmp, '[querying server]');
+   tmp = addElement(div, 'input', [
+     'id', 'name_entry',
+     'type', 'text',
+     'size', '20',
+   ]);
+   tmp.style.display = 'none';
+   addElement(div, 'input', [
+     'id', 'name_button',
+     'type', 'button',
+     'value', 'Change My Nickname',
+     'onclick', _UserID_prepareNameChange,
+   ]);
+   addElement(div, 'br');
+   addElement(div, 'span', [
+     'id', 'name_msg'
+   ]);
+   addElement(div, 'br');
+   addText(div, 'Your Unique ID is:');
+   tmp = addElement(div, 'span', [
+     'id', 'unique_id_msg'
+   ]);
+   addText(tmp, "{Loading...}");
+/*
+   addElement(div, 'br');
+   addElement(div, 'input', [
+     'id', 'id_button',
+     'type', 'button',
+     'value', 'Change UID to ' + '{{random_new_user_id}}',
+     'onclick', _UserID_userRequestedNewID,
+   ]);
+*/
+   return div;
+ }
+
+
+///////////////////////////////////////
 //  This object stores game state.
 //  Right now it uses app engine stuff.
 //  It's rather tailored to the puzzle module, but parts of it are generalizable.
@@ -325,6 +444,11 @@ function Multiset() {
     this.cols = 4;
   }
 
+  _WHP_pref_controller.prototype.get_whp_uid = function() {
+    if (uidc == null) return _UserID_current();
+    return this.uidc.get_whp_uid();
+  }
+
   _WHP_pref_controller.prototype.check_response = function(responseText) {
     if (responseText == "NOT_LOGGED_IN") {
       this.not_logged_in_callback();
@@ -348,7 +472,7 @@ function Multiset() {
 
   _WHP_pref_controller.prototype.getPrefs = function(callback) {
     this.getPrefs_extern_callback = callback;
-    var url = '{{server_urls.server_url}}datastore/getpuzzledata?id=' + this.uidc.get_whp_uid();
+    var url = '{{server_urls.server_url}}datastore/getpuzzledata?id=' + this.get_whp_uid();
     _IG_FetchContent(url, this.getPrefsCallbackWrapper.bind(this), { refreshInterval: 0 });
   }
 
@@ -381,7 +505,7 @@ function Multiset() {
       this.update_navbar();
     }
 
-    var url = '{{server_urls.server_url}}datastore/writepuzzledata?id=' + this.uidc.get_whp_uid() + '&data='
+    var url = '{{server_urls.server_url}}datastore/writepuzzledata?id=' + this.get_whp_uid() + '&data='
               + encodeURIComponent(ObjectToJSONString(this.game_state));
     pref_controller_temp = this;
     _IG_FetchContent(url, this.setPrefsCallbackWrapper.bind(this), { refreshInterval: 0 });
@@ -491,8 +615,13 @@ function Multiset() {
     this.uidc = uidc;
   }
 
+  _WHP_puz_controller.prototype.get_whp_uid = function() {
+    if (uidc == null) return _UserID_current();
+    return this.uidc.get_whp_uid();
+  }
+
   _WHP_puz_controller.prototype.loadState = function(key, callback) {
-    var url = '{{server_urls.server_url}}datastore/getpuzzledata?id=' + this.uidc.get_whp_uid()
+    var url = '{{server_urls.server_url}}datastore/getpuzzledata?id=' + this.get_whp_uid()
               + '&key=' + encodeURIComponent(key);
     this.loadState_callback = callback;
     _IG_FetchContent(url, this.loadStateCallbackWrapper.bind(this), { refreshInterval: 0 });
@@ -515,7 +644,7 @@ function Multiset() {
 
   _WHP_puz_controller.prototype.saveState = function(key, state, callback) {
     var url = '{{server_urls.server_url}}datastore/writepuzzledata?'
-              + 'id=' + this.uidc.get_whp_uid()
+              + 'id=' + this.get_whp_uid()
               + '&key=' + encodeURIComponent(key)
               + '&data=' + encodeURIComponent(ObjectToJSONString(state));
     this.saveState_callback = callback;
@@ -532,7 +661,7 @@ function Multiset() {
   _WHP_reportPuzzleSolved = function(puzNum) {
     var passgen = new _WHP_Random((new Date()).getTime());
     var url = '{{server_urls.server_url}}datastore/rps?'
-              + 'id=' + this.uidc.get_whp_uid()
+              + 'id=' + this.get_whp_uid()
               + '&puznum=' + puzNum
               + '&password=' + passgen.getInt(100000000);
     _IG_FetchContent(url, null, { refreshInterval: 0 });
