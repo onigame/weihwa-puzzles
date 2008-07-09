@@ -1,6 +1,8 @@
 import os
 import re
 import logger
+import string
+import random
 
 from datetime import datetime
 from datetime import timedelta
@@ -9,6 +11,13 @@ from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from django.template import TemplateDoesNotExist
+
+##########################################################
+
+def hexlify(b):
+  return "%02x"*len(b) % tuple(map(ord, b))
+
+random.seed(long(hexlify(os.urandom(100)), 16))
 
 ##########################################################
 
@@ -22,43 +31,126 @@ class User(db.Model):
   google_id = db.StringProperty()
   modified = db.DateTimeProperty()
 
-class NameWriter(webapp.RequestHandler):
+def RandomUnusedUserId():
+  u = 1
+  while u:
+    result = RandomUserId()
+    u = User.get_by_key_name(result)
+  return result
+
+def RandomUserId():
+  # 15 random alphabetic characters should handle about 40 billion users
+  result = ''
+  for x in range(15):
+    result += random.choice(list(string.uppercase))
+  return result
+
+def CreateUser(google_id, proposed_id):
+  gu = GoogleUser.get_or_insert(google_id)
+  if gu.whp_uid != proposed_id:
+    gu.whp_uid = proposed_id
+    gu.modified = datetime.now()
+    gu.put()
+
+  u = User.get_or_insert(gu.whp_uid)
+  if u.google_id != google_id:
+    u.google_id = google_id
+    u.modified = datetime.now()
+    u.put()
+
+  return u
+
+def GetUser(gu):  # takes GoogleUser as input
+  u = User.get_or_insert(gu.whp_uid)
+  if u.google_id != gu.whp_uid:
+    u.google_id = gu.whp_uid
+    u.modified = datetime.now()
+    u.put()
+  return u
+
+class UIDGet(webapp.RequestHandler):
   def get(self):
-    user = User.get_or_insert(self.request.get('id'))
+    gid = self.request.get('gid')
+    if not gid:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write('NOT_LOGGED_IN')
+      return
+    gu = GoogleUser.get_by_key_name(gid)
+    if not gu:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write('NOT_LOGGED_IN')
+      return
 
-    user.name = self.request.get('name')
-    user.modified = datetime.now()
+    u = GetUser(gu)
+    
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write(u.key().name())
 
-    google_user = users.get_current_user()
-    if (google_user):
-      user.google_id = google_user.email()
+class UIDPut(webapp.RequestHandler):
+  def get(self):
+    gid = self.request.get('gid')
+    if not gid:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write('NOT_LOGGED_IN')
+      return
+    # unfortunately we have no way of checking whether the given gid is valid.
 
-    user.put()
+    id = self.request.get('id')
+    if not id:
+      id = RandomUnusedUserId()
 
-    if (google_user):
-      gu = GoogleUser.get_or_insert(google_user.email())
-      gu.whp_uid = self.request.get('id')
-      gu.modified = user.modified
-      gu.put()
+    u = CreateUser(gid, id)
 
     self.response.headers['Content-Type'] = 'text/plain'
-    self.response.out.write("Stored %s with id %s" % (user.name, user.key().name()))
+    self.response.out.write(id)
 
-class NameReader(webapp.RequestHandler):
+class NameGet(webapp.RequestHandler):
   def get(self):
+    gid = self.request.get('gid')
+    if not gid:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write('NOT_LOGGED_IN')
+      return
+    gu = GoogleUser.get_by_key_name(gid)
+    if not gu:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write('NOT_LOGGED_IN')
+      return
+
+    u = GetUser(gu)
+
+    if not u.name:
+      u.name = re.match("([A-Za-z0-9_])+", guser.nickname()).group(1)
+      if not u.name:
+        u.name = "someDude"
+      u.modified = datetime.now()
+      u.put()
+
     self.response.headers['Content-Type'] = 'text/plain'
-    given_id = self.request.get('id')
-    if given_id == '':
-      self.response.out.write('UNKNOWN')
-      # logger.LogOneEntry("Server: Empty User requested Name")
-    else:
-      user = User.get_by_key_name(given_id)
-      if user != None:
-        self.response.out.write(user.name)
-        # logger.LogOneEntry("Server: User %s asked for name %s" % (user.key().name(), user.name))
-      else:
-        # Failed!  But we don't have error handling
-        logger.LogOneEntry("Server: User %s asked for name; user unknown" % (self.request.get('id')))
+    self.response.out.write(u.name)
+
+class NamePut(webapp.RequestHandler):
+  def get(self):
+    gid = self.request.get('gid')
+    if not gid:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write('NOT_LOGGED_IN')
+      return
+    gu = GoogleUser.get_by_key_name(gid)
+    if not gu:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write('NOT_LOGGED_IN')
+      return
+
+    u = GetUser(gu)
+
+    u.name = self.request.get('name')
+    u.modified = datetime.now()
+    u.put()
+
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write(u.name)
+
 
 ##########################################################
 
@@ -68,10 +160,10 @@ class UserPuzzleData(db.Model):
 
 class PuzzleDataWriter(webapp.RequestHandler):
   def get(self):
-    if (self.request.get('key') == ''):
-      combined_key = self.request.get('id')
-    else:
-      combined_key = self.request.get('id') + '$$' + self.request.get('key')
+    whp_uid = self.request.get('id')
+    combined_key = whp_uid
+    if (self.request.get('key') != ''):
+      combined_key += '$$' + self.request.get('key')
     userpuzzledata = UserPuzzleData.get_by_key_name(combined_key)
     olddata = ''
     if userpuzzledata == None:
@@ -83,25 +175,17 @@ class PuzzleDataWriter(webapp.RequestHandler):
     userpuzzledata.put()
     self.response.headers['Content-Type'] = 'text/plain'
     self.response.out.write("Stored %s with id %s" % (userpuzzledata.data, userpuzzledata.key().name()))
-#    if olddata == '':
-#      logger.LogOneEntry("Server: User %s acquired data %s" % (userpuzzledata.key().name(), userpuzzledata.data))
-#    else:
-#      logger.LogOneEntry("Server: User %s changed data from %s to %s" % (userpuzzledata.key().name(), olddata, userpuzzledata.data))
 
 class PuzzleDataReader(webapp.RequestHandler):
   def get(self):
+    whp_uid = self.request.get('id')
     self.response.headers['Content-Type'] = 'text/html'
-    if (self.request.get('key') == ''):
-      combined_key = self.request.get('id')
-    else:
-      combined_key = self.request.get('id') + '$$' + self.request.get('key')
+    combined_key = whp_uid
+    if (self.request.get('key') != ''):
+      combined_key += '$$' + self.request.get('key')
     userpuzzledata = UserPuzzleData.get_by_key_name(combined_key)
     if userpuzzledata != None:
       self.response.out.write(userpuzzledata.data)
-#      logger.LogOneEntry("Server: User %s asked for data %s" % (userpuzzledata.key().name(), userpuzzledata.data))
-#    else:
-#      # Failed!  But we don't have error handling
-#      logger.LogOneEntry("Server: User %s asked for data; userpuzzledata unknown" % (self.request.get('id')))
 
 def GetLastData(num):
   query = UserPuzzleData.all()
@@ -294,7 +378,7 @@ class DiagonalSudokuSubPage(webapp.RequestHandler):
 ###############################
 
 diagonalsudokuTemplateData = {
-        'num_puzzles': 26,
+        'num_puzzles': 27,
         'puzzle_content': "\
 '7xx4x8xxxxxx1xx4xxxx1x5xxxxx57xxxx2x2xxxxxxx9x4xxxx16xxxxx8x3xxxx2xx1xxxxxx6x9xx2',\
 'x3xxxx6xxxx6xxxx52xx8x2xx41xxx4xxx1xx572x349xx6xxx7xxx58xx7x9xx64xxxx2xxxx3xxxx8x',\

@@ -2,11 +2,11 @@ import wsgiref.handlers
 import os
 import datetime
 import string
-import random
 import logging
 import logger
 import urllib
 import re
+import random
 import puzzleutils
 
 from google.appengine.api import users
@@ -17,10 +17,6 @@ from google.appengine.ext.webapp import template
 from datetime import date
 from datetime import datetime
 from django.template import TemplateDoesNotExist
-
-def hexlify(b):
-  return "%02x"*len(b) % tuple(map(ord, b))
-random.seed(long(hexlify(os.urandom(100)), 16))
 
 class PuzzleGadget:
   def __init__(self, year, month, mdate, display_name, short_name):
@@ -131,8 +127,6 @@ class Javascript(webapp.RequestHandler):
   def get(self, filename):
     template_values = {
         'server_urls': ServerUrls(),
-        'random_new_user_id': self.RandomUserId(),
-        'random_username': self.RandomUserName(),
       }
     self.response.headers['Content-Type'] = 'text/javascript'
     try:
@@ -144,22 +138,6 @@ class Javascript(webapp.RequestHandler):
         self.response.out.write(open(path, 'r').read())
       except IOError:
         WriteBadPage('cannot find the js with name ' + filename)
-  def RandomUserId(self):
-    # This is a temporary placeholder until we can get real OpenSocial stuff
-    # 15 random alphabetic characters should handle about 40 billion users
-    result = ''
-    for x in range(15):
-      result += random.choice(list(string.uppercase))
-    return result
-  def RandomUserName(self):
-    # This is a temporary placeholder until we can get real OpenSocial stuff
-    return (random.choice(('Jordan', 'Alex', 'Jamie', 'Chris', 'Pat', 'Elliot', 'Willie', 'Val', 
-       'Tracy', 'Stacy', 'Skye', 'Robin', 'Nicky', 'Morgan', 'Madison', 'Leslie', 'Jackie',
-       'Glenn', 'Dana', 'Dale', 'Daryl', 'Drew', 'Charlie', 'Corey', 'Bryce', 'Blair'))
-       + random.choice(list(string.uppercase))
-       + random.choice(list(string.digits))
-       + random.choice(list(string.digits))
-    )
 
 class GadgetXML(webapp.RequestHandler):
   def get(self, filename):
@@ -216,6 +194,15 @@ class Test2XML(webapp.RequestHandler):
       WriteBadPage('cannot find the xml with name ' + filename)
 
 ##########################################################
+
+class WhoAmIPage(webapp.RequestHandler):
+  def get(self):
+    user = users.get_current_user()
+    self.response.headers['Content-Type'] = 'text/plain'
+    if user:
+      self.response.out.write('You are ' + user.email())
+    else:
+      self.response.out.write('You are not logged in.')
 
 class PuzzleLoginPage(webapp.RequestHandler):
   def get(self):
@@ -300,20 +287,28 @@ def real_main():
                                         ('/current.xml', CurrentGadgetXML),
                                         ('/js/(.*\.js)', Javascript),
                                         ('/gadgets/(.*\.xml)', GadgetXML),
+
                                         ('/datastore/message-write', logger.LogWriter),
                                         ('/datastore/message-all', logger.LogReader),
                                         ('/datastore/message-last', logger.LogReaderLast),
                                         ('/datastore/message-first', logger.LogReaderFirst),
                                         ('/datastore/message-delete-first', logger.LogDeleterFirst),
-                                        ('/datastore/writename', puzzleutils.NameWriter),
-                                        ('/datastore/getname', puzzleutils.NameReader),
+
+                                        ('/datastore/request_whp_id', puzzleutils.UIDGet),
+                                        ('/datastore/register_whp_id', puzzleutils.UIDPut),
+                                        ('/datastore/get_name', puzzleutils.NameGet),
+                                        ('/datastore/put_name', puzzleutils.NamePut),
+
+                                        ('/datastore/writepuzzledata', puzzleutils.PuzzleDataWriter),
+                                        ('/datastore/getpuzzledata', puzzleutils.PuzzleDataReader),
+                                        ('/datastore/rps', puzzleutils.ReportPuzzleSolved),
+
+                                        ('/whoami', WhoAmIPage),
                                         ('/puzzlelogin', PuzzleLoginPage),
                                         ('/puzzlelogout', PuzzleLogoutPage),
                                         ('/puzzleloggedout', PuzzleLoggedoutPage),
                                         ('/gadgetpage', GadgetPage),
-                                        ('/datastore/writepuzzledata', puzzleutils.PuzzleDataWriter),
-                                        ('/datastore/getpuzzledata', puzzleutils.PuzzleDataReader),
-                                        ('/datastore/rps', puzzleutils.ReportPuzzleSolved),
+
                                         ('/diagonalsudoku/(.*\.html)', puzzleutils.DiagonalSudokuSubPage),
                                         ('/logintest(.*)', LoginTestPage),
                                         ('/.*', MainPage),

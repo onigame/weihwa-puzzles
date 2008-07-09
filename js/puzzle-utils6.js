@@ -141,117 +141,152 @@ function Multiset() {
 
   // code to handle user ID and names.
 
-  var curname = '';
+  // Annoyingly, we can't pass cookies via _IG_FetchContent, so we have to pass an id around.
 
-  function _UserID_getNewID() {
+  function _UserID_controller_(email, nickname, not_logged_in_callback) {
+    this.google_email = email;
+    this.google_nickname = nickname;
+    this.not_logged_in_callback = not_logged_in_callback;
+
     var prefs = new _IG_Prefs();
-    id = '{{random_new_user_id}}';
-    prefs.set("user_id", id);
-    // _gel('id_button').disabled = true;
-    setText(_gel('unique_id_msg'),id);
+    this.whp_uid = prefs.getString("user_id");
+    this.whp_name = '[loading...]';
+    if (this.whp_uid == '' || this.whp_uid == 'NOT_LOGGED_IN') {
+      this.request_whp_uid();
+    } else {
+      this.register_whp_uid();
+    }
   }
 
-  function _UserID_current() {
+  _UserID_controller_.prototype.check_response = function(responseText) {
+    if (responseText == "NOT_LOGGED_IN") {
+      this.not_logged_in_callback();
+    }
+  }
+
+  _UserID_controller_.prototype.request_whp_uid = function() {
+    // Tell the server that this is our whp_uid.
+    var url = '{{server_urls.server_url}}datastore/request_whp_id?gid=' + this.google_email;
+    _IG_FetchContent(url, this.request_whp_uid_callback.bind(this), { refreshInterval: 0 });
+  }
+
+  _UserID_controller_.prototype.request_whp_uid_callback = function(responseText) {
+    this.check_response(responseText);
+    this.set_whp_uid(responseText);
+    this.load_whp_name();
+  }
+
+  _UserID_controller_.prototype.register_whp_uid = function() {
+    // Tell the server that this is our whp_uid.
+    var url = '{{server_urls.server_url}}datastore/register_whp_id?gid=' + this.google_email + '&id=' + this.whp_uid;
+    _IG_FetchContent(url, this.register_whp_uid_callback.bind(this), { refreshInterval: 0 });
+  }
+
+  _UserID_controller_.prototype.register_whp_uid_callback = function(responseText) {
+    this.check_response(responseText);
+    // the server returns the uid we should actually use (if we gave it a good one, it should return it)
+    this.set_whp_uid(responseText);
     var prefs = new _IG_Prefs();
-    var id = prefs.getString("user_id");
-    if (id == '') {
-      _UserID_getNewID();
+    prefs.set("user_id", this.whp_uid);
+    this.load_whp_name();
+  }
+
+  _UserID_controller_.prototype.load_whp_name = function() {
+    var url = '{{server_urls.server_url}}datastore/get_name?gid=' + this.google_email;
+    _IG_FetchContent(url, this.load_whp_name_callback.bind(this), { refreshInterval: 0 });
+  }
+
+  _UserID_controller_.prototype.load_whp_name_callback = function (responseText) {
+    this.check_response(responseText);
+    this.set_whp_name(responseText);
+  }
+
+  _UserID_controller_.prototype.get_whp_uid = function(value) {
+    return this.whp_uid;
+  }
+
+  _UserID_controller_.prototype.set_whp_uid = function(value) {
+    this.whp_uid = value;
+    var prefs = new _IG_Prefs();
+    prefs.set("user_id", this.whp_uid);
+    if (_gel('whp_uid') != null)
+      setText(_gel('whp_uid'), this.whp_uid);
+  }
+
+  _UserID_controller_.prototype.set_whp_name = function(value) {
+    this.whp_name = value;
+    if (_gel('whp_name') != null)
+      setText(_gel('whp_name'), value);
+  }
+
+  _UserID_controller_.prototype.userSetName = function() {
+    var name = _gel('whp_name_entry').value;
+    if (!name.match(/^[A-Za-z0-9\-\_]+$/)) {
+      _gel("whp_name_msg").innerHTML = "Only letters and numbers please";
+      return;
     }
-    return id;
+    var url = '{{server_urls.server_url}}datastore/put_name?gid=' + this.google_email + '&name=' + name;
+    this.whp_name = name;
+    _gel("whp_name").innerHTML = name;
+    _IG_FetchContent(url, this.userSetName_callback.bind(this), { refreshInterval: 0 });
   }
 
-  function _UserID_setName() {
-    var name = _gel('name_entry').value;
-    if (name.match(/^[A-Za-z0-9\-\_]+$/)) {
-      var url = '{{server_urls.server_url}}datastore/writename?id=' + _UserID_current()
-          + '&name=' + name;
-      curname = name;
-      _gel("username").innerHTML = curname;
-      _IG_FetchContent(url, function() {
-        _gel("name_entry").style.display = "none";
-        _gel("username").style.display = "inline";
-        _gel("name_msg").innerHTML = "New name accepted!";
-        _gel("name_button").value = "Change My Nickname";
-        _gel("name_button").onclick = _UserID_prepareNameChange;
-        _Log_addMessage('user ' + _UserID_current() + ' changed their name to ' + curname);
-      }, { refreshInterval: 0 });
-    } else {
-      _gel("name_msg").innerHTML = "Only letters and numbers please";
-    }
+  _UserID_controller_.prototype.userSetName_callback = function(responseText) {
+    this.check_response(responseText);
+    _gel("whp_name_entry").style.display = "none";
+    _gel("whp_name").style.display = "inline";
+    _gel("whp_name_msg").innerHTML = "New name accepted!";
+    _gel("whp_name_button").value = "Change My Nickname";
+    _gel("whp_name_button").onclick = this.prepareNameChange.bind(this);
   }
 
-  function _UserID_userRequestedNewID() {
-    _gel("name_entry").style.display = "inline";
-    _gel('name_entry').value = _UserID_getName();
-    _UserID_getNewID();
-    _UserID_setName();
+  _UserID_controller_.prototype.prepareNameChange = function() {
+    _gel("whp_name").style.display = "none";
+    _gel("whp_name_msg").innerHTML = "";
+    _gel("whp_name_entry").style.display = "inline";
+    _gel("whp_name_entry").value = this.google_nickname;
+    _gel("whp_name_button").value = "This one's good";
+    _gel("whp_name_button").onclick = this.userSetName.bind(this);
   }
 
-  function _UserID_prepareNameChange() {
-    _gel("username").style.display = "none";
-    _gel("name_msg").innerHTML = "";
-    _gel("name_entry").style.display = "inline";
-    _gel("name_entry").value = '{{random_username}}';
-    _gel("name_button").value = "This one's good";
-    _gel("name_button").onclick = _UserID_setName;
-  }
-
-  function _UserID_updateName(responseText) {
-    if (responseText == '') {
-      _gel('name_entry').value = '{{random_username}}';
-      _UserID_setName();
-    } else {
-      curname = responseText;
-      _gel('username').innerHTML = curname;
-    }
-    _gel('unique_id_msg').innerHTML = _UserID_current();
-  }
-
-  function _UserID_getName() {
-    var url = '{{server_urls.server_url}}datastore/getname?id=' + _UserID_current();
-    _IG_FetchContent(url, _UserID_updateName, { refreshInterval: 0 });
-  }
-
-  function _UserID_getUI() {
+  _UserID_controller_.prototype.getUI = function() {
     var div = document.createElement('div');
     div.style.fontSize = '10pt';
+    addText(div, 'Your Google ID is:');
+    var tmp = addElement(div, 'span', []);
+    addText(tmp, this.google_email);
+    addElement(div, 'br');
     addText(div, 'Your Nickname is:');
     var tmp = addElement(div, 'span', [
-      'id', 'username',
+      'id', 'whp_name',
     ]);
+    setText(tmp, this.whp_name);
     tmp.style.display = 'inline';
-    addText(tmp, '[querying server]');
     tmp = addElement(div, 'input', [
-      'id', 'name_entry',
+      'id', 'whp_name_entry',
       'type', 'text',
       'size', '20',
     ]);
     tmp.style.display = 'none';
     addElement(div, 'input', [
-      'id', 'name_button',
+      'id', 'whp_name_button',
       'type', 'button',
       'value', 'Change My Nickname',
-      'onclick', _UserID_prepareNameChange,
+      'onclick', this.prepareNameChange.bind(this),
     ]);
     addElement(div, 'br');
     addElement(div, 'span', [
-      'id', 'name_msg'
+      'id', 'whp_name_msg'
     ]);
     addElement(div, 'br');
-    addText(div, 'Your Unique ID is:');
+    addText(div, 'Your Puzzler ID is:');
     tmp = addElement(div, 'span', [
-      'id', 'unique_id_msg'
+      'id', 'whp_uid'
     ]);
-    addText(tmp, "{Loading...}");
-/*
-    addElement(div, 'br');
-    addElement(div, 'input', [
-      'id', 'id_button',
-      'type', 'button',
-      'value', 'Change UID to ' + '{{random_new_user_id}}',
-      'onclick', _UserID_userRequestedNewID,
-    ]);
-*/
+    if (this.whp_uid == '')
+      setText(tmp, "[Loading...]");
+    else
+      setText(tmp, this.whp_uid);
     return div;
   }
 
@@ -273,8 +308,9 @@ function Multiset() {
     this.puz_count = 12;
   }
 
-  function _WHP_pref_controller(module_id, navigation) {
-    this.user_id = _UserID_current();
+  function _WHP_pref_controller(module_id, navigation, uidc, not_logged_in_callback) {
+    this.uidc = uidc;
+    this.not_logged_in_callback = not_logged_in_callback;
     this.game_state = null;
     this.navigation = navigation;
     this.getPrefs_callback = null;
@@ -284,6 +320,12 @@ function Multiset() {
     this.box_width = 5;
     this.rows = 3;
     this.cols = 4;
+  }
+
+  _WHP_pref_controller.prototype.check_response = function(responseText) {
+    if (responseText == "NOT_LOGGED_IN") {
+      this.not_logged_in_callback();
+    }
   }
 
   _WHP_pref_controller.prototype.get_color = function(puz_num) {
@@ -302,14 +344,14 @@ function Multiset() {
   }
 
   _WHP_pref_controller.prototype.getPrefs = function(callback) {
-    this.getPrefs_callback = callback;
-    var url = '{{server_urls.server_url}}datastore/getpuzzledata?id='
-              + this.user_id;
-    _IG_FetchContent(url, _IG_Callback(this.getPrefsCallbackWrapper, this), { refreshInterval: 0 });
+    this.getPrefs_extern_callback = callback;
+    var url = '{{server_urls.server_url}}datastore/getpuzzledata?id=' + this.uidc.get_whp_uid();
+    _IG_FetchContent(url, this.getPrefsCallbackWrapper.bind(this), { refreshInterval: 0 });
   }
 
-  _WHP_pref_controller.prototype.getPrefsCallbackWrapper = function(result, original) {
-    original.getPrefsCallback(result);
+  _WHP_pref_controller.prototype.getPrefsCallbackWrapper = function(result) {
+    this.check_response(result);
+    this.getPrefsCallback(result);
   }
 
   _WHP_pref_controller.prototype.getPrefsCallback = function(result) {
@@ -326,8 +368,8 @@ function Multiset() {
       this.update_navbar();
     }
     this.updatePrefDisplay();
-    if (this.getPrefs_callback) {
-      this.getPrefs_callback();
+    if (this.getPrefs_extern_callback) {
+      this.getPrefs_extern_callback();
     }
   }
 
@@ -336,15 +378,15 @@ function Multiset() {
       this.update_navbar();
     }
 
-    var url = '{{server_urls.server_url}}datastore/writepuzzledata?id='
-              + this.user_id + '&data='
+    var url = '{{server_urls.server_url}}datastore/writepuzzledata?id=' + this.uidc.get_whp_uid() + '&data='
               + encodeURIComponent(ObjectToJSONString(this.game_state));
     pref_controller_temp = this;
-    _IG_FetchContent(url, _IG_Callback(this.setPrefsCallbackWrapper, this), { refreshInterval: 0 });
+    _IG_FetchContent(url, this.setPrefsCallbackWrapper.bind(this), { refreshInterval: 0 });
   }
 
-  _WHP_pref_controller.prototype.setPrefsCallbackWrapper = function(result, original) {
-    original.setPrefsCallback(result);
+  _WHP_pref_controller.prototype.setPrefsCallbackWrapper = function(result) {
+    this.check_response(result);
+    this.setPrefsCallback(result);
   }
 
   _WHP_pref_controller.prototype.setPrefsCallback = function(result) {
@@ -440,20 +482,20 @@ function Multiset() {
   function _WHP_puz_state() {
   }
 
-  function _WHP_puz_controller() {
+  function _WHP_puz_controller(uidc) {
     this.loadState_callback = null;
     this.saveState_callback = null;
+    this.uidc = uidc;
   }
 
   _WHP_puz_controller.prototype.loadState = function(key, callback) {
-    var url = '{{server_urls.server_url}}datastore/getpuzzledata?'
-              + 'id=' + _UserID_current()
+    var url = '{{server_urls.server_url}}datastore/getpuzzledata?id=' + this.uidc.get_whp_uid()
               + '&key=' + encodeURIComponent(key);
     this.loadState_callback = callback;
-    _IG_FetchContent(url, _IG_Callback(this.loadStateCallbackWrapper, this), { refreshInterval: 0 });
+    _IG_FetchContent(url, this.loadStateCallbackWrapper.bind(this), { refreshInterval: 0 });
   }
 
-  _WHP_puz_controller.prototype.loadStateCallbackWrapper = function(result, original) {
+  _WHP_puz_controller.prototype.loadStateCallbackWrapper = function(result) {
     var answer = null;
     if (result == null || result == "") {
       answer = new _WHP_puz_state();
@@ -463,22 +505,22 @@ function Multiset() {
     if (!answer) {
       answer = new _WHP_puz_state();
     }
-    if (original.loadState_callback) {
-      original.loadState_callback(answer);
+    if (this.loadState_callback) {
+      this.loadState_callback(answer);
     }
   }
 
   _WHP_puz_controller.prototype.saveState = function(key, state, callback) {
     var url = '{{server_urls.server_url}}datastore/writepuzzledata?'
-              + 'id=' + _UserID_current()
+              + 'id=' + this.uidc.get_whp_uid()
               + '&key=' + encodeURIComponent(key)
               + '&data=' + encodeURIComponent(ObjectToJSONString(state));
     this.saveState_callback = callback;
-    _IG_FetchContent(url, _IG_Callback(this.saveStateCallbackWrapper, this), { refreshInterval: 0 });
+    _IG_FetchContent(url, this.saveStateCallbackWrapper.bind(this), { refreshInterval: 0 });
   }
 
-  _WHP_puz_controller.prototype.saveStateCallbackWrapper = function(result, original) {
-    original.saveState_callback(result);
+  _WHP_puz_controller.prototype.saveStateCallbackWrapper = function(result) {
+    this.saveState_callback(result);
   }
 
 ////////////////////////////////////////////////////
@@ -487,7 +529,7 @@ function Multiset() {
   _WHP_reportPuzzleSolved = function(puzNum) {
     var passgen = new _WHP_Random((new Date()).getTime());
     var url = '{{server_urls.server_url}}datastore/rps?'
-              + 'id=' + _UserID_current()
+              + 'id=' + this.uidc.get_whp_uid()
               + '&puznum=' + puzNum
               + '&password=' + passgen.getInt(100000000);
     _IG_FetchContent(url, null, { refreshInterval: 0 });
