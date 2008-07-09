@@ -212,14 +212,14 @@
                           frameborder="0" scrolling="false" height="800" width="400">
                   </iframe>
                 </td><td>
-                  Recent Solves (times are in UTC):
-                  <iframe style="border:solid"
+                  Recent Solves (times are in UTC, refreshes every 15 seconds):
+                  <iframe style="border:solid" id="recentsolves"
                           src="/diagonalsudoku/recent-solves.html"
                           height="300" width="300">
                   </iframe>
                   <BR>
-                  Top 100 players by number of puzzles solved:
-                  <iframe style="border:solid"
+                  Top 100 players by number of puzzles solved (refreshes every 15 seconds):
+                  <iframe style="border:solid" id="top100"
                           src="/diagonalsudoku/top100.html"
                           height="600" width="300">
                   </iframe>
@@ -239,7 +239,6 @@
             </ul>
             <h2>Known Bugs:</h2>
             <UL>
-                <LI>Each time this page is refreshed, the game considers you to be a new user, so game records aren't saved.  Sorry!  Working on that.... it might be the case that I'll need to get you to log onto a Google Account to play on this page.  Is that okay?  E-mail me.
             </UL>
             <h2>TODO List:</h2>
             Want to see other features on this TODO list?  <a href="mailto:weihwa.feedback+20080530@gmail.com">E-mail me.</a>
@@ -265,13 +264,13 @@
                 <LI>Add timestamps to logs and server-side data -- DONE
                 <LI>Adding autosave feature -- DONE
                 <LI>Add one puzzle a day (automatically) -- well, being added, but not automatic yet
-                <LI>Allow for google accounts on home page to also use UID systems -- deferred
+                <LI>Allow for google accounts on home page to also use UID systems -- DONE
                 <LI>Add timer functionality to UI -- deferred
                 <LI>Set up cron job to automate puzzle-a-day generation -- deferred
                 <LI>Add timing into general scoring, using Sphinx code if possible (user records will probably be erased) -- deferred
                 <LI>Create standalone page on appspot.com, just a container for the gadget -- DONE
-                <LI>Add Global high score list to standalone page -- in progress
-                <LI>Add Player-global-ranking high score list to standalone page -- in progress
+                <LI>Add Global high score list to standalone page -- DONE
+                <LI>Add Player-global-ranking high score list to standalone page -- DONE
                 <LI>Add Friend high score list to standalone page (requires Open Social)
                 <LI>Add Player-friend-ranking high score list to standalong page
                 <LI>Deal with necessary speed enhancements (ask Ryan Barrett) if not done already
@@ -306,7 +305,8 @@
   }
 
   setInterval('Reload("lastteniframe")', 15000);
+  setInterval('Reload("recentsolves")', 15000);
+  setInterval('Reload("top100")', 15000);
 </script>
-
 </body>
 </html>
