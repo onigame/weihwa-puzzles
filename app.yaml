@@ -6,6 +6,7 @@ api_version: 1
 handlers:
 - url: /images
   static_dir: images
+  expiration: 8d 8h
 
 - url: /js/puzzle-utils6\.js
   script: mainpage.py
@@ -15,6 +16,7 @@ handlers:
 
 - url: /js
   static_dir: staticjs
+  expiration: 1d
 
 - url: /gadgets/20080523-diagonalsudoku.xml
   script: mainpage.py
