@@ -212,19 +212,19 @@
                           frameborder="0" scrolling="false" height="800" width="400">
                   </iframe>
                 </td><td>
-                  Recent Solves (times are in UTC, refreshes every 15 seconds):
+                  Recent Solves (times are in UTC, refreshes every minute)
                   <iframe style="border:solid" id="recentsolves"
                           src="/diagonalsudoku/recent-solves.html"
                           height="300" width="300">
                   </iframe>
                   <BR>
-                  Top 100 players by number of puzzles solved (refreshes every 15 seconds):
+                  Top 100 players by number of puzzles solved (refreshes every minute):
                   <iframe style="border:solid" id="top100"
                           src="/diagonalsudoku/top100.html"
                           height="600" width="300">
                   </iframe>
                 </td></tr><tr><td colspan=2>
-                  Last thirty messages (refreshes every 15 seconds):
+                  Last thirty messages (refreshes every minute):
                   <iframe style="border:solid" id="lastteniframe"
                           src="{{server_urls.server_url}}datastore/message-last?count=30" height="530" width="800">
                   </iframe>
@@ -304,9 +304,9 @@
     f.contentWindow.location.reload(true);
   }
 
-  setInterval('Reload("lastteniframe")', 15000);
-  setInterval('Reload("recentsolves")', 15000);
-  setInterval('Reload("top100")', 15000);
+  setInterval('Reload("lastteniframe")', 60000);
+  setInterval('Reload("recentsolves")', 60000);
+  setInterval('Reload("top100")', 60000);
 </script>
 </body>
 </html>

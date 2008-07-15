@@ -11,6 +11,12 @@ indexes:
 # your application using appcfg.py.
 
 # Used once in query history.
+- kind: GMDR_State
+  properties:
+  - name: timestamp
+    direction: desc
+
+# Unused in query history -- copied from input.
 - kind: LogEntry
   properties:
   - name: datetime
@@ -22,7 +28,7 @@ indexes:
   - name: date
     direction: desc
 
-# Used 10 times in query history.
+# Unused in query history -- copied from input.
 - kind: PuzzleSolveTimes
   properties:
   - name: modified_timestamp
@@ -34,7 +40,7 @@ indexes:
   - name: modified
     direction: desc
 
-# Used 10 times in query history.
+# Unused in query history -- copied from input.
 - kind: UserPuzzleRecord
   properties:
   - name: num_puzzles_solved

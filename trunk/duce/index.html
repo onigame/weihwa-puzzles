@@ -1,0 +1,189 @@
+<html>
+<head>
+<title>Duce: A Game Place</title>
+</head>
+<body>
+
+<h2>Your Games</h2>
+
+{% if seatings %}
+  <TABLE BORDER=1>
+  <TR>
+    <TH>Game ID</TH>
+    <TH>Game</TH>
+    <TH>Variant</TH>
+    <TH>Game Name</TH>
+    <TH>Your Nickname</TH>
+    <TH>Game Created</TH>
+    <TH>Game Modified</TH>
+    <TH>Game Over?</TH>
+    <TH>Actions</TH>
+  </TR>
+  {% for seating in seatings %}
+    <TR>
+    <TD>{{seating.game_id}}</TD>
+    <TD>{{seating.ruleset}}</TD>
+    <TD>{{seating.variant}}</TD>
+    <TD>{{seating.game_name}}</TD>
+    <TD>{{seating.nickname}}</TD>
+    <TD>{{seating.created|date:"Y-m-d H:i:s"}}</TD>
+    <TD>{{seating.modified|date:"Y-m-d H:i:s"}}</TD>
+    <TD>{% if seating.completed %}Yes{% else %}No{% endif %}</TD>
+    <TD><input type=submit value="Play" onClick="PlayGame({{seating.game_id}});">
+    <TR>
+  {% endfor %}
+  </TABLE>
+{% else %}
+  You are not in any games!
+{% endif %}
+
+  <P>
+  <div id="create_game_panel" style="display:none">
+    <h3>Available Players:</h3>
+    {% if available_players %}
+       <form id="startgameform" method="post">
+       <UL>
+         {% for pl in available_players %}
+           <LI>
+           <input type=checkbox name="cg-{{pl.uid}}" id="cg-{{pl.uid}}" {% ifequal pl.uid player.uid %} checked disabled {% endifequal %}>
+           {{pl.nickname}}
+         {% endfor %}
+       </UL>
+         Game:
+         <select name="ruleset">
+           <option value="GuessMyDieRoll" selected>GuessMyDieRoll</option>
+         </select>
+         Variant:
+         <select name="variant">
+           <option value="Original" selected>Original</option>
+         </select>
+       </form>
+       <input type=submit value="Create a game with these players" onClick="TryCreateGame();">
+    {% else %}
+       There are no available players, not even yourself!
+    {% endif %}
+  </div>
+  </p>
+
+<hr>
+
+<H2>Your Player Data</H2>
+
+<UL>
+<!---
+<LI>
+{% if player.public %}
+  Other players can see you.
+{% else %}
+  Other players cannot see you.
+{% endif %}
+  <input type=submit value="Change This" onClick="TogglePlayer('public');">
+--->
+<LI>
+{% if player.l4g %}
+  You are looking to play more games.
+{% else %}
+  You are not looking to play any games.
+{% endif %}
+  <input type=submit value="Change This" onClick="TogglePlayer('l4g');">
+</UL>
+
+<hr>
+
+<H2>Your User Data</H2>
+
+<span id="userid_ui"></span>
+
+<hr>
+
+<a href="faq.html">FAQ</a>
+
+<BR>
+
+Mail suggestions to <a href="mailto:{{weihwa_email}}">Wei-Hwa</a>
+
+<!---
+<form action="/puzzlelogout?url=/">
+<input type=submit value="Log out of Wei-Hwa's Puzzles">
+</form>
+--->
+
+<script type="text/javascript" src="/js/general-lib.js"></script>
+<script type="text/javascript" src="/js/prototype.js"></script>
+<script type="text/javascript" src="/js/puzzle-utils6.js"></script>
+
+<script type="text/javascript">
+
+  window.onload = start;
+  var uidc;
+
+  function server_login() {
+    window.location.reload();
+    // shouldn't get here, but we will if you're not logged in.
+  }
+ 
+  function start() {
+    uidc = new _UserID_controller_("{{user.google_id}}", "{{user.name}}", server_login, start2);
+  }
+
+  function TogglePlayer(param) {
+    url = '{{server_url}}action.cgi?command=toggle&field=' + param + "&url=" + encodeURIComponent(document.URL);
+    window.location.replace(url);
+  }
+
+  function start2() {
+    _gel('userid_ui').appendChild(uidc.getUI());
+    convertToPanel(_gel("create_game_panel"), "Create a Game", false);
+  }
+
+  var opponent_ids = [
+    {% for pl in available_players %}
+       '{{pl.uid}}' {% if forloop.last %}{% else %},{% endif %}
+    {% endfor %}
+  ];
+
+  function PlayerCount() {
+    var total = 0;
+    for (var i=0; i<opponent_ids.length; ++i) {
+      if (_gel("cg-" + opponent_ids[i]).checked)
+        total++;
+    }
+    return total;
+  }
+
+  function TryCreateGame() {
+    if (PlayerCount() != 2) {
+      alert("Sorry, that game requires two players.");
+      return;
+    }
+    var form = _gel("startgameform");
+    form.action = '{{server_url}}action.cgi';
+    _gel("cg-{{player.uid}}").disabled = false;
+    addElement(form, 'input', [
+      'type', 'hidden',
+      'name', 'command',
+      'value', 'startgame'
+    ])
+    addElement(form, 'input', [
+      'type', 'hidden',
+      'name', 'url',
+      'value', encodeURIComponent(document.URL)
+    ])
+    addElement(form, 'input', [
+      'type', 'hidden',
+      'name', 'creator',
+      'value', '{{player.uid}}'
+    ])
+    form.method = 'GET';
+    form.submit();
+  }
+
+  function PlayGame(game_id) {
+    url = '{{server_url}}play.cgi?game_id=' + game_id;
+    window.location.replace(url);
+  }
+
+</script>
+
+</body>
+</html>
