@@ -1,6 +1,7 @@
 import os
 import re
 import logger
+import logging
 import string
 import random
 
@@ -11,6 +12,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from django.template import TemplateDoesNotExist
+
 
 ##########################################################
 
@@ -24,12 +26,22 @@ random.seed(long(hexlify(os.urandom(100)), 16))
 # Google User: reverse mapping.
 class GoogleUser(db.Model):
   whp_uid = db.StringProperty()
-  modified = db.DateTimeProperty()
+  modified = db.DateTimeProperty(auto_now=True)
 
 class User(db.Model):
   name = db.StringProperty()
   google_id = db.StringProperty()
-  modified = db.DateTimeProperty()
+  modified = db.DateTimeProperty(auto_now=True)
+
+def RandomUserName():
+  # This is a temporary placeholder until we can get real OpenSocial stuff
+  return (random.choice(('Jordan', 'Alex', 'Jamie', 'Chris', 'Pat', 'Elliot', 'Willie', 'Val', 
+     'Tracy', 'Stacy', 'Skye', 'Robin', 'Nicky', 'Morgan', 'Madison', 'Leslie', 'Jackie',
+     'Glenn', 'Dana', 'Dale', 'Daryl', 'Drew', 'Charlie', 'Corey', 'Bryce', 'Blair'))
+     + random.choice(list(string.uppercase))
+     + random.choice(list(string.digits))
+     + random.choice(list(string.digits))
+  )
 
 def RandomUnusedUserId():
   u = 1
@@ -49,13 +61,28 @@ def CreateUser(google_id, proposed_id):
   gu = GoogleUser.get_or_insert(google_id)
   if gu.whp_uid != proposed_id:
     gu.whp_uid = proposed_id
-    gu.modified = datetime.now()
     gu.put()
 
   u = User.get_or_insert(gu.whp_uid)
   if u.google_id != google_id:
     u.google_id = google_id
-    u.modified = datetime.now()
+    if not u.name or u.name == "None":
+      u.name = RandomUserName()
+    u.put()
+  
+  return u
+
+def GetOrCreateUser(google_id):
+  gu = GoogleUser.get_or_insert(google_id)
+  if not gu.whp_uid:
+    gu.whp_uid = RandomUnusedUserId()
+    gu.put()
+
+  u = User.get_or_insert(gu.whp_uid)
+  if u.google_id != google_id:
+    u.google_id = google_id
+    if not u.name or u.name == "None":
+      u.name = RandomUserName()
     u.put()
 
   return u
@@ -64,11 +91,14 @@ def GetUser(gu):  # takes GoogleUser as input
   u = User.get_or_insert(gu.whp_uid)
   if u.google_id != gu.whp_uid:
     u.google_id = gu.whp_uid
-    u.modified = datetime.now()
+    if not u.name or u.name == "None":
+      u.name = RandomUserName()
     u.put()
   return u
 
 class UIDGet(webapp.RequestHandler):
+  def post(self):
+    return self.get()
   def get(self):
     gid = self.request.get('gid')
     if not gid:
@@ -87,6 +117,8 @@ class UIDGet(webapp.RequestHandler):
     self.response.out.write(u.key().name())
 
 class UIDPut(webapp.RequestHandler):
+  def post(self):
+    return self.get()
   def get(self):
     gid = self.request.get('gid')
     if not gid:
@@ -105,61 +137,62 @@ class UIDPut(webapp.RequestHandler):
     self.response.out.write(id)
 
 class NameGet(webapp.RequestHandler):
+  def post(self):
+    return self.get()
   def get(self):
-    id = self.request.get('id')
-    if not id:
+    gid = self.request.get('gid')
+
+    if not gid:
+      id = self.request.get('id')
+      if not id:
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write("SomeDude")     # Change to NOT_LOGGED_IN when opensocial works
+        return;
+
+      u = User.get_by_key_name(self.request.get('id'))
+    else:
+      gu = GoogleUser.get_by_key_name(gid)
+      if not gu:
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write('NOT_LOGGED_IN')
+        return
+      u = GetUser(gu)
+
+    if not u:
       self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write("SomeDude")
+      self.response.out.write("NoNameGuy")
       return;
-    u = User.get_by_key_name(self.request.get('id'))
-########### uncomment when OpenSocial works
-#    gid = self.request.get('gid')
-#    if not gid:
-#      self.response.headers['Content-Type'] = 'text/plain'
-#      self.response.out.write('NOT_LOGGED_IN')
-#      return
-#    gu = GoogleUser.get_by_key_name(gid)
-#    if not gu:
-#      self.response.headers['Content-Type'] = 'text/plain'
-#      self.response.out.write('NOT_LOGGED_IN')
-#      return
-#
-#    u = GetUser(gu)
 
     if not u.name:
       u.name = re.match("([A-Za-z0-9_])+", guser.nickname()).group(1)
       if not u.name:
         u.name = "someDude"
-      u.modified = datetime.now()
       u.put()
 
     self.response.headers['Content-Type'] = 'text/plain'
     self.response.out.write(u.name)
 
 class NamePut(webapp.RequestHandler):
+  def post(self):
+    return self.get()
   def get(self):
-    id = self.request.get('id')
-    if not id:
-      self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write("SomeDude")
-      return;
-    u = User.get_by_key_name(self.request.get('id'))
-########### uncomment when OpenSocial works
-#    gid = self.request.get('gid')
-#    if not gid:
-#      self.response.headers['Content-Type'] = 'text/plain'
-#      self.response.out.write('NOT_LOGGED_IN')
-#      return
-#    gu = GoogleUser.get_by_key_name(gid)
-#    if not gu:
-#      self.response.headers['Content-Type'] = 'text/plain'
-#      self.response.out.write('NOT_LOGGED_IN')
-#      return
-#
-#    u = GetUser(gu)
+    gid = self.request.get('gid')
+    if not gid:
+      id = self.request.get('id')
+      if not id:
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write("SomeDude")     # Change to NOT_LOGGED_IN when opensocial works
+        return;
+      u = User.get_by_key_name(self.request.get('id'))
+    else:
+      gu = GoogleUser.get_by_key_name(gid)
+      if not gu:
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write('NOT_LOGGED_IN')
+        return
+      u = GetUser(gu)
 
     u.name = self.request.get('name')
-    u.modified = datetime.now()
     u.put()
 
     self.response.headers['Content-Type'] = 'text/plain'
@@ -170,7 +203,7 @@ class NamePut(webapp.RequestHandler):
 
 class UserPuzzleData(db.Model):
   data = db.TextProperty()    # usually JSON
-  modified = db.DateTimeProperty()
+  modified = db.DateTimeProperty(auto_now=True)
 
 class PuzzleDataWriter(webapp.RequestHandler):
   def get(self):
@@ -185,7 +218,6 @@ class PuzzleDataWriter(webapp.RequestHandler):
     else:
       olddata = userpuzzledata.data;
     userpuzzledata.data = self.request.get('data')
-    userpuzzledata.modified = datetime.now();
     userpuzzledata.put()
     self.response.headers['Content-Type'] = 'text/plain'
     self.response.out.write("Stored %s with id %s" % (userpuzzledata.data, userpuzzledata.key().name()))
@@ -213,7 +245,7 @@ class PuzzleSolveTimes(db.Model):
   uid = db.StringProperty()
   puzzletype = db.StringProperty()
   puzzleid = db.StringProperty()
-  modified_timestamp = db.DateTimeProperty()
+  modified_timestamp = db.DateTimeProperty()   # we don't use auto_now because we want to manage this ourselves
   solvetimes = db.ListProperty(datetime)
   last_solvetime = db.DateTimeProperty()
   best_solvetime = db.DateTimeProperty()
@@ -221,7 +253,7 @@ class PuzzleSolveTimes(db.Model):
 class UserPuzzleRecord(db.Model):
   uid = db.StringProperty()
   puzzletype = db.StringProperty()
-  modified_timestamp = db.DateTimeProperty()
+  modified_timestamp = db.DateTimeProperty()  # we don't use auto_now because we want to manage this ourselves
   num_puzzles_solved = db.IntegerProperty()
   which_puzzles_solved = db.ListProperty(int)   # 0 = not solved, 1 = solved (future values might be added)
   when_puzzles_first_solvetime = db.ListProperty(datetime)
@@ -392,7 +424,7 @@ class DiagonalSudokuSubPage(webapp.RequestHandler):
 ###############################
 
 diagonalsudokuTemplateData = {
-        'num_puzzles': 27,
+        'num_puzzles': 30,
         'puzzle_content': "\
 '7xx4x8xxxxxx1xx4xxxx1x5xxxxx57xxxx2x2xxxxxxx9x4xxxx16xxxxx8x3xxxx2xx1xxxxxx6x9xx2',\
 'x3xxxx6xxxx6xxxx52xx8x2xx41xxx4xxx1xx572x349xx6xxx7xxx58xx7x9xx64xxxx2xxxx3xxxx8x',\
@@ -447,3 +479,257 @@ diagonalsudokuTemplateData = {
 " }
 
 
+#####################################
+
+class DuceGame(db.Model):
+  # key is "game_id", which is a number
+  name = db.StringProperty()                          # assigned by creator, need not be unique
+  created = db.DateTimeProperty(auto_now_add=True)    # when the game was created
+  creator = db.StringProperty()                       # uid of created player
+  modified = db.DateTimeProperty(auto_now=True)       # when last move in the game was made
+  state = db.StringProperty()                         # in case game state needs to be stored (should be a pointer of some sort?)
+  completed = db.BooleanProperty(default=False)       # is the game over?
+  ruleset = db.StringProperty()                       # the core rules we're playing by (just a title)
+  variant = db.StringProperty()                       # what variant, if any
+
+  def getAllSeats(self):
+    result = []
+    id = self.key().id()
+    if not id:
+      # we really should throw some sort of exception here
+      return result
+    seating_query = DuceSeating.all()
+    seating_query.filter('game_id =', id)
+    for seating in seating_query:
+      result.append(seating)
+    return result
+
+  def getAllPlayers(self):
+    result = []
+    id = self.key().id()
+    if not id:
+      # we really should throw some sort of exception here
+      return result
+    seating_query = DuceSeating.all()
+    seating_query.filter('game_id =', id)
+    for seating in seating_query:
+      if not seating.kibitz:
+        result.append(seating)
+    return result
+
+class DucePlayer(db.Model):
+  # key is uid
+  public = db.BooleanProperty()      # show me on public forums
+  l4g = db.BooleanProperty()         # "looking for game"
+
+class DuceSeating(db.Model):         # a seating is a player/game relation
+  game_id = db.IntegerProperty()
+  nickname = db.StringProperty()     # player's nickname in the game
+  uid = db.StringProperty()
+  kibitz = db.BooleanProperty()      # just looking, not actually playing
+
+#####################################
+# external games
+
+import duce_guess_my_die_roll
+
+#####################################
+# Duce API calls
+
+def getSeatingNickname(game_id, uid):
+  query = DuceSeating.all()
+  query.filter('game_id =', game_id)
+  query.filter('uid =', uid)
+  return [seating.nickname for seating in query]
+  
+
+#####################################
+
+def DuceUrlMappings():
+  url_mappings = [('/duce(.*)', DucePage)]
+  url_mappings.append(duce_guess_my_die_roll.UrlMappings())
+  return ('/duce(.*)', DucePage)
+
+class DucePage(webapp.RequestHandler):
+  home_url = "/duce/index.html"
+  user = None            # current user
+  uid = None             # current user's uid
+
+  def post(self, filename):
+    self.get(filename)
+  def get(self, filename):
+    guser = users.get_current_user()
+    if not guser:
+      self.redirect(users.create_login_url(self.request.url))
+      return
+    self.user = GetOrCreateUser(guser.email())
+    self.uid = self.user.key().name()
+
+    if filename == "/index.html":
+      self.MainPage()
+    elif filename == "/faq.html":
+      self.FaqPage()
+    elif filename == "/action.cgi":
+      self.ActionPage();
+    elif filename == "/play.cgi":
+      self.PlayPage();
+    else:
+      self.redirect(self.home_url)
+
+  def MainPage(self):
+    seating_query = DuceSeating.all()
+    seating_query.filter('uid =', self.uid)
+    seatings = []
+
+    for seating in seating_query:               # add game names to the seatings
+      game = DuceGame.get_by_id(seating.game_id)
+      seating.game_name = game.name
+      seating.created = game.created
+      seating.completed = game.completed
+      seating.ruleset = game.ruleset
+      seating.variant = game.variant
+      seatings.append(seating)
+
+    player = DucePlayer.get_or_insert(self.uid, 
+        public=True,
+        l4g=True,
+      )
+    player.uid = self.uid
+
+    available_player_query = DucePlayer.all()
+    available_player_query.filter('l4g =', True)
+    available_players = []
+
+    self_inside = False
+    for available_player in available_player_query:
+      available_player.nickname = User.get_by_key_name(available_player.key().name()).name
+      available_player.uid = available_player.key().name()
+      if available_player.uid == self.uid:
+        self_inside = True
+      available_players.append(available_player)
+
+    if not self_inside:
+      me = DucePlayer.get_by_key_name(self.uid)
+      me.nickname = User.get_by_key_name(me.key().name()).name
+      me.uid = self.uid
+      available_players.append(me)
+
+    if os.environ.get('SERVER_NAME') == 'weihwa-puzzles.appspot.com':
+      weihwa_email = 'weihwa.feedback@gmail.com'
+      server_url = 'http://weihwa-puzzles.appspot.com/duce/'
+    else:
+      weihwa_email = 'whuang@google.com'
+      server_url = 'http://enigma.sfo.corp.google.com:8080/duce/'
+
+    template_values = {
+      'user': self.user,
+      'uid': self.uid,
+      'player': player,
+      'available_players': available_players,
+      'seatings': seatings,
+      'weihwa_email': weihwa_email,
+      'server_url': server_url,
+    }
+    path = os.path.join(os.path.dirname(__file__), 'duce/index.html')
+    self.response.out.write(template.render(path, template_values))
+
+  def FaqPage(self):
+    if os.environ.get('SERVER_NAME') == 'weihwa-puzzles.appspot.com':
+      weihwa_email = 'weihwa.feedback@gmail.com'
+      server_url = 'http://weihwa-puzzles.appspot.com/duce/'
+    else:
+      weihwa_email = 'whuang@google.com'
+      server_url = 'http://enigma.sfo.corp.google.com:8080/duce/'
+    template_values = {
+      'weihwa_email': weihwa_email,
+      'server_url': server_url,
+    }
+    path = os.path.join(os.path.dirname(__file__), 'duce/faq.html')
+    self.response.out.write(template.render(path, template_values))
+
+  def ActionPage(self):
+    command = self.request.get("command")
+    if command == "toggle":
+      self.PlayerToggle()
+    if command == "startgame":
+      self.StartGame()
+
+  def GoBack(self):
+    url = self.request.get("url")
+    if url:
+      self.redirect(url)
+    else:
+      self.redirect(self.home_url)
+
+  def StartGame(self):
+    # who is playing?
+    players = []
+    for arg in self.request.arguments():
+      # u.name = re.match("([A-Za-z0-9_])+", guser.nickname()).group(1)
+      mobj = re.match(r"cg\-(.+)", arg)
+      if mobj:
+        dp = DucePlayer.get_by_key_name(mobj.group(1))
+        if not dp:
+          self.response.headers['Content-Type'] = 'text/plain'
+          self.response.out.write("The player with code %s does not exist!" % mobj.group(1))
+          return;
+        players.append(dp)
+    game = DuceGame()
+    game.name = "Unnamed"
+    game.creator = self.request.get('creator')
+    game.ruleset = self.request.get('ruleset')
+    game.variant = self.request.get('variant')
+    game.put()
+    for p in players:
+      seating = DuceSeating()
+      seating.game_id = game.key().id()
+      seating.uid = p.key().name()
+      seating.nickname = User.get_by_key_name(seating.uid).name
+      seating.kibitz = False
+      seating.put()
+
+    if game.ruleset == "GuessMyDieRoll":
+      gmdr_mgr = duce_guess_my_die_roll.GMDR_Manager(game, self.uid)
+      gmdr_mgr.StartGame()
+
+    self.GoBack()
+
+  def PlayerToggle(self):
+    field = self.request.get("field")
+    if field == "public":
+      player = DucePlayer.get_or_insert(self.uid)
+      player.public = not player.public
+    if field == "l4g":
+      player = DucePlayer.get_or_insert(self.uid)
+      player.l4g = not player.l4g
+      if player.l4g:
+        player.public = True
+    player.put()
+    self.GoBack()
+
+  def PlayPage(self):
+    try:
+      game = DuceGame.get_by_id(int(self.request.get("game_id")))
+      if game.ruleset == "GuessMyDieRoll":
+        gmdr_mgr = duce_guess_my_die_roll.GMDR_Manager(game, self.uid)
+        gmdr_mgr.PlayPage(self.request, self.response)
+        return
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write("The game %s is not implemented yet.\n" % game.ruleset)
+      self.DebugPage()
+      return
+    except ValueError:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write("'%s' is not a valid game ID.\n" % self.request.get("game_id"))
+      self.DebugPage()
+
+  def DebugPage(self):
+    args = self.request.arguments()
+    self.response.headers['Content-Type'] = 'text/plain'
+    for arg in args:
+      self.response.out.write(arg)
+      self.response.out.write("\n")
+      self.response.out.write(self.request.get(arg))
+      self.response.out.write("\n")
+
+########################################

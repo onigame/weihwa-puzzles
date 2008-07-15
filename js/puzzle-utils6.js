@@ -1,6 +1,13 @@
 // Copyright 2006 Google, Inc.
 // Author: Wei-Hwa Huang
 
+/////////////////////////////////////////////////
+// note: Requires prototype.
+
+function _gel(o) {
+  return document.getElementById(o);
+}
+
 ///////////////////////////////////////////////
 //  A random number implementation.
 
@@ -129,19 +136,66 @@ function Multiset() {
 }
 
   ///////////////////////////////////////////////
+  // wrapper for _IG_Fetch_Content.
+
+  function _WHP_Fetch(url, callback) {
+    if (typeof _IG_FetchContent != "undefined") {
+      _IG_FetchContent(url, callback, { refreshInterval: 0 });
+      return;
+    }
+    var request = new XMLHttpRequest();
+    request.open("POST", url, true);
+    request.setRequestHeader("Content-Type",
+                             "application/x-javascript;");
+    request.onreadystatechange = function() {
+      if (request.readyState == 4 && request.status == 200) {
+        if (request.responseText) {
+          callback(request.responseText);
+        }
+      }
+    };
+    request.send("");
+  }
+
+  ///////////////////////////////////////////////
+  // wrapper for _IG_Prefs.
+
+  _WHP_LOCALDATA = [];
+
+  function _WHP_GetData(key) {
+    if (typeof _IG_Prefs != "undefined") {
+      var prefs = new _IG_Prefs();
+      return prefs.getString(key);
+    } else if (typeof _WHP_LOCALDATA[key] != "undefined") {
+      return _WHP_LOCALDATA[key];
+    } else {
+      return "";
+    }
+  }
+
+  function _WHP_SetData(key, data) {
+    if (typeof _IG_Prefs != "undefined") {
+      var prefs = new _IG_Prefs();
+      prefs.set(key, data);
+    } else {
+      _WHP_LOCALDATA[key] = data;
+    }
+  }
+
+  ///////////////////////////////////////////////
   // code to handle logging on server
 
   function _Log_addMessage(content) {
     var url = '{{server_urls.server_url}}datastore/message-write?content='
               + encodeURIComponent('Client: ' + content);
-    _IG_FetchContent(url, function(result) { }, { refreshInterval: 0 });
+    _WHP_Fetch(url, function(result) { });
   }
 
   ///////////////////////////////////////////////
 
   // code to handle user ID and names.
 
-  // Annoyingly, we can't pass cookies via _IG_FetchContent, so we have to pass an id around.
+  // Annoyingly, we can't pass cookies via _WHP_Fetch, so we have to pass an id around.
 
   function _UserID_controller_(email, nickname, not_logged_in_callback, id_loaded_callback) {
     this.google_email = email;
@@ -149,8 +203,7 @@ function Multiset() {
     this.not_logged_in_callback = not_logged_in_callback;
     this.id_loaded_callback = id_loaded_callback;      // will be called when the id is stable.
 
-    var prefs = new _IG_Prefs();
-    this.whp_uid = prefs.getString("user_id");
+    this.whp_uid = _WHP_GetData("user_id");
     this.whp_name = '[loading...]';
     if (this.whp_uid == '' || this.whp_uid == 'NOT_LOGGED_IN') {
       this.request_whp_uid();
@@ -168,7 +221,7 @@ function Multiset() {
   _UserID_controller_.prototype.request_whp_uid = function() {
     // Tell the server that this is our whp_uid.
     var url = '{{server_urls.server_url}}datastore/request_whp_id?gid=' + this.google_email;
-    _IG_FetchContent(url, this.request_whp_uid_callback.bind(this), { refreshInterval: 0 });
+    _WHP_Fetch(url, this.request_whp_uid_callback.bind(this));
   }
 
   _UserID_controller_.prototype.request_whp_uid_callback = function(responseText) {
@@ -181,22 +234,21 @@ function Multiset() {
   _UserID_controller_.prototype.register_whp_uid = function() {
     // Tell the server that this is our whp_uid.
     var url = '{{server_urls.server_url}}datastore/register_whp_id?gid=' + this.google_email + '&id=' + this.whp_uid;
-    _IG_FetchContent(url, this.register_whp_uid_callback.bind(this), { refreshInterval: 0 });
+    _WHP_Fetch(url, this.register_whp_uid_callback.bind(this));
   }
 
   _UserID_controller_.prototype.register_whp_uid_callback = function(responseText) {
     this.check_response(responseText);
     // the server returns the uid we should actually use (if we gave it a good one, it should return it)
     this.set_whp_uid(responseText);
-    var prefs = new _IG_Prefs();
-    prefs.set("user_id", this.whp_uid);
+    _WHP_SetData("user_id", this.whp_uid);
     this.load_whp_name();
     this.id_loaded_callback();
   }
 
   _UserID_controller_.prototype.load_whp_name = function() {
     var url = '{{server_urls.server_url}}datastore/get_name?gid=' + this.google_email;
-    _IG_FetchContent(url, this.load_whp_name_callback.bind(this), { refreshInterval: 0 });
+    _WHP_Fetch(url, this.load_whp_name_callback.bind(this));
   }
 
   _UserID_controller_.prototype.load_whp_name_callback = function (responseText) {
@@ -210,8 +262,7 @@ function Multiset() {
 
   _UserID_controller_.prototype.set_whp_uid = function(value) {
     this.whp_uid = value;
-    var prefs = new _IG_Prefs();
-    prefs.set("user_id", this.whp_uid);
+    _WHP_SetData("user_id", this.whp_uid);
     if (_gel('whp_uid') != null)
       setText(_gel('whp_uid'), this.whp_uid);
   }
@@ -231,7 +282,7 @@ function Multiset() {
     var url = '{{server_urls.server_url}}datastore/put_name?gid=' + this.google_email + '&name=' + name;
     this.whp_name = name;
     _gel("whp_name").innerHTML = name;
-    _IG_FetchContent(url, this.userSetName_callback.bind(this), { refreshInterval: 0 });
+    _WHP_Fetch(url, this.userSetName_callback.bind(this));
   }
 
   _UserID_controller_.prototype.userSetName_callback = function(responseText) {
@@ -299,16 +350,13 @@ function Multiset() {
 var curname = '';
 
  function _UserID_getNewID() {
-   var prefs = new _IG_Prefs();
-   id = '{{random_new_user_id}}';
-   prefs.set("user_id", id);
+   _WHP_SetData("user_id", '{{random_new_user_id}}');
    // _gel('id_button').disabled = true;
-   setText(_gel('unique_id_msg'),id);
+   setText(_gel('unique_id_msg'),'{{random_new_user_id}}');
  }
 
  function _UserID_current() {
-   var prefs = new _IG_Prefs();
-   var id = prefs.getString("user_id");
+   var id = _WHP_GetData("user_id");
    if (id == '') {
      _UserID_getNewID();
    }
@@ -322,14 +370,14 @@ var curname = '';
          + '&name=' + name;
      curname = name;
      _gel("username").innerHTML = curname;
-     _IG_FetchContent(url, function() {
+     _WHP_Fetch(url, function() {
        _gel("name_entry").style.display = "none";
        _gel("username").style.display = "inline";
        _gel("name_msg").innerHTML = "New name accepted!";
        _gel("name_button").value = "Change My Nickname";
        _gel("name_button").onclick = _UserID_prepareNameChange;
        _Log_addMessage('user ' + _UserID_current() + ' changed their name to ' + curname);
-     }, { refreshInterval: 0 });
+     });
    } else {
      _gel("name_msg").innerHTML = "Only letters and numbers please";
    }
@@ -365,7 +413,7 @@ var curname = '';
 
  function _UserID_getName() {
    var url = '{{server_urls.server_url}}datastore/get_name?id=' + _UserID_current();
-   _IG_FetchContent(url, _UserID_updateName, { refreshInterval: 0 });
+   _WHP_Fetch(url, _UserID_updateName);
  }
 
  function _UserID_getUI() {
@@ -473,7 +521,7 @@ var curname = '';
   _WHP_pref_controller.prototype.getPrefs = function(callback) {
     this.getPrefs_extern_callback = callback;
     var url = '{{server_urls.server_url}}datastore/getpuzzledata?id=' + this.get_whp_uid();
-    _IG_FetchContent(url, this.getPrefsCallbackWrapper.bind(this), { refreshInterval: 0 });
+    _WHP_Fetch(url, this.getPrefsCallbackWrapper.bind(this));
   }
 
   _WHP_pref_controller.prototype.getPrefsCallbackWrapper = function(result) {
@@ -508,7 +556,7 @@ var curname = '';
     var url = '{{server_urls.server_url}}datastore/writepuzzledata?id=' + this.get_whp_uid() + '&data='
               + encodeURIComponent(ObjectToJSONString(this.game_state));
     pref_controller_temp = this;
-    _IG_FetchContent(url, this.setPrefsCallbackWrapper.bind(this), { refreshInterval: 0 });
+    _WHP_Fetch(url, this.setPrefsCallbackWrapper.bind(this));
   }
 
   _WHP_pref_controller.prototype.setPrefsCallbackWrapper = function(result) {
@@ -624,7 +672,7 @@ var curname = '';
     var url = '{{server_urls.server_url}}datastore/getpuzzledata?id=' + this.get_whp_uid()
               + '&key=' + encodeURIComponent(key);
     this.loadState_callback = callback;
-    _IG_FetchContent(url, this.loadStateCallbackWrapper.bind(this), { refreshInterval: 0 });
+    _WHP_Fetch(url, this.loadStateCallbackWrapper.bind(this));
   }
 
   _WHP_puz_controller.prototype.loadStateCallbackWrapper = function(result) {
@@ -648,7 +696,7 @@ var curname = '';
               + '&key=' + encodeURIComponent(key)
               + '&data=' + encodeURIComponent(ObjectToJSONString(state));
     this.saveState_callback = callback;
-    _IG_FetchContent(url, this.saveStateCallbackWrapper.bind(this), { refreshInterval: 0 });
+    _WHP_Fetch(url, this.saveStateCallbackWrapper.bind(this));
   }
 
   _WHP_puz_controller.prototype.saveStateCallbackWrapper = function(result) {
@@ -664,5 +712,5 @@ var curname = '';
               + 'id=' + this.get_whp_uid()
               + '&puznum=' + puzNum
               + '&password=' + passgen.getInt(100000000);
-    _IG_FetchContent(url, null, { refreshInterval: 0 });
+    _WHP_Fetch(url, null);
   }

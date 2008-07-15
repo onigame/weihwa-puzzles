@@ -127,6 +127,8 @@ class Javascript(webapp.RequestHandler):
   def get(self, filename):
     template_values = {
         'server_urls': ServerUrls(),
+        'random_new_user_id': puzzleutils.RandomUnusedUserId(),
+        'random_username': "SomeDude",
       }
     self.response.headers['Content-Type'] = 'text/javascript'
     try:
@@ -282,38 +284,38 @@ class PuzzleLoggedoutPage(webapp.RequestHandler):
 ##########################################################
 
 def real_main():
-  application = webapp.WSGIApplication([('/', MainPage),
-                                        ('/confirm-login.html', ConfirmLoginHTML),
-                                        ('/current.xml', CurrentGadgetXML),
-                                        ('/js/(.*\.js)', Javascript),
-                                        ('/gadgets/(.*\.xml)', GadgetXML),
+  url_mappings = [('/', MainPage),
+                  ('/confirm-login.html', ConfirmLoginHTML),
+                  ('/current.xml', CurrentGadgetXML),
+                  ('/js/(.*\.js)', Javascript),
+                  ('/gadgets/(.*\.xml)', GadgetXML),
 
-                                        ('/datastore/message-write', logger.LogWriter),
-                                        ('/datastore/message-all', logger.LogReader),
-                                        ('/datastore/message-last', logger.LogReaderLast),
-                                        ('/datastore/message-first', logger.LogReaderFirst),
-                                        ('/datastore/message-delete-first', logger.LogDeleterFirst),
+                  ('/datastore/message-write', logger.LogWriter),
+                  ('/datastore/message-all', logger.LogReader),
+                  ('/datastore/message-last', logger.LogReaderLast),
+                  ('/datastore/message-first', logger.LogReaderFirst),
+                  ('/datastore/message-delete-first', logger.LogDeleterFirst),
 
-                                        ('/datastore/request_whp_id', puzzleutils.UIDGet),
-                                        ('/datastore/register_whp_id', puzzleutils.UIDPut),
-                                        ('/datastore/get_name', puzzleutils.NameGet),
-                                        ('/datastore/put_name', puzzleutils.NamePut),
+                  ('/datastore/request_whp_id', puzzleutils.UIDGet),
+                  ('/datastore/register_whp_id', puzzleutils.UIDPut),
+                  ('/datastore/get_name', puzzleutils.NameGet),
+                  ('/datastore/put_name', puzzleutils.NamePut),
 
-                                        ('/datastore/writepuzzledata', puzzleutils.PuzzleDataWriter),
-                                        ('/datastore/getpuzzledata', puzzleutils.PuzzleDataReader),
-                                        ('/datastore/rps', puzzleutils.ReportPuzzleSolved),
+                  ('/datastore/writepuzzledata', puzzleutils.PuzzleDataWriter),
+                  ('/datastore/getpuzzledata', puzzleutils.PuzzleDataReader),
+                  ('/datastore/rps', puzzleutils.ReportPuzzleSolved),
 
-                                        ('/whoami', WhoAmIPage),
-                                        ('/puzzlelogin', PuzzleLoginPage),
-                                        ('/puzzlelogout', PuzzleLogoutPage),
-                                        ('/puzzleloggedout', PuzzleLoggedoutPage),
-                                        ('/gadgetpage', GadgetPage),
+                  ('/whoami', WhoAmIPage),
+                  ('/puzzlelogin', PuzzleLoginPage),
+                  ('/puzzlelogout', PuzzleLogoutPage),
+                  ('/puzzleloggedout', PuzzleLoggedoutPage),
+                  ('/gadgetpage', GadgetPage),
 
-                                        ('/diagonalsudoku/(.*\.html)', puzzleutils.DiagonalSudokuSubPage),
-                                        ('/logintest(.*)', LoginTestPage),
-                                        ('/.*', MainPage),
-                                       ],
-                                       debug=True)
+                  ('/diagonalsudoku/(.*\.html)', puzzleutils.DiagonalSudokuSubPage),
+                  ('/logintest(.*)', LoginTestPage)]
+  url_mappings.append(puzzleutils.DuceUrlMappings())
+  url_mappings.append(('/.*', MainPage))
+  application = webapp.WSGIApplication(url_mappings, debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 
 def profile_main():

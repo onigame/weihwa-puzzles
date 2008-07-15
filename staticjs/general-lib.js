@@ -34,15 +34,16 @@ function toPercentage(numerator, denominator) {
 // Also, adds parameters to the element as specified.
 // Returns the new element.
 function addElement(node, type, params) {
-  node.appendChild(document.createElement(type));
+  var newguy = document.createElement(type);
   if (params != undefined) {
     var index = 1;
     while (index < params.length) {
-      node.lastChild[params[index-1]] = params[index];
+      newguy[params[index-1]] = params[index];
       index += 2;
     }
   }
-  return node.lastChild;
+  node.appendChild(newguy);
+  return newguy;
 }
 
 // Convenience function; adds an HTML linebreak.
@@ -122,22 +123,30 @@ CustomButton = function(onclick, img_norm, img_down) {
 
 // Callback function used by convertToPanel, below.
 function togglePanelVisibility(id) {
-  var content = _gel(id + "-content");
+  var content = _gel(id);
   if (content.style["display"] == "none") {
     content.style["display"] = "block";
-    _gel(id + "-img").src = woshambo.C.IMAGES + "arrow-open.png";
+    _gel(id + "-img").src = "/images/arrow-open.png";
   } else {
     content.style["display"] = "none";
-    _gel(id + "-img").src = woshambo.C.IMAGES + "arrow-closed.png";
+    _gel(id + "-img").src = "/images/arrow-closed.png";
   }
-  _IG_AdjustIFrameHeight();
+  if (typeof _IG_AdjustIFrameHeight != "undefined")
+    _IG_AdjustIFrameHeight();
 }
 
 // Turns a normal <div> in the page into a nice-looking
 // panel, that can be shrunk or expanded by clicking
 // on a little pointy-arrow.
-function convertToPanel(div, title) {
+function convertToPanel(div, title, start_open) {
   var id = div.id;
+
+  var content = document.createElement("span");
+  content.innerHTML = div.innerHTML;
+  div.innerHTML = "";
+  div.id += "-wrapper";
+  content.id = id;
+
   div.style.border = '1px solid #b3c9ef';
   div.style.margin = '0.2em 0.2em 0.2em 0.2em';
   div.style.MozBorderRadius = '0.5em';
@@ -145,8 +154,6 @@ function convertToPanel(div, title) {
 
   var tabheader = document.createElement("span");
   tabheader.id = id + "-tab";
-  var content = document.createElement("span");
-  content.id = id + "-content";
 
   tabheader.style.backgroundColor = "#C3D9FF";
   tabheader.style.color = "#333333";
@@ -157,19 +164,22 @@ function convertToPanel(div, title) {
   tabheader.style.cursor = "pointer";
   tabheader.style.display = "block";
 
-  content.style.display = "block";
+  content.style.display = "none";
   content.style.margin = '0.5em 0.5em 0.5em 0.5em';
-
-  div.appendChild(tabheader);
-  div.appendChild(content);
 
   tabheader.onclick = function () {
     togglePanelVisibility(id);
   }
   addElement(tabheader, "img");
   tabheader.childNodes[0].id = id + "-img";
-  tabheader.childNodes[0].src = woshambo.C.IMAGES + "arrow-open.png";
+  tabheader.childNodes[0].src = "/images/arrow-closed.png";
   addText(tabheader, title);
+
+  div.appendChild(tabheader);
+  div.appendChild(content);
+
+
+  if (start_open) togglePanelVisibility(id);
 }
 
 // Dummy function used for debugging.
