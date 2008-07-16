@@ -8,20 +8,27 @@
 
 <hr>
 
+{% if messages %}
 
-{% if started_game %}
-
-<i>For some reason, the server did not have a record of your game.  A new game has been started with this game id.</i>
-
+{{messages}}
 <hr>
 
 {% endif %}
 
-The current player is: {{cur_player_name}}
+The current player is: 
+{% ifequal state.active_seat.key seating.key %}
+
+<b>You!</b>
+
+{% else %}
+
+{{state.active_seat.nickname}}
+
+{% endifequal %}
 
 <hr>
 
-{% if ready_to_play %}
+{% if is_active %}
 
 Choose a number.  I will roll a die; if you match that number, then you win!
 
@@ -36,16 +43,31 @@ Choose a number.  I will roll a die; if you match that number, then you win!
     num = n + 1;
     form = document.createElement("form");
     form.id = "choose" + num;
-    form.method = "get";
+    form.method = "post";
+
+    d1 = document.createElement("input");
+    d1.type = "hidden";
+    d1.name = "game_id";
+    d1.value = "{{seating.game.key.id}}";
+    form.appendChild(d1);
+
+    d1 = document.createElement("input");
+    d1.type = "hidden";
+    d1.name = "action";
+    d1.value = "choose";
+    form.appendChild(d1);
+
     d1 = document.createElement("input");
     d1.type = "hidden";
     d1.name = "chose";
     d1.value = "" + num;
-    d2 = document.createElement("input");
-    d2.type = "submit";
-    d2.value = "" + num;
     form.appendChild(d1);
-    form.appendChild(d2);
+
+    d1 = document.createElement("input");
+    d1.type = "submit";
+    d1.value = "" + num;
+    form.appendChild(d1);
+
     new Insertion.Bottom("controls", form);
   };
 
@@ -59,6 +81,8 @@ Choose a number.  I will roll a die; if you match that number, then you win!
 It is not your turn.  Please wait until it is your turn.  <!-- TODO:  Send an e-mail reminder -->
 
 {% endif %}
+
+<hr>
 
 <a href=".">Back</a>
 

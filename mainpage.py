@@ -7,7 +7,7 @@ import logger
 import urllib
 import re
 import random
-import puzzleutils
+import puzzles
 
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -127,7 +127,7 @@ class Javascript(webapp.RequestHandler):
   def get(self, filename):
     template_values = {
         'server_urls': ServerUrls(),
-        'random_new_user_id': puzzleutils.RandomUnusedUserId(),
+        'random_new_user_id': puzzles.RandomUnusedUserId(),
         'random_username': "SomeDude",
       }
     self.response.headers['Content-Type'] = 'text/javascript'
@@ -145,7 +145,7 @@ class GadgetXML(webapp.RequestHandler):
   def get(self, filename):
     template_values = {};
     if filename == '20080523-diagonalsudoku.xml':
-      template_values = puzzleutils.diagonalsudokuTemplateData
+      template_values = puzzles.diagonalsudokuTemplateData
     template_values['server_urls'] = ServerUrls()
     self.response.headers['Content-Type'] = 'text/xml'
     path = os.path.join(os.path.dirname(__file__), 'gadgets/' + filename)
@@ -296,14 +296,14 @@ def real_main():
                   ('/datastore/message-first', logger.LogReaderFirst),
                   ('/datastore/message-delete-first', logger.LogDeleterFirst),
 
-                  ('/datastore/request_whp_id', puzzleutils.UIDGet),
-                  ('/datastore/register_whp_id', puzzleutils.UIDPut),
-                  ('/datastore/get_name', puzzleutils.NameGet),
-                  ('/datastore/put_name', puzzleutils.NamePut),
+                  ('/datastore/request_whp_id', puzzles.UIDGet),
+                  ('/datastore/register_whp_id', puzzles.UIDPut),
+                  ('/datastore/get_name', puzzles.NameGet),
+                  ('/datastore/put_name', puzzles.NamePut),
 
-                  ('/datastore/writepuzzledata', puzzleutils.PuzzleDataWriter),
-                  ('/datastore/getpuzzledata', puzzleutils.PuzzleDataReader),
-                  ('/datastore/rps', puzzleutils.ReportPuzzleSolved),
+                  ('/datastore/writepuzzledata', puzzles.PuzzleDataWriter),
+                  ('/datastore/getpuzzledata', puzzles.PuzzleDataReader),
+                  ('/datastore/rps', puzzles.ReportPuzzleSolved),
 
                   ('/whoami', WhoAmIPage),
                   ('/puzzlelogin', PuzzleLoginPage),
@@ -311,9 +311,10 @@ def real_main():
                   ('/puzzleloggedout', PuzzleLoggedoutPage),
                   ('/gadgetpage', GadgetPage),
 
-                  ('/diagonalsudoku/(.*\.html)', puzzleutils.DiagonalSudokuSubPage),
+                  ('/diagonalsudoku/(.*\.html)', puzzles.DiagonalSudokuSubPage),
                   ('/logintest(.*)', LoginTestPage)]
-  url_mappings.append(puzzleutils.DuceUrlMappings())
+
+  url_mappings.extend(puzzles.UrlMappings())
   url_mappings.append(('/.*', MainPage))
   application = webapp.WSGIApplication(url_mappings, debug=True)
   wsgiref.handlers.CGIHandler().run(application)
@@ -337,4 +338,3 @@ main = real_main;
 
 if __name__ == "__main__":
   main()
-

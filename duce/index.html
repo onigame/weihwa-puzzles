@@ -15,21 +15,23 @@
     <TH>Game Name</TH>
     <TH>Your Nickname</TH>
     <TH>Game Created</TH>
+    <TH>Created By</TH>
     <TH>Game Modified</TH>
     <TH>Game Over?</TH>
     <TH>Actions</TH>
   </TR>
   {% for seating in seatings %}
     <TR>
-    <TD>{{seating.game_id}}</TD>
-    <TD>{{seating.ruleset}}</TD>
-    <TD>{{seating.variant}}</TD>
-    <TD>{{seating.game_name}}</TD>
+    <TD>{{seating.game.key.id}}</TD>
+    <TD>{{seating.game.ruleset}}</TD>
+    <TD>{{seating.game.variant}}</TD>
+    <TD>{{seating.game.name}}</TD>
     <TD>{{seating.nickname}}</TD>
-    <TD>{{seating.created|date:"Y-m-d H:i:s"}}</TD>
-    <TD>{{seating.modified|date:"Y-m-d H:i:s"}}</TD>
-    <TD>{% if seating.completed %}Yes{% else %}No{% endif %}</TD>
-    <TD><input type=submit value="Play" onClick="PlayGame({{seating.game_id}});">
+    <TD>{{seating.game.created|date:"Y-m-d H:i:s"}}</TD>
+    <TD>{{seating.game.creator.user.name}}</TD>
+    <TD>{{seating.game.modified|date:"Y-m-d H:i:s"}}</TD>
+    <TD>{% if seating.game.completed %}Yes{% else %}No{% endif %}</TD>
+    <TD><input type=submit value="Play" onClick="PlayGame({{seating.game.key.id}});">
     <TR>
   {% endfor %}
   </TABLE>
@@ -45,8 +47,8 @@
        <UL>
          {% for pl in available_players %}
            <LI>
-           <input type=checkbox name="cg-{{pl.uid}}" id="cg-{{pl.uid}}" {% ifequal pl.uid player.uid %} checked disabled {% endifequal %}>
-           {{pl.nickname}}
+           <input type=checkbox name="cg-{{pl.user.uid}}" id="cg-{{pl.user.uid}}" {% ifequal pl.user.uid player.user.uid %} checked disabled {% endifequal %}>
+           {{pl.user.name}}
          {% endfor %}
        </UL>
          Game:
@@ -92,7 +94,8 @@
 
 <H2>Your User Data</H2>
 
-<span id="userid_ui"></span>
+<iframe src="/user_id.html" width="100%" frameborder=0 marginheight=0 marginwidth=0>
+</iframe>
 
 <hr>
 
@@ -115,7 +118,6 @@ Mail suggestions to <a href="mailto:{{weihwa_email}}">Wei-Hwa</a>
 <script type="text/javascript">
 
   window.onload = start;
-  var uidc;
 
   function server_login() {
     window.location.reload();
@@ -123,7 +125,7 @@ Mail suggestions to <a href="mailto:{{weihwa_email}}">Wei-Hwa</a>
   }
  
   function start() {
-    uidc = new _UserID_controller_("{{user.google_id}}", "{{user.name}}", server_login, start2);
+    convertToPanel(_gel("create_game_panel"), "Create a Game", false);
   }
 
   function TogglePlayer(param) {
@@ -131,14 +133,9 @@ Mail suggestions to <a href="mailto:{{weihwa_email}}">Wei-Hwa</a>
     window.location.replace(url);
   }
 
-  function start2() {
-    _gel('userid_ui').appendChild(uidc.getUI());
-    convertToPanel(_gel("create_game_panel"), "Create a Game", false);
-  }
-
   var opponent_ids = [
     {% for pl in available_players %}
-       '{{pl.uid}}' {% if forloop.last %}{% else %},{% endif %}
+       '{{pl.user.uid}}' {% if forloop.last %}{% else %},{% endif %}
     {% endfor %}
   ];
 
@@ -158,7 +155,7 @@ Mail suggestions to <a href="mailto:{{weihwa_email}}">Wei-Hwa</a>
     }
     var form = _gel("startgameform");
     form.action = '{{server_url}}action.cgi';
-    _gel("cg-{{player.uid}}").disabled = false;
+    _gel("cg-{{player.user.uid}}").disabled = false;
     addElement(form, 'input', [
       'type', 'hidden',
       'name', 'command',
@@ -168,11 +165,6 @@ Mail suggestions to <a href="mailto:{{weihwa_email}}">Wei-Hwa</a>
       'type', 'hidden',
       'name', 'url',
       'value', encodeURIComponent(document.URL)
-    ])
-    addElement(form, 'input', [
-      'type', 'hidden',
-      'name', 'creator',
-      'value', '{{player.uid}}'
     ])
     form.method = 'GET';
     form.submit();
