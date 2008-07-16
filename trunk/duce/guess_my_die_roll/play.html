@@ -9,80 +9,88 @@
 <hr>
 
 {% if messages %}
-
-{{messages}}
-<hr>
-
+  {{messages}}
+  <hr>
 {% endif %}
 
-The current player is: 
-{% ifequal state.active_seat.key seating.key %}
+{% if state.game_ended %}
 
-<b>You!</b>
+  The game is over.
+
+  The winner was
+  {% ifequal state.winner.key seating.key %}
+    <b>You!</b>
+  {% else %}
+    {{state.winner.nickname}}.
+  {% endifequal %}
 
 {% else %}
 
-{{state.active_seat.nickname}}
+  The current player is: 
+  {% ifequal state.active_seat.key seating.key %}
+    <b>You!</b>
+  {% else %}
+    {{state.active_seat.nickname}}.
+  {% endifequal %}
+  <hr>
 
-{% endifequal %}
+  {% if is_active %}
+    Choose a number.  I will roll a die; if you match that number, then you win!
+    <div id="controls"></div>
+    <hr>
+    <script type="text/javascript" src="/js/prototype.js"></script>
+    <script type="text/javascript">
+
+      function addButton(n) {
+        num = n + 1;
+        form = document.createElement("form");
+        form.id = "choose" + num;
+        form.method = "post";
+
+        d1 = document.createElement("input");
+        d1.type = "hidden";
+        d1.name = "game_id";
+        d1.value = "{{seating.game.key.id}}";
+        form.appendChild(d1);
+
+        d1 = document.createElement("input");
+        d1.type = "hidden";
+        d1.name = "action";
+        d1.value = "choose";
+        form.appendChild(d1);
+
+        d1 = document.createElement("input");
+        d1.type = "hidden";
+        d1.name = "chose";
+        d1.value = "" + num;
+        form.appendChild(d1);
+
+        d1 = document.createElement("input");
+        d1.type = "submit";
+        d1.value = "" + num;
+        form.appendChild(d1);
+
+        new Insertion.Bottom("controls", form);
+      };
+
+      i = 6;
+      i.times(addButton);
+    </script>
+  {% else %}
+    It is not your turn.  Please wait until it is your turn.  <!-- TODO:  Send an e-mail reminder -->
+  {% endif %}
+
+{% endif %}
 
 <hr>
+ 
+<input type=submit value="Refresh" onclick="Refresh();">
 
-{% if is_active %}
-
-Choose a number.  I will roll a die; if you match that number, then you win!
-
-<div id="controls"></div>
-
-<hr>
-
-<script type="text/javascript" src="/js/prototype.js"></script>
 <script type="text/javascript">
-
-  function addButton(n) {
-    num = n + 1;
-    form = document.createElement("form");
-    form.id = "choose" + num;
-    form.method = "post";
-
-    d1 = document.createElement("input");
-    d1.type = "hidden";
-    d1.name = "game_id";
-    d1.value = "{{seating.game.key.id}}";
-    form.appendChild(d1);
-
-    d1 = document.createElement("input");
-    d1.type = "hidden";
-    d1.name = "action";
-    d1.value = "choose";
-    form.appendChild(d1);
-
-    d1 = document.createElement("input");
-    d1.type = "hidden";
-    d1.name = "chose";
-    d1.value = "" + num;
-    form.appendChild(d1);
-
-    d1 = document.createElement("input");
-    d1.type = "submit";
-    d1.value = "" + num;
-    form.appendChild(d1);
-
-    new Insertion.Bottom("controls", form);
-  };
-
-  i = 6;
-  i.times(addButton);
-
+  function Refresh() {
+    window.location.replace(document.URL);  // so we don't resubmit POST data
+  }
 </script>
-
-{% else %}
-
-It is not your turn.  Please wait until it is your turn.  <!-- TODO:  Send an e-mail reminder -->
-
-{% endif %}
-
-<hr>
 
 <a href=".">Back</a>
 
