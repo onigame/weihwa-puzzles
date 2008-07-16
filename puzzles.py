@@ -524,7 +524,6 @@ class UserIdPage(webapp.RequestHandler):
 ##########################################################
 
 ## add the "duce" path.
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'duce/')))
 import duce
 
 ##########################################################

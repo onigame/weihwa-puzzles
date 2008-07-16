@@ -10,7 +10,14 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Used 41 times in query history.
+# Used 77 times in query history.
+- kind: GMDR_State
+  properties:
+  - name: game
+  - name: timestamp
+    direction: desc
+
+# Used 102 times in query history.
 - kind: GMDR_State
   properties:
   - name: timestamp
