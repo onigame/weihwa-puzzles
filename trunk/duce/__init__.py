@@ -10,6 +10,7 @@ from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 
 import puzzles
+import sanitize
 
 ##########################################################
 # exceptions
@@ -23,6 +24,7 @@ class Player(db.Model):
   user = db.ReferenceProperty(puzzles.User)    # who am I?
   public = db.BooleanProperty()                # show me on public forums
   l4g = db.BooleanProperty()                   # "looking for game"
+  comment = db.TextProperty()                  # right now, just used as a suggestion/comment box
 
 class Game(db.Model):
   # key is "game_id", which is a number
@@ -114,6 +116,12 @@ class DucePage(webapp.RequestHandler):
       self.MainPage()
     elif filename == "/faq.html":
       self.FaqPage()
+    elif filename == "/suggestion_box.html":
+      self.SuggestionBoxPage()
+    elif filename == "/get_comment.ajax":
+      self.GetCommentAjax();
+    elif filename == "/put_comment.ajax":
+      self.PutCommentAjax();
     elif filename == "/action.cgi":
       self.ActionPage();
     elif filename == "/play.cgi":
@@ -244,6 +252,18 @@ class DucePage(webapp.RequestHandler):
       self.response.out.write("'%s' is not a valid game ID.\n" % self.request.get("game_id"))
       self.DebugPage()
 
+  def SuggestionBoxPage(self):
+    all_player_query = Player.all()
+    all_players = []
+    for player in all_player_query:
+      all_players.append(player)
+    template_values = {
+      'cur_player': self.player,
+      'all_players': all_players,
+    }
+    path = os.path.join(os.path.dirname(__file__), 'suggestion_box.html')
+    self.response.out.write(template.render(path, template_values))
+
   def DebugPage(self):
     args = self.request.arguments()
     self.response.headers['Content-Type'] = 'text/plain'
@@ -252,6 +272,39 @@ class DucePage(webapp.RequestHandler):
       self.response.out.write("\n")
       self.response.out.write(self.request.get(arg))
       self.response.out.write("\n")
+
+  def PutCommentAjax(self):
+    if self.request.get("comment"):
+      self.player.comment = self.request.get("comment")
+      self.player.put()
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write("SUCCESS")
+    self.DebugAjax();
+
+  def GetCommentAjax(self):
+    key_name = self.request.get("key_name")
+    LocalError = "Something went wrong in GetCommentAjax: "
+    try:
+      if not key_name:
+        raise LocalError, "key does not exist"
+      player = Player.get_by_key_name(key_name)
+      if not player:
+        raise LocalError, "player with key %s does not exist" % key_name
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write(sanitize.PlainText_to_HTML(player.comment)
+                              if player.comment 
+                              else '<i>[no comments]</i>')
+    except LocalError, explanation:
+      logging.error(LocalError + explanation)
+      self.error(500)
+
+  def DebugAjax(self):
+    args = self.request.arguments()
+    for arg in args:
+      logging.debug("AJAX %s : %s" % (arg, self.request.get(arg)))
+    self.response.headers['Content-Type'] = 'text/plain'
+    return;
+
 
 ########################################
 ## add paths for games.
