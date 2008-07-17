@@ -123,13 +123,12 @@ CustomButton = function(onclick, img_norm, img_down) {
 
 // Callback function used by convertToPanel, below.
 function togglePanelVisibility(id) {
-  var content = _gel(id);
-  if (content.style["display"] == "none") {
-    content.style["display"] = "block";
-    _gel(id + "-img").src = "/images/arrow-open.png";
+  if (Element.visible(id)) {
+    Element.hide(id);
+    $(id + "-img").src = "/images/arrow-closed.png";
   } else {
-    content.style["display"] = "none";
-    _gel(id + "-img").src = "/images/arrow-closed.png";
+    Element.show(id);
+    $(id + "-img").src = "/images/arrow-open.png";
   }
   if (typeof _IG_AdjustIFrameHeight != "undefined")
     _IG_AdjustIFrameHeight();
@@ -178,9 +177,28 @@ function convertToPanel(div, title, start_open) {
   div.appendChild(tabheader);
   div.appendChild(content);
 
-
   if (start_open) togglePanelVisibility(id);
 }
+
+// Same as above, but just creates the HTML for the panel.
+function makePanelHTML(id, title) {
+  html = (
+' <div id="IDHERE-wrapper" ' +
+'      style="border:1px solid #b3c9ef;margin:0.2em 0.2em 0.2em 0.2em;-moz-border-radius:0.5em;display:block" ' +
+' > ' +
+'   <span id="IDHERE-tab" ' +
+'         style="background-color:#C3D9FF;color:#333333;font-weight:bold;padding-bottom:0.25em;padding-left:0.5em;padding-top:0.25em;cursor:pointer;display:block" ' +
+'         onClick="togglePanelVisibility(\'IDHERE\')" ' +
+'   > ' +
+'     <img id="IDHERE-img" src="/images/arrow-closed.png"> ' +
+      title +
+'   </span> ' +
+'   <span id="IDHERE" style="display:none;margin:0.5em 0.5em 0.5em 0.5em"> ' +
+'   </span> ' +
+' </div> ');
+  html = html.replace(/IDHERE/g, id);
+  return html;
+} 
 
 // Dummy function used for debugging.
 // Since the javascript in the core xml file has a
