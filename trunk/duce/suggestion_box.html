@@ -1,0 +1,99 @@
+<html>
+<head>
+<title>Duce: A Game Place</title>
+</head>
+<body>
+
+<script type="text/javascript" src="/js/general-lib.js"></script>
+<script type="text/javascript" src="/js/prototype.js"></script>
+
+<span id="comment_table">
+
+<table border=1>
+  <tr>
+    <th>Player</th>
+    <th>Comments</th>
+  </tr>
+  {% for player in all_players %}
+    <tr>
+      <td>{{player.user.name}}</td>
+      <td id="comment-{{player.key.name}}">{{player.comment}}</td>
+      <script type="text/javascript">
+        new Ajax.PeriodicalUpdater(
+          "comment-{{player.key.name}}",
+          "get_comment.ajax",
+          {
+            parameters : "key_name={{player.key.name}}",
+            onFailure : function(resp) {
+              $("comment-{{player.key.name}}").innerHTML = "<i>[error loading from server]</i>";
+            },
+            frequency : 30,
+            decay : 2
+          }
+        );
+      </script>
+      <!-- <td><input type=submit onclick="RefreshComment('{{player.key.name}}')"></td> -->
+    </tr>
+  {% endfor %}
+</table>
+
+</span>
+
+<span id="comment_form">
+
+  <form id="comment_form">
+    <textarea rows="5" cols="60" name="comment">{{cur_player.comment}}</textarea>
+  </form>
+  <input id="comment_submit" type=submit value="Them's my Comments">
+  <span id="comment_result"></span>
+
+</span>
+
+<span id="content"></span>
+
+<script type="text/javascript">
+  $("content").innerHTML = makePanelHTML("sug", "Suggestion Box");
+
+  $("sug").appendChild($("comment_table"));
+  togglePanelVisibility("sug");
+
+  new Insertion.Bottom("sug", makePanelHTML("my_sug", "Edit My Suggestion"));
+  $("my_sug").appendChild($("comment_form"));
+
+  $("comment_submit").onclick = UserSubmittedComment;
+
+  function UserSubmittedComment() {
+    $("comment_submit").value = "Submitting...";
+    $("comment_submit").disabled = true;
+    new Ajax.Request("put_comment.ajax", {
+      onSuccess : function(resp) {
+        $("comment_result").innerHTML = "Your comment was submitted successfully.";
+        $("comment_submit").value = "Them's my Comments";
+        $("comment_submit").disabled = false;
+        RefreshComment('{{cur_player.key.name}}');
+        new Ajax.Updater(
+          "comment-{{cur_player.key.name}}",
+          "get_comment.ajax",
+          {
+            parameters : "key_name={{player.key.name}}",
+            onFailure : function(resp) {
+              $("comment-{{cur_player.key.name}}").innerHTML = "<i>[error loading from server]</i>";
+            },
+          }
+        );
+      },
+      onFailure : function(resp) {
+        $("comment_result").innerHTML = "There was a failure submitting your comment.";
+        $("comment_submit").value = "Them's my Comments";
+        $("comment_submit").disabled = false;
+      },
+      parameters : Form.serialize($("comment_form"))
+    });
+  }
+
+
+</script>
+
+
+</body>
+</html>

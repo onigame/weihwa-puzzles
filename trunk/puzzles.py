@@ -451,7 +451,7 @@ class DiagonalSudokuSubPage(webapp.RequestHandler):
 ###############################
 
 diagonalsudokuTemplateData = {
-        'num_puzzles': 32,
+        'num_puzzles': 33,
         'puzzle_content': "\
 '7xx4x8xxxxxx1xx4xxxx1x5xxxxx57xxxx2x2xxxxxxx9x4xxxx16xxxxx8x3xxxx2xx1xxxxxx6x9xx2',\
 'x3xxxx6xxxx6xxxx52xx8x2xx41xxx4xxx1xx572x349xx6xxx7xxx58xx7x9xx64xxxx2xxxx3xxxx8x',\
