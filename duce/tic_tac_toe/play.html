@@ -1,10 +1,10 @@
 <html>
 <head>
-<title>Duce: Guess My Die Roll</title>
+<title>Duce: Tic Tac Toe</title>
 </head>
 <body>
 
-<h1>Guess My Die Roll</h1>
+<h1>Tic Tac Toe</h1>
 
 <hr>
 
@@ -13,16 +13,32 @@
   <hr>
 {% endif %}
 
-{% if state.game_ended %}
+{% if game_ended %}
 
   The game is over.
 
   The winner was
-  {% ifequal state.winner.key seat.key %}
+  {% ifequal state.result.winner.key seat.key %}
     <b>You!</b>
   {% else %}
-    {{state.winner.nickname}}.
+    {{state.result.winner.nickname}}.
   {% endifequal %}
+
+  <table border=1>
+   <tr>
+   <td id="p0">{{grid.0}}</td>
+   <td id="p1">{{grid.1}}</td>
+   <td id="p2">{{grid.2}}</td>
+   </tr><tr>
+   <td id="p3">{{grid.3}}</td>
+   <td id="p4">{{grid.4}}</td>
+   <td id="p5">{{grid.5}}</td>
+   </tr><tr>
+   <td id="p6">{{grid.6}}</td>
+   <td id="p7">{{grid.7}}</td>
+   <td id="p8">{{grid.8}}</td>
+   </tr>
+  </table>
 
 {% else %}
 
@@ -32,17 +48,34 @@
   {% else %}
     {{state.active_seat.nickname}}.
   {% endifequal %}
+
   <hr>
 
+  <table border=1>
+   <tr>
+   <td id="p0">{{grid.0}}</td>
+   <td id="p1">{{grid.1}}</td>
+   <td id="p2">{{grid.2}}</td>
+   </tr><tr>
+   <td id="p3">{{grid.3}}</td>
+   <td id="p4">{{grid.4}}</td>
+   <td id="p5">{{grid.5}}</td>
+   </tr><tr>
+   <td id="p6">{{grid.6}}</td>
+   <td id="p7">{{grid.7}}</td>
+   <td id="p8">{{grid.8}}</td>
+   </tr>
+  </table>
+
   {% if is_active %}
-    Choose a number.  I will roll a die; if you match that number, then you win!
+    Play somewhere.
     <div id="controls"></div>
     <hr>
     <script type="text/javascript" src="/js/prototype.js"></script>
     <script type="text/javascript">
 
       function addButton(n) {
-        num = n + 1;
+        num = n;
         form = document.createElement("form");
         form.id = "choose" + num;
         form.method = "post";
@@ -67,13 +100,13 @@
 
         d1 = document.createElement("input");
         d1.type = "submit";
-        d1.value = "" + num;
+        d1.value = "Here";
         form.appendChild(d1);
 
-        new Insertion.Bottom("controls", form);
+        new Insertion.Bottom("p" + n, form)
       };
 
-      i = 6;
+      i = 9;
       i.times(addButton);
     </script>
   {% else %}

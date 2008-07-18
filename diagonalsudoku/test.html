@@ -1,0 +1,1327 @@
+<style> 
+body,td,a,p,.h{font-family:arial,sans-serif;}
+</style>
+
+<div style="position:relative;float:right;margin-left:2px;margin-right:0px;margin-top:2px;margin-bottom:0px;">
+<A TARGET="_top" HREF="{{server_urls.server_url}}"><IMG SRC="{{server_urls.server_url}}images/home.png"
+     STYLE="border:0px"
+     ALT="Puzzle Homepage: Play previous puzzles!"
+     TITLE="Puzzle Homepage: Play previous puzzles!"
+></A><A HREF="mailto:weihwa.feedback+20080523@gmail.com"><IMG SRC="{{server_urls.server_url}}images/mail.png"
+     STYLE="border:0px"
+     ALT="Click here to send feedback"
+     TITLE="Click here to send feedback"
+></A>
+</div>
+
+<script type="text/javascript" src="/js/general-lib.js"></script>
+<script type="text/javascript" src="/js/igoogle_draglib.js"></script>
+<script type="text/javascript" src="/js/igoogle_gridlib.js"></script>
+<script type="text/javascript" src="/js/puzzle-utils7.js"></script>
+<script type="text/javascript" src="/js/json2.js"></script>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-1247731-2");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+
+<script type="text/javascript">
+<!-- Javascript begins
+
+  // Copyright 2006 Google, Inc.
+  // Author: Wei-Hwa Huang
+
+  ///////////////////////////////////////////////
+
+  function GadgetPrefs() {
+    return new gadgets.Prefs();
+  }
+
+  ///////////////////////////////////////////////
+
+  function _WHP_game_state() {
+    this.cur_puz = 0;
+    this.puz_count = {{num_puzzles}};
+    this.puz_solved = new Array();
+    for (var i=0; i<this.puz_count; ++i) {
+      this.puz_solved[i] = 0;
+    }
+    this.recent_solved = -1;
+  }
+
+  function _WHP_puz_state() {
+    this.d = new Array();
+  }
+
+  _WHP_pref_controller.prototype.get_color = function(puznum) {
+    if (this.game_state.puz_solved[puznum] == 1) {
+      return "#00FF00";
+    } else {
+      return "#FF0000";
+    }
+  }
+
+  _WHP_pref_controller.prototype.score = function() {
+    var answer = 0;
+    for (var i=0; i<this.game_state.puz_count; ++i) {
+      answer += this.game_state.puz_solved[i];
+    }
+    return answer;
+  }
+
+  _WHP_pref_controller.prototype.extra_update_state = function() {
+    var num = this.score();
+    if (num == 500) {
+      _gel("numsolved").innerHTML = "All puzzles";
+    } else {
+      _gel("numsolved").innerHTML = num + " puzzle" + (num == 1 ? "" : "s");
+    }
+    _gel("points").innerHTML = this.score();
+  }
+
+  ///////////////////////////////////////////////
+  ///  Primitive Sudoku classes.
+
+  var letters = new Array('1','2','3','4','5','6','7','8','9');
+  var sudoku_size = 9;
+
+  function sudoku_cell(id, size) {
+    this.id = id;
+    this.size = size;
+    this.fixed = false;
+    this.value = -1;
+    this.regions = new Array();
+
+    this.friend_values = new Multiset();
+  }
+
+  sudoku_cell.prototype.add_region = function (region) {
+    this.regions.push(region);
+  }
+
+  sudoku_cell.prototype.get_value = function () {
+    return this.value; 
+  }
+
+  sudoku_cell.prototype.allows = function (value) {
+    return (!this.friend_values.has(value));
+  }
+
+  sudoku_cell.prototype.allowed_letters = function () {
+    var answer = "";
+    for (var i=0; i<this.size; ++i) {
+      if (!this.friend_values.has(i)) {
+        answer += letters[i];
+      }
+    }
+    return answer;
+  }
+
+  sudoku_cell.prototype.add_placed = function (value, src_id) {
+    if (src_id == this.id) return;
+    var change_happening = (!this.friend_values.has(value));
+    this.friend_values.add(value);
+    if (change_happening)
+      this.changed(this.id);
+  }
+
+  sudoku_cell.prototype.remove_placed = function (value, src_id) {
+    if (src_id == this.id) return;
+    var change_happening = (this.friend_values.count(value) == 1);
+    this.friend_values.remove(value);
+    if (change_happening) {
+      this.changed(this.id);
+      this.value_changed(value);
+    }
+  }
+
+  sudoku_cell.prototype.set_value = function (value, fixed) {
+    for (var i = 0; i < this.regions.length; ++i) {
+      this.regions[i].remove_placed(this.value, this.id);
+      this.regions[i].add_placed(value, this.id);
+    }
+    this.fixed = fixed;
+    this.value = value;
+    this.changed(this.id);
+    this.value_changed(value);
+  }
+
+  sudoku_cell.prototype.reset_value = function () {
+    for (var i = 0; i < this.regions.length; ++i) {
+      this.regions[i].remove_placed(this.value, this.id);
+    }
+    var old_value = this.value;
+    this.value = -1;
+    this.changed(this.id);
+    this.value_changed(old_value);
+  }
+
+  sudoku_cell.prototype.changed = function (id) {
+    // callback -- indicates cell change.
+  }
+
+  sudoku_cell.prototype.value_changed = function (id) {
+    // callback -- indicates value change.
+  }
+
+  function sudoku_region(id, size, dup_ok) {
+    this.id = id;
+    this.size = size;
+    this.cells = new Array();
+    this.placed = new Multiset();
+    this.dup_ok = dup_ok;
+  }
+
+  sudoku_region.prototype.add_cell = function (cell) {
+    this.cells.push(cell);
+  }
+
+  sudoku_region.prototype.add_placed = function (value, src_id) {
+    if (value != -1) {
+      this.placed.add(value);
+      if (!this.dup_ok) {
+        for (var i = 0; i < this.cells.length; ++i) {
+          if (this.cells[i].id != src_id) {  // this check isn't really necessary but it pays to be paranoid.
+            this.cells[i].add_placed(value, src_id);
+          }
+        }
+      }
+      this.changed(this.id);
+    }
+  }
+
+  sudoku_region.prototype.has = function (value) {
+    return this.placed.has(value);
+  }
+
+  sudoku_region.prototype.count = function (value) {
+    return this.placed.count(value);
+  }
+
+  sudoku_region.prototype.has_dupes = function () {
+    if (this.dup_ok) { 
+      return false;
+    }
+    return this.placed.has_dupes();
+  }
+
+  sudoku_region.prototype.has_all = function () {
+//    for (var i = 0; i < this.cells.length; ++i) {
+    for (var i = 0; i < sudoku_size; ++i) {
+      if (this.placed.count(i) == 0) return false;
+    }
+    return true;
+  }
+
+  sudoku_region.prototype.completed = function () {
+    if (this.dup_ok) {
+      return ((this.placed.size == this.size) && (this.has_all()));
+    } else {
+      return ((this.placed.size == this.size) && (!this.placed.has_dupes()));
+    }
+  }
+
+  sudoku_region.prototype.is_bad = function () {
+    if (this.dup_ok) {
+      var dcount = 0;
+      for (var i = 0; i < sudoku_size; ++i) {
+        if (this.placed.count(i) > 2) return true;
+        if (this.placed.count(i) == 2) dcount++;
+      }
+      return (dcount > 1);
+    } else {
+      return (this.placed.has_dupes());
+    }
+  }
+
+  sudoku_region.prototype.allowed_letters = function () {
+    var answer = "";
+//    for (var i=0; i<this.size; ++i) {
+    for (var i=0; i < sudoku_size; ++i) {
+      if (!this.placed.has(i)) {
+        answer += letters[i];
+      }
+    }
+    return answer;
+  }
+
+  sudoku_region.prototype.remove_placed = function (value, src_id) {
+    if (value != -1) {
+      this.placed.remove(value);
+      for (var i = 0; i < this.cells.length; ++i) {
+        if (this.cells[i].id != src_id) {  // this check isn't really necessary but it pays to be paranoid.
+          this.cells[i].remove_placed(value, src_id);
+        }
+      }
+      this.changed(this.id);
+    }
+  }
+
+  sudoku_region.prototype.changed = function (id) {
+    // callback -- indicates region change.
+  }
+
+
+  ///////////////////////////////////////////////
+
+  function puzzle_data() {
+    this.prefix = '{{server_urls.server_url}}images/';
+    this.autosave_id = 0;
+    this.resetPuzzleData(0);
+  }
+
+  puzzle_data.prototype.resetPuzzle = function(game_state) {
+    this.game_state = game_state;
+    var index = this.game_state.cur_puz;
+    this.resetPuzzleData(index);
+  }
+
+  var raw_puzzle_data = new Array({{puzzle_content}});
+
+  puzzle_data.prototype.resetPuzzleData = function(index) {
+    this.raw_puzzle = raw_puzzle_data[index];
+    this.size = sudoku_size;
+    this.puznum = index;
+
+    this.area = this.size * this.size;
+    this.row_regions = new Array(this.size);
+    this.col_regions = new Array(this.size);
+    this.box_regions = new Array(this.size);
+    this.diag_regions = new Array(2);
+
+    for (var i=0; i<this.size; ++i) {
+      this.row_regions[i] = new sudoku_region(i, this.size, false);
+      this.col_regions[i] = new sudoku_region(i + this.size, this.size, false);
+    }
+    for (var i=0; i<this.size; ++i) {
+      this.box_regions[i] = new sudoku_region(i + this.size + this.size, this.size, false);
+    }
+    this.diag_regions[0] = new sudoku_region(3 * this.size, this.size, false);
+    this.diag_regions[1] = new sudoku_region(3 * this.size + 1, this.size, false);
+
+    this.cells = new Array(this.area);
+    for (var i=0; i<this.area; ++i) {
+      this.cells[i] = new sudoku_cell(i, this.size);
+      this.cells[i].add_region(this.row_regions[Math.floor(i / this.size)]);
+      this.row_regions[Math.floor(i / this.size)].add_cell(this.cells[i]);
+
+      this.cells[i].add_region(this.col_regions[i % this.size]);
+      this.col_regions[i % this.size].add_cell(this.cells[i]);
+
+      var box_num = this.box_num(i);
+      this.cells[i].add_region(this.box_regions[box_num]);
+      this.box_regions[box_num].add_cell(this.cells[i]);
+    }
+    for (var i=0; i<this.size; ++i) {
+      this.cells[i*10].add_region(this.diag_regions[0]);
+      this.diag_regions[0].add_cell(this.cells[i*10]);
+      this.cells[(i+1)*8].add_region(this.diag_regions[1]);
+      this.diag_regions[1].add_cell(this.cells[(i+1)*8]);
+    }
+
+    this.palette_count = new Multiset();
+    for (var i=0; i<this.size; ++i) {
+      for (var j=0; j<this.size; ++j) {
+        this.palette_count.add(i);
+      }
+    }
+
+    this.affix = function (index, value) {
+      this.cells[index].set_value(value, true);
+      this.palette_count.remove(value);
+    }
+
+    for (var i=0; i<this.size*this.size; i ++) {
+      var val = this.raw_puzzle.substr(i, 1);
+      if (val != 'x') {
+        this.affix(i, val-1);
+      }
+    }
+
+    var callback_this = this;
+    callback_this.cell_changed_callback = function (index) {
+      callback_this.cell_changed(index);
+    }
+    callback_this.value_changed_callback = function (index) {
+      callback_this.value_changed(index);
+    }
+    for (var i=0; i<this.area; ++i) {
+      this.cells[i].changed = this.cell_changed_callback;
+      this.cells[i].value_changed = this.value_changed_callback;
+    }
+    callback_this.region_changed_callback = function (index) {
+      if (index == -1) return;
+      var pos = index % this.size;
+      if (index < this.size) {
+        callback_this._IGG_refreshCell(2 * this.gridsize * (pos + 1) - 1);
+      } else if (index < this.size * 2) {
+        callback_this._IGG_refreshCell(this.gridarea - this.gridsize + pos + 2);
+      } else {
+        callback_this._IGG_refreshCell(this.gridarea + this.gridsize + pos);
+      }
+    }
+    for (var i=0; i<this.size; ++i) {
+      this.row_regions[i].changed = this.region_changed_callback;
+      this.col_regions[i].changed = this.region_changed_callback;
+      this.box_regions[i].changed = this.region_changed_callback;
+    }
+    this.diag_regions[0].changed = this.region_changed_callback;
+    this.diag_regions[1].changed = this.region_changed_callback;
+
+    this.gridsize = this.size*2+2;
+    this.gridarea = this.gridsize*this.gridsize;
+    this.colors = new Array("#A9C5EB", "#FFBBBB", "#FFFF88", "#DDF8CC", "#CEA8F4", "#FFBBFF", "#BBFFFF");
+
+    this.keycursor = -1;
+  }
+
+  puzzle_data.prototype.box_num = function (index) {
+    return Math.floor(index/27) * 3 + Math.floor(index % 9 / 3);
+  }
+  
+  puzzle_data.prototype.save_progress = function () {
+    pref_controller.setPrefs();
+  }
+
+  puzzle_data.prototype.increment_palette = function (index) {
+    if (index == -1) return;
+    this.palette_count.add(index);
+    this.cell_changed(index + this.area);
+  }
+
+  puzzle_data.prototype.decrement_palette = function (index) {
+    if (index == -1) return;
+    this.palette_count.remove(index);
+    this.cell_changed(index + this.area);
+  }
+
+  puzzle_data.prototype.value_changed = function(value) {
+    this._IGG_refreshCell(value + this.gridarea);
+  }
+
+  puzzle_data.prototype.cell_changed = function(index) {
+    if (index >= this.area) {
+      // palette or bulb.
+      this._IGG_refreshCell(index - this.area + this.gridarea);
+    } else {
+      var row = Math.floor(index / this.size); 
+      var col = index % this.size;
+      var box = this.box_num(index);
+      this._IGG_refreshCell((2*row+1)*this.gridsize + (2*col+1)); // cell
+      this._IGG_refreshCell((2*row+2)*this.gridsize - 1); // row
+      this._IGG_refreshCell(this.gridarea - this.gridsize + (2*col+1)); // col
+      this._IGG_refreshCell(this.gridarea + this.size + box); // box
+      if (index % 10 == 0)
+        this._IGG_refreshCell(this.gridarea + this.size * 2); // diag1
+      if (index % 8 == 0)
+        this._IGG_refreshCell(this.gridarea + this.size * 2 + 1); // diag1
+    }
+  }
+
+  puzzle_data.prototype.isSolved = function() {
+    for (var i = 0; i < this.size; ++i) {
+      if (!this.row_regions[i].completed()) return false;
+      if (!this.col_regions[i].completed()) return false;
+    }
+    for (var i = 0; i < this.size; ++i) {
+      if (!this.box_regions[i].completed()) return false;
+    }
+    for (var i = 0; i < 2; ++i) {
+      if (!this.diag_regions[i].completed()) return false;
+    }
+    return true;
+  }
+
+  puzzle_data.prototype.blank = function() {
+    if (pcborder == "#FFFFFF")
+      return document.createTextNode("");
+    var result = new Image();
+    result.alt = '-';
+    result.src = this.prefix + 'blank.gif';
+    return result;
+  }
+
+  puzzle_data.prototype.black = function() {
+    var result = new Image();
+    result.alt = '-';
+    result.src = this.prefix + 'black.gif';
+    return result;
+  }
+
+  puzzle_data.prototype.autosave_checkbox = function() {
+    var checked = _gel("autosave").checked;
+    var prefs = new GadgetPrefs();
+    prefs.set("autosave", (checked ? "yes" : ""));
+    clearInterval(this.autosave_id);
+    if (checked) {
+      this.autosave_id = setInterval("puzzle.save_state()", 30000);
+    }
+  };
+
+  puzzle_data.prototype.save_state = function() {
+    var state = new _WHP_puz_state();
+    for (var i=0; i<this.area; ++i) {
+      if(!this.cells[i].fixed && this.cells[i].get_value() != -1) {
+        state.d.push(i, this.cells[i].get_value());
+      }
+    }
+    _gel("resetbutton3").disabled = true;
+    _gel("save_button").disabled = true;
+    _gel("load_button").disabled = true;
+    _gel("save_button").value = "Saving...";
+    var key = 'P' + this.game_state.cur_puz;
+    keyed_state_controller.saveState(key, state, function() {
+      _gel("resetbutton3").disabled = false;
+      _gel("save_button").disabled = false;
+      _gel("load_button").disabled = false;
+      _gel("save_button").value = "Save";
+    });
+  }
+
+  puzzle_data.prototype.load_state = function() {
+    var key = 'P' + this.game_state.cur_puz;
+    _gel("resetbutton3").disabled = true;
+    _gel("save_button").disabled = true;
+    _gel("load_button").disabled = true;
+    _gel("load_button").value = "Loading...";
+    keyed_state_controller.loadState(key, load_state_callback);
+  }
+
+  var load_state_callback = function(state) {
+    puzzle.load_state_callback(state);
+  }
+
+  puzzle_data.prototype.load_state_callback = function(state) {
+    reset(this.game_state);
+    for (var i = 1; i < state.d.length; i += 2) {
+      var digit = state.d[i]; 
+      var pos = state.d[i-1];
+      this.decrement_palette(digit);
+      this.cells[pos].set_value(digit, false);
+    }
+    _gel("resetbutton3").disabled = false;
+    _gel("save_button").disabled = false;
+    _gel("load_button").disabled = false;
+    _gel("load_button").value = "Load";
+  }
+
+  puzzle_data.prototype.get_background_color = function(index) {
+    if (index >= this.gridarea + this.size * 2) {
+      // diag
+      return this.colors[index - this.gridarea - this.size * 2];
+    } else if (index >= this.gridarea + this.size) {
+      return "#FFFFFF";
+    } else if (index >= this.gridarea) {
+      return "#FFFFFF";
+    } else {
+      var g_row = Math.floor(index / this.gridsize);
+      var g_col = index % this.gridsize;
+      if (g_row == this.gridsize-1 || g_col == this.gridsize-1) {
+        return "#CCCCCC";
+      } else if (g_row == 0 || g_col == 0 || g_row == this.gridsize-2 || g_col == this.gridsize-2) {
+        return pcborder;
+      } else if (g_row % 2 == 0 && g_col % 2 == 0) {
+        var row = g_row / 2 - 1;
+        var col = g_col / 2 - 1;
+        var reg1 = this.box_num(row * this.size + col);
+        if (reg1 != this.box_num(row * this.size + col+1)) return pcborder;
+        if (reg1 != this.box_num((row+1) * this.size + col)) return pcborder;
+        if (reg1 != this.box_num((row+1) * this.size + col+1)) return pcborder;
+        return "#FFFFFF";
+        return this.colors[reg1];
+      } else if (g_row % 2 == 0) {
+        var row = g_row / 2 - 1;
+        var col = (g_col - 1) / 2;
+        var reg1 = this.box_num(row * this.size + col);
+        if (reg1 != this.box_num((row+1) * this.size + col)) return pcborder;
+        return "#FFFFFF";
+        return this.colors[reg1];
+      } else if (g_col % 2 == 0) {
+        var row = (g_row - 1)/ 2;
+        var col = g_col / 2 - 1;
+        var reg1 = this.box_num(row * this.size + col);
+        if (reg1 != this.box_num(row * this.size + col+1)) return pcborder;
+        return "#FFFFFF";
+        return this.colors[reg1];
+      } else {
+        var row = (g_row - 1) / 2;
+        var col = (g_col - 1) / 2;
+        var reg1 = this.box_num(row * this.size + col);
+        if (row == 4 && col == 4) return this.colors[4]; 
+        if (row == col) return this.colors[0]; 
+        if (row + col == 8) return this.colors[1]; 
+        return "#FFFFFF";
+        return this.colors[reg1];
+      }
+    }
+  }
+
+  puzzle_data.prototype.set_background_colors = function() {
+    for (var i=0; i<this.gridarea; ++i) {
+      _gel(grid.getCellTDID(i)).style.backgroundColor = this.get_background_color(i);
+    }
+  }
+
+  puzzle_data.prototype.get_mini_image = function (region, value, title) {
+    var answer = new Image(8, 8);
+    answer.title = title;
+    var c = region.count(value);
+    if (c > 1) {
+      answer.src = this.prefix + 'sudoku' + (value + 1) + 'red.png';
+    } else if (c == 1) {
+      answer.src = this.prefix + 'sudokublank.png';
+    } else {
+      answer.src = this.prefix + 'sudoku' + (value + 1) + 'black.png';
+    }
+    return answer;
+  }
+
+  puzzle_data.prototype.get_title = function (reg) {
+    if (reg.completed()) {
+      return "Completed";
+    } else if (reg.is_bad()) {
+      return "Error: Too many duplicate numbers";
+    } else {
+      return "Numbers left: " + reg.allowed_letters();
+    }
+  }
+
+  puzzle_data.prototype.get_region_info = function(region) {
+    var answer = null;
+    if (region.completed()) {
+      img = new Image(24,24);
+      img.src = this.prefix + 'green.p' + 'ng';
+      img.title = this.get_title(region);
+      return img;
+    } else {
+      table = document.createElement('table');
+      table.cellPadding = 0;
+      table.cellSpacing = 0;
+      table.border = 0;
+      for (var i = 0; i < 3; ++i) {
+        var tr = addElement(table, 'tr');
+        for (var j = 0; j < 3; ++j) {
+          td = addElement(tr, 'td', [
+            'align',  'middle',
+            'valign', 'center'
+          ]);
+          td.appendChild(this.get_mini_image(region, i*3+j, this.get_title(region)));
+        }
+      }
+      return table;
+    }
+  }
+
+  puzzle_data.prototype.palette_object = function(value, count) {
+    var letter = letters[value];
+    var table = document.createElement('table');
+    table.cellPadding = 0;
+    table.cellSpacing = 0;
+    table.border = 0;
+    for (var i = 0; i < 3; ++i) {
+      var tr = addElement(table, 'tr');
+      for (var j = 0; j < 3; ++j) {
+        td = addElement(tr, 'td', [
+          'align',  'middle',
+          'valign', 'center'
+        ]);
+        td.appendChild(this.get_mini_image(this.box_regions[i*3+j],
+                                           value, count + " left"));
+      }
+    }
+    return table;
+  }
+
+  puzzle_data.prototype._IGG_getNormalView = function(index) {
+    if (index == this.gridarea + this.size * 2 + 1)
+      return this.get_region_info(this.diag_regions[1]);
+    if (index == this.gridarea + this.size * 2)
+      return this.get_region_info(this.diag_regions[0]);
+    if (index >= this.gridarea + this.size) 
+      return this.get_region_info(this.box_regions[index - this.gridarea - this.size]);
+    if (index >= this.gridarea) {
+      var number = index - this.gridarea;
+      return this.palette_object(number, this.palette_count.count(number));
+    }
+
+    var g_row = Math.floor(index / this.gridsize);
+    var g_col = index % this.gridsize;
+    if (g_row == this.gridsize-1 && g_col == this.gridsize-1)  // corner
+      return document.createTextNode("");
+    if (g_row == this.gridsize-1 && g_col % 2 == 0)
+      return document.createTextNode("");
+    if (g_row == this.gridsize-1)
+      return this.get_region_info(this.col_regions[(g_col - 1)/2]);
+    if (g_col == this.gridsize-1 && g_row % 2 == 0)
+      return document.createTextNode("");
+    if (g_col == this.gridsize-1)
+      return this.get_region_info(this.row_regions[(g_row - 1)/2]);
+
+    if (g_row % 2 == 0 || g_col % 2 == 0)
+      return this.blank();
+
+    var row = (g_row - 1) / 2;
+    var col = (g_col - 1) / 2;
+    var index = row * this.size + col;
+
+    var value = this.cells[index].get_value();
+    var fixed = this.cells[index].fixed;
+    if (value < 0) {
+      var allowed = this.cells[index].allowed_letters();
+      var item = this.get_raw_cell("?", index);
+      item.title = (this.cells[index].allowed_letters() == "") ?
+                   "No letters possible!" :
+                   ("Could be: " + allowed);
+      item.style.color = '#FFFFFF';
+      return item;
+    } else {
+      var item = this.get_raw_cell(letters[value], index);
+      item.title = fixed ? 'Given at start' : 'Placed by you';
+      item.style.color = fixed ? '#008000' : pcborder;
+      item.style.fontWeight = 'bold';
+      item.style.cursor = fixed ? 'default' : 'pointer,hand';
+      return item;
+    }
+  }
+
+  puzzle_data.prototype._IGG_getSourceViewObject = function(g_index) {
+    var pos = g_index - this.gridarea;
+    if (pos >= 0 && pos < this.size) {
+      return this.palette_object(pos, this.palette_count.count(pos) - 1);
+    }
+    var index = this.gtoi(g_index);
+    if (index < 0) return;
+    var item = this.get_raw_cell('?', index);
+    item.style.color = "#FFFFFF";
+    if (!this.cells[index].fixed) item.style.cursor = 'pointer,hand';
+    return item;
+  }
+
+  puzzle_data.prototype._IGG_getTargetView = function(target, source) {
+    var pos = target - this.gridarea;
+    if (pos >= 0 && pos < this.size) {
+      return this.palette_object(pos, this.palette_count.count(pos) + 1);
+    }
+    var value = source - this.gridarea;
+    if (value < 0 || value >= this.size) {
+      value = this.value_at(source);
+    }
+    var item = this.get_raw_cell(letters[value], this.gtoi(target));
+    item.style.color = "#D0D0D0";
+    item.style.fontWeight = 'bold';
+    item.style.cursor = 'pointer,hand';
+    return item;
+  }
+
+  puzzle_data.prototype.get_raw_cell = function(value, index) {
+    var result = document.createElement("span");
+    result.style.textAlign = 'center';
+    result.style.cursor = 'default';
+    result.style.fontSize = '16pt';
+    if (index == this.keycursor) result.style.backgroundColor = '#808080';
+    result.onclick = 'puzzle.handleClick(' + index + ')';
+    if (document.addEventListener) {
+      result.addEventListener('click', function() {puzzle.handleClick(index)}, false);
+    } else {
+      result.attachEvent('onclick', function() {puzzle.handleClick(index)});
+    }
+
+    addText(result, value);
+    return result;
+  }
+
+  puzzle_data.prototype.gtoi = function(g_index) {
+    if (g_index < 0) return -1;
+    if (g_index >= this.gridarea + this.size) return -1;
+    if (g_index >= this.gridarea) return -1;
+    if (g_index % 2 == 0) return -1;
+    var g_row = Math.floor(g_index / this.gridsize);
+    if (g_row % 2 == 0) return -1;
+    var g_col = g_index % this.gridsize;
+    if (g_row == this.gridsize-1 || g_col == this.gridsize-1) return -1;
+    var row = (g_row - 1)/2;
+    var col = (g_col - 1)/2;
+    return row * this.size + col;
+  }
+
+  puzzle_data.prototype.itop = function(index) {
+    return (index + this.gridarea);
+  }
+
+  puzzle_data.prototype.itog = function(index) {
+    var row = Math.floor(index / this.size);
+    var col = index % this.size;
+    return (2*row+1)*this.gridsize + (2*col+1);
+  }
+
+  puzzle_data.prototype.value_at = function(g_index) {
+    var index = this.gtoi(g_index);
+    if (index == -1) return -1;
+    return this.cells[index].get_value();
+  }
+
+  puzzle_data.prototype._IGG_getSurrogateView = function(index) {
+    var value = index - this.gridarea;
+    if (value < 0) {
+      value = this.value_at(index);
+    }
+    var result = document.createElement('span');
+    result.style.fontSize = '18pt';
+    addText(result, letters[value]);
+    return result;
+  }
+
+  puzzle_data.prototype.handleClick = function(location) {
+    var old_cursor = this.keycursor;
+    if (location == -1 || location >= this.area || this.cells[location].fixed) {
+      this.keycursor = -1;
+    }
+    this.keycursor = location;
+    this.cell_changed(old_cursor);
+    this.cell_changed(this.keycursor);
+  }
+
+  puzzle_data.prototype.rc_interpret = function (row, col) {
+    while (row < 0) row += this.size;
+    while (row >= this.size) row -= this.size;
+    while (col < 0) col += this.size;
+    while (col >= this.size) col -= this.size;
+    return (row*this.size + col);
+  }
+
+  puzzle_data.prototype.move_cursor_dir = function(dir) {
+    // 0 = up, 1 = right, 2 = down, 3 = left.
+    var old_cursor = this.keycursor;
+    var row = Math.floor(this.keycursor / this.size);
+    var col = this.keycursor % this.size;
+    if (dir % 4 == 0) {
+      row--;
+    } else if (dir % 4 == 1) {
+      col++;
+    } else if (dir % 4 == 2) {
+      row++;
+    } else if (dir % 4 == 3) {
+      col--;
+    } else {
+      return;
+    }
+    this.keycursor = this.rc_interpret(row, col);
+    this.cell_changed(old_cursor);
+    this.cell_changed(this.keycursor);
+  }
+
+  puzzle_data.prototype.handleEraseKey = function() {
+    if (this.cells[this.keycursor].fixed) return;
+    this._IGG_handleDrag(this.itog(this.keycursor), -1);
+  }
+
+  puzzle_data.prototype.handleNumberKey = function(keychar) {
+    if (this.cells[this.keycursor].fixed) return;
+    if (this.palette_count.count(keychar-1) == 0) return;
+    this._IGG_handleDrag(this.itop(keychar-1), this.itog(this.keycursor));
+  }
+
+  puzzle_data.prototype.handleKeyPress = function(keynum, keychar) {
+    if (this.keycursor == -1) return;
+    if (keynum == 38 || keynum == 104 || keychar == "I") {
+      this.move_cursor_dir(0);
+      return;
+    }
+    if (keynum == 39 || keynum == 102 || keychar == "L") {
+      this.move_cursor_dir(1);
+      return;
+    }
+    if (keynum == 40 || keynum == 98 || keychar == "K") {
+      this.move_cursor_dir(2);
+      return;
+    }
+    if (keynum == 37 || keynum == 100 || keychar == "J") {
+      this.move_cursor_dir(3);
+      return;
+    }
+    if (keynum == 46 || keychar == " " || keychar == "0") {
+      this.handleEraseKey();
+      return;
+    }
+    if (keychar >= 1 && keychar <= this.size) {
+      this.handleNumberKey(keychar);
+      return;
+    }
+  }
+
+  puzzle_data.prototype._IGG_handleDrag = function(source, target) {
+    if (source == -1) return;
+    if (source == target) {
+      this._IGG_refreshCell(source);
+      return;
+    }
+    if (target == -1) {
+      this._IGG_refreshCell(source);
+      if (this.value_at(source) == -1) return;
+      target = this.value_at(source) + this.gridarea;
+    }
+    if (source >= this.gridarea) {
+      // palette to grid
+      if (target >= this.gridarea) {
+        this._IGG_refreshCell(source);
+        return;
+      }
+      var digit = source - this.gridarea;
+      this.increment_palette(this.value_at(target));
+      this.decrement_palette(digit);
+      this.cells[this.gtoi(target)].set_value(digit, false);
+    } else if (target >= this.gridarea) {
+      // grid to palette
+      var digit = target - this.gridarea;
+      this.increment_palette(digit);
+      this.cells[this.gtoi(source)].reset_value();
+    } else {
+      // grid to grid
+      var digit = this.value_at(source);
+      this.increment_palette(this.value_at(target));
+      this.cells[this.gtoi(source)].reset_value();
+      this.cells[this.gtoi(target)].set_value(digit, false);
+    }
+    grid.refreshDragSources();
+    if (this.isSolved()) {
+      pref_controller.game_state.puz_solved[this.puznum] = 1;
+      pref_controller.game_state.recent_solved = this.puznum;
+
+      _Log_addMessage('user ' + curname + ' solved puzzle ' + (this.puznum+1));
+
+      this.save_progress();
+      pref_controller.updatePrefDisplay();
+    }
+  }
+
+  puzzle_data.prototype._IGG_isDragSource = function(g_index) {
+    if (g_index >= this.gridarea && g_index < this.gridarea + this.size) {
+      var digit = g_index - this.gridarea;
+      return (this.palette_count.count(digit) != 0);
+    }
+    var index = this.gtoi(g_index);
+    if (index == -1) return false;
+    if (this.cells[index].fixed) return false;
+    if (this.cells[index].get_value() == -1) return false;
+    return true;
+  }
+
+  puzzle_data.prototype._IGG_isDragTarget = function(g_index, src) {
+    if (g_index >= this.gridarea && g_index < this.gridarea + this.size) {
+      var digit = g_index - this.gridarea;
+      return (digit == this.value_at(src));
+    }
+    var index = this.gtoi(g_index);
+    if (index == -1) return false;
+    if (this.cells[index].fixed) return false;
+    return true;
+  }
+
+  ///////////////////////////////////////
+
+  var puzzle;
+  var grid;
+  var pref_controller;
+  var keyed_state_controller;
+  var pcborder = "#000000";
+
+  window.onload = start;
+
+  function start() {
+    var whpemail = '';
+    var whpnick = '';
+    var view = '';
+    var my_args = document.URL.split('?')[1].split('&');
+    for (var i=0; i<my_args.length; ++i) {
+      var nvpair = my_args[i].split('='); 
+      if (nvpair[0] == 'whpemail') whpemail = nvpair[1];
+      if (nvpair[0] == 'whpnick') whpnick = nvpair[1];
+      if (nvpair[0] == 'view') view = nvpair[1];
+    }
+//    if (whpemail == '') {
+//      window.location = '{{server_urls.server_url}}puzzlelogin?url=' + encodeURIComponent(document.URL);
+//      return;
+//    }
+//    dprint('I think your e-mail is ' + whpemail);
+//    dprint('I think your nickname is ' + whpnick);
+
+    _gel('userid_ui').appendChild(_UserID_getUI());
+    _UserID_getName();
+
+    pref_controller = new _WHP_pref_controller(__MODULE_ID__, true);
+    pref_controller.num_puzzles = {{num_puzzles}};
+    var r = 1;
+    var c = 1;
+    while (r*c < {{num_puzzles}}) {
+      if (r < c) {
+        r++;
+      } else {
+        c++;
+      }
+    }
+    pref_controller.rows = r;
+    pref_controller.cols = c;
+    pref_controller.box_height = Math.floor(50/r)+1;
+    pref_controller.box_width = Math.floor(50/c)+1;
+
+    _gel("game_state_html").appendChild(pref_controller.getTableUI({{num_puzzles}}));
+    pref_controller.getPrefs(start2);
+
+    keyed_state_controller = new _WHP_puz_controller();
+
+    setTimeout(start3, 1000);
+  }
+  
+  function start2() {
+    loaded_data = true;
+    pref_controller.getPrefs_callback = null;
+
+    if (pref_controller.game_state.puz_count != {{num_puzzles}}) {
+      pref_controller.game_state.puz_count = {{num_puzzles}};
+      while (pref_controller.game_state.puz_solved.length < {{num_puzzles}})
+        pref_controller.game_state.puz_solved.push(0);
+    }
+    if (pref_controller.game_state.cur_puz >= {{num_puzzles}}) {
+      pref_controller.game_state.cur_puz = {{num_puzzles}} - 1;
+    }
+
+    puzzle = new puzzle_data();
+    reset(pref_controller.game_state);
+
+    _IG_AdjustIFrameHeight();
+
+    var prefs = new GadgetPrefs();
+    var as = prefs.getString("autosave");
+    if (as != "") {
+      _gel("autosave").checked = true;
+      puzzle.autosave_checkbox();
+    }
+    puzzle.load_state();
+  }
+
+  var loaded_data = false;
+  var seconds_to_wait = 20;
+
+  function start3() {
+    if (loaded_data) return;
+    if (seconds_to_wait <= 0) {
+      setText(_gel("numsolved"), "{Server error}");
+      pref_controller.getPrefs_callback = null;
+      puzzle = new puzzle_data();
+      reset(pref_controller.game_state);
+    } else {
+      setText(_gel("numsolved"), "{Loading..." + seconds_to_wait + "}");
+      seconds_to_wait--;
+      setTimeout(start3, 1000);
+    }
+  }
+
+  function reset(game_state) {
+    puzzle.resetPuzzle(game_state);
+    grid = new _IG_Grid(puzzle, "mygrid", puzzle.gridsize, puzzle.gridsize);
+    _gel("table_html").innerHTML = "";
+    _gel("table_html").appendChild(grid.getTable());
+    grid.getTable().border = 0;
+    grid.getTable().cellPadding = 0;
+    grid.getTable().cellSpacing = 0;
+    make_palette();
+    make_boxcode();
+    make_diagcode();
+    puzzle.set_background_colors();
+
+    grid.dragHandler.topMargin = 0;
+    grid.dragHandler.bottomMargin = 30;
+    grid.dragHandler.leftMargin = 10;
+    grid.dragHandler.rightMargin = 10;
+    if (navigator.userAgent.toLowerCase().match("ie")) {
+      grid.dragHandler.surrogateOffsetX = -2;
+      grid.dragHandler.surrogateOffsetY = 0;
+      grid.dragHandler.leftMargin = 10;
+      grid.dragHandler.rightMargin = 10;
+      grid.dragHandler.topMargin = 10;
+      grid.dragHandler.bottomMargin = 10;
+    } else if (navigator.userAgent.toLowerCase().match("safari")) {
+      grid.dragHandler.surrogateOffsetX = -2;
+      grid.dragHandler.surrogateOffsetY = 0;
+      grid.dragHandler.leftMargin = 5;
+      grid.dragHandler.rightMargin = 10;
+      grid.dragHandler.topMargin = 10;
+      grid.dragHandler.bottomMargin = 10;
+    }
+    puzzle._IGG_refreshAll();
+    grid.initDragging();
+  }
+
+  function make_palette() {
+    var palette_table = document.createElement('table');
+    palette_table.border = "1";
+    palette_table.cellPadding = "3px";
+    palette_table.cellSpacing = "0px";
+    palette_table.id = "palette_table";
+    palette_table.width = "40px";
+    var palette = document.createElement('tbody');
+    _gel("palette").innerHTML = "";
+    _gel("palette").appendChild(palette_table);
+    palette_table.appendChild(palette);
+    palette.appendChild(document.createElement('tr'));
+    var row = document.createElement('tr');
+    palette.appendChild(row);
+    for (var digit = 1; digit <= puzzle.size; digit++) {
+      var tabledata = document.createElement('td');
+      row.appendChild(tabledata);
+      tabledata.align = "center";
+      tabledata.appendChild(grid.getCell(digit - 1 + puzzle.gridarea));
+    }
+  }
+
+  function make_boxcode() {
+    var boxcode_table = document.createElement('table');
+    boxcode_table.border = "1";
+    boxcode_table.cellPadding = "3px";
+    boxcode_table.cellSpacing = "0px";
+    boxcode_table.id = "boxcode_table";
+    boxcode_table.width = "40px";
+    var boxcode = document.createElement('tbody');
+    _gel("boxcode").innerHTML = "";
+    _gel("boxcode").appendChild(boxcode_table);
+    boxcode_table.appendChild(boxcode);
+    var row = document.createElement('tr');
+    boxcode.appendChild(row);
+    for (var digit = 1; digit <= 3; digit++) {
+      var tabledata = document.createElement('td');
+      row.appendChild(tabledata);
+      tabledata.align = "center";
+      // tabledata.style.backgroundColor = puzzle.colors[digit-1];
+      tabledata.appendChild(grid.getCell(digit - 1 + puzzle.size + puzzle.gridarea));
+    }
+    var row2 = document.createElement('tr');
+    boxcode.appendChild(row2);
+    for (var digit = 4; digit <= 6; digit++) {
+      var tabledata = document.createElement('td');
+      row2.appendChild(tabledata);
+      tabledata.align = "center";
+      // tabledata.style.backgroundColor = puzzle.colors[digit-1];
+      tabledata.appendChild(grid.getCell(digit - 1 + puzzle.size + puzzle.gridarea));
+    }
+    var row3 = document.createElement('tr');
+    boxcode.appendChild(row3);
+    for (var digit = 7; digit <= 9; digit++) {
+      var tabledata = document.createElement('td');
+      row3.appendChild(tabledata);
+      tabledata.align = "center";
+      // tabledata.style.backgroundColor = puzzle.colors[digit-1];
+      tabledata.appendChild(grid.getCell(digit - 1 + puzzle.size + puzzle.gridarea));
+    }
+  }
+
+  function make_diagcode() {
+    var diagcode_table = document.createElement('table');
+    diagcode_table.border = "1";
+    diagcode_table.cellPadding = "3px";
+    diagcode_table.cellSpacing = "0px";
+    diagcode_table.id = "diagcode_table";
+    diagcode_table.width = "40px";
+    var diagcode = document.createElement('tbody');
+    _gel("diagcode").innerHTML = "";
+    _gel("diagcode").appendChild(diagcode_table);
+    diagcode_table.appendChild(diagcode);
+    var row = document.createElement('tr');
+    diagcode.appendChild(row);
+    tabledata = document.createElement('td');
+    row.appendChild(tabledata);
+    tabledata.align = "center";
+    tabledata.style.backgroundColor = puzzle.colors[0];
+    tabledata.appendChild(grid.getCell(2 * puzzle.size + puzzle.gridarea));
+    var row2 = document.createElement('tr');
+    diagcode.appendChild(row2);
+    tabledata = document.createElement('td');
+    row2.appendChild(tabledata);
+    tabledata.align = "center";
+    tabledata.style.backgroundColor = puzzle.colors[1];
+    tabledata.appendChild(grid.getCell(1 + 2 * puzzle.size + puzzle.gridarea));
+  }
+
+  _WHP_pref_controller.prototype.change_level = function(amount) {
+    this.nav_puz += amount;
+    if (this.nav_puz < 0) this.nav_puz = 0;
+    if (this.nav_puz >= this.game_state.puz_count) this.nav_puz = this.game_state.puz_count - 1;
+    this.update_navbar();
+  }
+
+  _WHP_pref_controller.prototype.new_puzzle_request = function() {
+    this.game_state.cur_puz = this.nav_puz;
+    reset(this.game_state);
+    this.setPrefs();
+    this.update_navbar();
+  }
+
+  function dprint(s) {
+    _gel("debug1").innerHTML += "DEBUG " + s + "<BR>";
+  }
+
+  function clear_board() {
+    pref_controller.new_puzzle_request();
+  }
+
+  function change_border() {
+    if (pcborder == "#000000") {
+      pcborder = "#FFFFFF";
+    } else {
+      pcborder = "#000000";
+    }
+    pref_controller.new_puzzle_request();
+  }
+
+  function pass_key_press(e) {
+    var keynum;
+    if (window.event) {
+      keynum = e.keyCode;
+    } else if (e.which) {
+      keynum = e.which;
+    }
+    keychar = String.fromCharCode(keynum).toUpperCase();
+    puzzle.handleKeyPress(keynum, keychar);
+  }
+
+  if (document.addEventListener) {
+    document.addEventListener("keyup", pass_key_press, false);
+  } else {
+    document.attachEvent("onkeyup", pass_key_press);
+  }
+
+
+//////////////////////////
+
+// Javascript ends -->
+</script>
+
+<font size=-1>
+
+<form style="margin-top:3px;margin-bottom:0px">
+Puzzle: <span id="puznum">1</span>
+<input style="font-size:10" id="levp1" type="button" value="+" onclick="pref_controller.change_level(1)"/>
+<input style="font-size:10" disabled id="levm1" type="button" value="-" onclick="pref_controller.change_level(-1)"/>
+<input style="font-size:10" id="levp10" type="button" value="+10" onclick="pref_controller.change_level(10)"/>
+<input style="font-size:10" disabled id="levm10" type="button" value="-10" onclick="pref_controller.change_level(-10)"/>
+<input style="font-size:10" id="levp5" type="button" value="+5" onclick="pref_controller.change_level(5)"/>
+<input style="font-size:10" disabled id="levm5" type="button" value="-5" onclick="pref_controller.change_level(-5)"/>
+<input style="font-size:10" id="newp" type="button" disabled value="On Puzzle 1" onclick="pref_controller.new_puzzle_request()"/>
+</form>
+
+<span style="font-size:10">
+<b>Diagonal Sudoku</b>: Due to popular demand, I've added the ability to save and load the state of your current puzzle.  You can
+find the controls in the lower-left.
+Go to <a target="_top" href="{{server_urls.server_url}}/gadgetpage?g=20080523-diagonalsudoku&d=2008-05-23">this
+puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
+</span>
+<span id="showrules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('rules').style.display='inline';_gel('showrules').style.display='none';_gel('hiderules').style.display='inline'">Rules.</span>
+<span id="hiderules" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('rules').style.display='none';_gel('showrules').style.display='inline';_gel('hiderules').style.display='none'">Hide Rules.</span>
+<span id="rules" style="display:none;font-size:x-small">
+   Place numbers into the grid such that each letter appears once in each row, once in each column, once along each diagonal,
+   and once in each of the regions.
+</span>
+<span id="showinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline"
+   onclick="_gel('instructions').style.display='inline';_gel('showinstructions').style.display='none';_gel('hideinstructions').style.display='inline'">How to Play.</span>
+<span id="hideinstructions" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none"
+   onclick="_gel('instructions').style.display='none';_gel('showinstructions').style.display='inline';_gel('hideinstructions').style.display='none'">Hide How to Play.</span>
+<span id="instructions" style="display:none;font-size:x-small">
+   Drag numbers from the palette into the grid.  The lights will
+   turn <span style="color:#008000">yellow-green</span> or <span style="color:#FF0000">red</span>
+   depending on whether that row, column, or region is satisfied.  You can also click on a blank space on the grid to pull up a cursor; control
+   the cursor with the arrow keys (or the IJKL keys), write a number in the cursor with the number keys, and erase by typing 0.
+</span>
+<BR>
+
+<table border="0"><tr><td colspan=3 valign=top>
+  <span id="palette"></span>
+</td><tr><tr><td colspan=3>
+  <span id="table_html"></span>
+</td><tr><tr><td>
+  <center>
+  <table>
+  <tr><td>
+    <input id="resetbutton3" style="font-size:8pt" type="button" value="Clear"
+     onclick="clear_board();">
+  </td></tr><tr><td>
+    <input id="border" style="font-size:8pt" type="button" value="Borders"
+     onclick="change_border();">
+  </td></tr><tr><td>
+    <input id="save_button" style="font-size:8pt" type="button" value="Save"
+     onclick="puzzle.save_state();">
+  </td></tr><tr><td>
+    <input id="autosave" type="checkbox" onclick="puzzle.autosave_checkbox();">
+    <span style="font-size:7pt">30s autosave</span>
+  </td></tr><tr><td>
+    <input id="load_button" style="font-size:8pt" type="button" value="Load"
+     onclick="puzzle.load_state();">
+  </td></tr><tr><td>
+<!--
+    <input id="sizechange" style="font-size:9" type="button" value="Shrink"
+     onclick="puzzle.changeSize();">
+-->
+  </td></tr>
+  </table>
+
+  </center>
+</td><td>
+  <span id="boxcode"></span>
+</td><td>
+  <span id="diagcode"></span>
+</td></tr></table>
+
+<HR>
+
+<table border=0 cellpadding=3 cellspacing=3><tr><td>
+  <center><span id="game_state_html"></span></center>
+
+</td><td style="font-size:9pt">
+  <span id="numsolved">{Loading...} puzzles</span> solved
+</td><td style="font-size:9pt">
+<span style="visibility:hidden">
+  Your points: <span id="points">?</span>
+</span>
+  <input id="resetbutton" style="font-size:10;visibility:hidden" type="button" value="Clear Stats"
+    onclick="pref_controller.resetPrefs();puzzle.resetPuzzle(pref_controller.game_state);"/>
+</td></tr></table>
+<span id="win" style="font-size:9pt; font-weight:bold">&nbsp;</span>
+
+<HR>
+
+<span id="userid_ui"></span>
+<!--
+(Note: getting a new UID will lose all your puzzle data, and will orphan the old UID (unless
+someone else has it).  Use sparingly.)
+-->
+
+<HR>
+
+<span id="debug1" style="font-size:8pt;font-weight:bold"></span>
+<BR>
+<span id="debug2" style="font-size:8pt;font-weight:bold"></span>
+
+<span id="showversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;font-size:x-small"
+   onclick="_gel('version').style.display='inline';_gel('showversion').style.display='none';_gel('hideversion').style.display='inline';_IG_AdjustIFrameHeight()">
+Version 4.0</span>
+<span id="hideversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none;font-size:x-small"
+   onclick="_gel('version').style.display='none';_gel('showversion').style.display='inline';_gel('hideversion').style.display='none';_IG_AdjustIFrameHeight()">
+Version 4.0</span>
+<span id="version" style="display:none;font-size:x-small">
+<BR>   v1.0 : initial release.
+<BR>   v2.0 : Created 'homepage', changed message.
+<BR>   v3.0 : Added simple user authentication and a "name" that can be changed.
+<BR>   v3.1 : Teeny problem with name not updated due to server lag fixed.
+<BR>   v3.2 : Rachel Emerson sez:  "Numbers are not letters and letters are not numbers. Why are the numbers referred to as letters in the instructions?"  Fixed!
+<BR>   v4.0 : Added keyboard shortcuts.
+<BR>   v5.0 : Added save and load.
+<BR>   v5.1 : Added a 30-second autosave feature.
+<BR>   v5.2 : Removed UID generator.
+</span>
+
+</FONT>

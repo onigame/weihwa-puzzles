@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+    title="LA LA Wei-Hwa's Puzzles"
+    description="Regular Puzzle Challenges from a Google Engineer"
+    author="Wei-Hwa Huang and others"
+    author_email="weihwa.feedback+ig20080523@gmail.com"
+    author_link="{{server_urls.server_url}}"
+    title_url="{{server_urls.server_url}}"
+    author_location="Mountain View, CA, USA"
+    author_affiliation="Google, Inc."
+    screenshot="{{server_urls.server_url}}images/screenshot.png"
+    thumbnail="{{server_urls.server_url}}images/thumbnail.png"
+    height="500">
+    <Require feature='dynamic-height'/>
+    <Require feature='setprefs'/>
+    <Require feature='drag'/>
+    <Require feature='grid'/>
+    <Require feature='analytics'/>
+  </ModulePrefs>
+  <UserPref
+      name="puzzle_data_20080523"
+      default_value=""
+      datatype="hidden"/>
+  <UserPref
+      name="user_id"
+      default_value=""
+      datatype="hidden"/>
+  <UserPref
+      name="autosave"
+      default_value=""
+      datatype="hidden"/>
+  <Content type="url" href="http://enigma:8080/diagonalsudoku/test.html">
+  </Content>
+</Module>
+

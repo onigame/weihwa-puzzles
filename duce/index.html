@@ -4,116 +4,6 @@
 </head>
 <body>
 
-<h2>Your Games</h2>
-
-{% if seatings %}
-  <TABLE BORDER=1>
-  <TR>
-    <TH>Game ID</TH>
-    <TH>Game</TH>
-    <TH>Variant</TH>
-    <TH>Game Name</TH>
-    <TH>Your Nickname</TH>
-    <TH>Game Created</TH>
-    <TH>Created By</TH>
-    <TH>Game Modified</TH>
-    <TH>Game Over?</TH>
-    <TH>Actions</TH>
-  </TR>
-  {% for seating in seatings %}
-    <TR>
-    <TD>{{seating.game.key.id}}</TD>
-    <TD>{{seating.game.ruleset}}</TD>
-    <TD>{{seating.game.variant}}</TD>
-    <TD>{{seating.game.name}}</TD>
-    <TD>{{seating.nickname}}</TD>
-    <TD>{{seating.game.created|date:"Y-m-d H:i:s"}}</TD>
-    <TD>{{seating.game.creator.user.name}}</TD>
-    <TD>{{seating.game.modified|date:"Y-m-d H:i:s"}}</TD>
-    <TD>{% if seating.game.completed %}Yes{% else %}No{% endif %}</TD>
-    <TD><input type=submit value="Play" onClick="PlayGame({{seating.game.key.id}});">
-    <TR>
-  {% endfor %}
-  </TABLE>
-{% else %}
-  You are not in any games!
-{% endif %}
-
-  <P>
-  <div id="create_game_panel" style="display:none">
-    <h3>Available Players:</h3>
-    {% if available_players %}
-       <form id="startgameform" method="post">
-       <UL>
-         {% for pl in available_players %}
-           <LI>
-           <input type=checkbox name="cg-{{pl.user.uid}}" id="cg-{{pl.user.uid}}" {% ifequal pl.user.uid player.user.uid %} checked disabled {% endifequal %}>
-           {{pl.user.name}}
-         {% endfor %}
-       </UL>
-         Game:
-         <select name="ruleset">
-           <option value="GuessMyDieRoll" selected>GuessMyDieRoll</option>
-         </select>
-         Variant:
-         <select name="variant">
-           <option value="Original" selected>Original</option>
-         </select>
-       </form>
-       <input type=submit value="Create a game with these players" onClick="TryCreateGame();">
-    {% else %}
-       There are no available players, not even yourself!
-    {% endif %}
-  </div>
-  </p>
-
-<hr>
-
-<H2>Your Player Data</H2>
-
-<UL>
-<!---
-<LI>
-{% if player.public %}
-  Other players can see you.
-{% else %}
-  Other players cannot see you.
-{% endif %}
-  <input type=submit value="Change This" onClick="TogglePlayer('public');">
---->
-<LI>
-{% if player.l4g %}
-  You are looking to play more games.
-{% else %}
-  You are not looking to play any games.
-{% endif %}
-  <input type=submit value="Change This" onClick="TogglePlayer('l4g');">
-</UL>
-
-<hr>
-
-<H2>Your User Data</H2>
-
-<iframe src="/user_id.html" width="100%" frameborder=0 marginheight=0 marginwidth=0>
-</iframe>
-
-<hr>
-
-<a href="faq.html">FAQ</a>
-
-<BR>
-
-Mail suggestions to <a href="mailto:{{weihwa_email}}">Wei-Hwa</a>, or write them here:
-
-<iframe src="suggestion_box.html" width="100%" frameborder=0 marginheight=0 marginwidth=0 height=800>
-</iframe>
-
-<!---
-<form action="/puzzlelogout?url=/">
-<input type=submit value="Log out of Wei-Hwa's Puzzles">
-</form>
---->
-
 <script type="text/javascript" src="/js/general-lib.js"></script>
 <script type="text/javascript" src="/js/prototype.js"></script>
 <script type="text/javascript" src="/js/puzzle-utils6.js"></script>
@@ -179,6 +69,134 @@ Mail suggestions to <a href="mailto:{{weihwa_email}}">Wei-Hwa</a>, or write them
   }
 
 </script>
+
+<h2>Your Games</h2>
+
+{% if seats %}
+  <TABLE BORDER=1>
+  <TR>
+    <TH>Game ID</TH>
+    <TH>Game</TH>
+    <TH>Variant</TH>
+    <TH>Game Name</TH>
+    <TH>Your Nickname</TH>
+    <TH>Game Created</TH>
+    <TH>Created By</TH>
+    <TH>Game Modified</TH>
+    <TH>Players</TH>
+    <TH>Game Over?</TH>
+    <TH>Active Player</TH>
+    <TH>Actions</TH>
+  </TR>
+  {% for seat in seats %}
+    <TR>
+    <TD>{{seat.game.key.id}}</TD>
+    <TD>{{seat.game.ruleset}}</TD>
+    <TD>{{seat.game.variant}}</TD>
+    <TD>{{seat.game.name}}</TD>
+    <TD>{{seat.nickname}}</TD>
+    <TD>{{seat.game.created|date:"Y-m-d H:i:s"}}</TD>
+    <TD>{{seat.game.creator.user.name}}</TD>
+    <TD>{{seat.game.modified|date:"Y-m-d H:i:s"}}</TD>
+    <TD id="players-{{seat.game.key.id}}"></TD>
+    <script type="text/javascript">
+      new Ajax.Updater(
+        "players-{{seat.game.key.id}}",
+        "get_players_in_game.ajax",
+        {
+          parameters : "game_id={{seat.game.key.id}}",
+          onFailure : function(resp) {
+            $("players-{{seat.game.key.id}}").innerHTML = "<i>[could not load from server]</i>";
+          }
+        }
+      );
+    </script>
+    <TD>{% if seat.game.completed %}Yes{% else %}No{% endif %}</TD>
+    <TD>{{seat.game.state.active_seat.nickname}}</TD>
+    <TD><input type=submit value="Play" onClick="PlayGame({{seat.game.key.id}});">
+    <TR>
+  {% endfor %}
+  </TABLE>
+{% else %}
+  You are not in any games!
+{% endif %}
+
+  <P>
+  <div id="create_game_panel" style="display:none">
+    <h3>Available Players:</h3>
+    {% if available_players %}
+       <form id="startgameform" method="post">
+       <UL>
+         {% for pl in available_players %}
+           <LI>
+           <input type=checkbox name="cg-{{pl.user.uid}}" id="cg-{{pl.user.uid}}" {% ifequal pl.user.uid player.user.uid %} checked disabled {% endifequal %}>
+           {{pl.user.name}}
+         {% endfor %}
+       </UL>
+         Game:
+         <select name="ruleset">
+           <option value="GuessMyDieRoll" selected>GuessMyDieRoll</option>
+           <option value="TicTacToe" selected>TicTacToe</option>
+         </select>
+         Variant:
+         <select name="variant">
+           <option value="Original" selected>Original</option>
+         </select>
+       </form>
+       <input type=submit value="Create a game with these players" onClick="TryCreateGame();">
+    {% else %}
+       There are no available players, not even yourself!
+    {% endif %}
+  </div>
+  </p>
+
+<hr>
+
+<H2>Your Player Data</H2>
+
+<UL>
+<!---
+<LI>
+{% if player.public %}
+  Other players can see you.
+{% else %}
+  Other players cannot see you.
+{% endif %}
+  <input type=submit value="Change This" onClick="TogglePlayer('public');">
+--->
+<LI>
+{% if player.l4g %}
+  You are looking to play more games.
+{% else %}
+  You are not looking to play any games.
+{% endif %}
+  <input type=submit value="Change This" onClick="TogglePlayer('l4g');">
+</UL>
+
+<hr>
+
+<H2>Your User Data</H2>
+
+<iframe src="/user_id.html" width="100%" frameborder=0 marginheight=0 marginwidth=0>
+</iframe>
+
+<hr>
+
+<a href="faq.html">FAQ</a>
+
+<BR>
+
+Mail suggestions to <a href="mailto:{{weihwa_email}}">Wei-Hwa</a>, or write them here:
+
+<iframe src="suggestion_box.html" width="100%" frameborder=0 marginheight=0 marginwidth=0 height=800>
+</iframe>
+
+<!---
+<form action="/puzzlelogout?url=/">
+<input type=submit value="Log out of Wei-Hwa's Puzzles">
+</form>
+--->
+
 
 </body>
 </html>
