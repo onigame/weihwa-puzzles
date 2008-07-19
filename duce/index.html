@@ -112,7 +112,7 @@
       );
     </script>
     <TD>{% if seat.game.completed %}Yes{% else %}No{% endif %}</TD>
-    <TD>{{seat.game.state.active_seat.nickname}}</TD>
+    <TD>{{seat.game.GetState.active_seat.nickname}}</TD>
     <TD><input type=submit value="Play" onClick="PlayGame({{seat.game.key.id}});">
     <TR>
   {% endfor %}

@@ -1,0 +1,32 @@
+<html>
+<head>
+<title>Duce: User Info</title>
+</head>
+<body>
+
+<span id="userid_ui"></span>
+
+<script type="text/javascript" src="/js/general-lib.js"></script>
+<script type="text/javascript" src="/js/puzzle-utils6.js"></script>
+<script type="text/javascript" src="/js/prototype.js"></script>
+<script type="text/javascript">
+
+  window.onload = start;
+  var uidc;
+
+  function server_login() {
+    window.top.reload();
+  }
+
+  function start() {
+    uidc = new _UserID_controller_("{{user.google_id}}", "{{user.name}}", server_login, start2);
+  }
+
+  function start2() {
+    $('userid_ui').appendChild(uidc.getUI());
+  }
+
+</script>
+
+</body>
+</html>
