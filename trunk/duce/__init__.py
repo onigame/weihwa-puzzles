@@ -16,6 +16,7 @@ import sanitize
 # exceptions
 
 SeatCountError = "The game/player pair did not have the expected number of seats"
+GameHasNoState = "The selected game does not have a current GameState"
 
 ##########################################################
 
@@ -67,6 +68,20 @@ class Game(db.Model):
         seat.result = 0.0
       seat.put()
     self.put()
+
+  def GetMostRecentState(self):
+    if not self.ruleset in game_list.names:
+      raise game_list.UnrecognizedGame
+    query = game_list.names[self.ruleset].GameState.all()
+    query.filter('game =', self)
+    query.order('-modified')
+    results = query.fetch(1)
+    if (len(results) == 0):
+      raise GameHasNoState
+    return results[0]
+
+  def GetState(self):
+    return self.GetMostRecentState()
 
 class Seat(db.Model):
   '''
@@ -213,8 +228,14 @@ class DucePage(webapp.RequestHandler):
     if command == "toggle":
       self.PlayerToggle()
     if command == "startgame":
-      game = self.CreateGame()
-      self.StartGame(game)
+      if game.ruleset in game_list.names:
+        game = self.CreateGame()
+        self.StartGame(game)
+      else:
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write("The game %s is not implemented yet.\n" % game.ruleset)
+        self.DebugPage()
+        return
     self.GoBack()
 
   def GoBack(self):
@@ -254,20 +275,12 @@ class DucePage(webapp.RequestHandler):
     return game
 
   def StartGame(self, game):
-    if game.ruleset == "GuessMyDieRoll":
-      state = guess_my_die_roll.GameState()
-      state.Setup(game)
-      state.put()
-      game.state = state
-      game.started = True
-      game.put()
-    if game.ruleset == "TicTacToe":
-      state = tic_tac_toe.GameState()
-      state.Setup(game)
-      state.put()
-      game.state = state
-      game.started = True
-      game.put()
+    state = game_list.names[game.ruleset].GameState()
+    state.Setup(game)
+    state.put()
+    game.state = state
+    game.started = True
+    game.put()
 
   def PlayerToggle(self):
     field = self.request.get("field")
@@ -284,37 +297,24 @@ class DucePage(webapp.RequestHandler):
       game = Game.get_by_id(int(self.request.get("game_id")))
       seat = Seat.GetSeat(game, self.player)
 
-      if game.ruleset == "GuessMyDieRoll":
-        query = guess_my_die_roll.GameState.all()
-        query.filter('game =', game)
-        query.order('-modified')
-        results = query.fetch(1)
-        if (len(results) > 0):
-          results[0].PlayPage(self.request, self.response, seat)
-        else:
-          self.response.headers['Content-Type'] = 'text/plain'
-          self.response.out.write("Error: no game state exists")
-        return
-
-      if game.ruleset == "TicTacToe":
-        query = tic_tac_toe.GameState.all()
-        query.filter('game =', game)
-        query.order('-modified')
-        results = query.fetch(1)
-        if (len(results) > 0):
-          results[0].PlayPage(self.request, self.response, seat)
-        else:
-          self.response.headers['Content-Type'] = 'text/plain'
-          self.response.out.write("Error: no game state exists")
-        return
+      state = game.GetState()
+      state.PlayPage(self.request, self.response, seat)
 
       self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write("The game %s is not implemented yet.\n" % game.ruleset)
+      self.response.out.write("The game %s is not implemented!\n" % game.ruleset)
       self.DebugPage()
       return
+    except GameHasNoState:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write("The selected game ( %s ) doesn't seem to have a GameState!\n" % self.request.get("game_id"))
+      self.DebugPage()
     except ValueError:
       self.response.headers['Content-Type'] = 'text/plain'
       self.response.out.write("'%s' is not a valid game ID.\n" % self.request.get("game_id"))
+      self.DebugPage()
+    except game_list.UnrecognizedGame:
+      self.response.headers['Content-Type'] = 'text/plain'
+      self.response.out.write("The game name '%s' was not recognized.\n" % game.ruleset)
       self.DebugPage()
 
   def SuggestionBoxPage(self):
@@ -402,13 +402,12 @@ class DucePage(webapp.RequestHandler):
 ########################################
 ## add paths for games.
 
-import guess_my_die_roll
-import tic_tac_toe
+import game_list
 
 def UrlMappings():
   url_mappings = []
   url_mappings.append(('/duce(.*)', DucePage))
-  url_mappings.extend(guess_my_die_roll.UrlMappings())
-  url_mappings.extend(tic_tac_toe.UrlMappings())
+  for module in game_list.names.values():
+    url_mappings.extend(module.UrlMappings())
   return url_mappings
 
