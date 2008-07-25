@@ -12,11 +12,7 @@ from google.appengine.ext.webapp import template
 import puzzles
 import sanitize
 
-##########################################################
-# exceptions
-
-SeatCountError = "The game/player pair did not have the expected number of seats"
-GameHasNoState = "The selected game does not have a current GameState"
+from exceptions import *
 
 ##########################################################
 
@@ -61,11 +57,17 @@ class Game(db.Model):
     '''
     self.completed = True
     winning_keys = [winner.key() for winner in winners]
+    has_winner = False
+    all_seats = self.GetAllSeats()
+    for seat in all_seats:
+      if seat.key() in winning_keys:
+        has_winner = True
+    loser_score = 0.0 if has_winner else (1.0 / len(all_seats))
     for seat in self.GetAllSeats():
       if seat.key() in winning_keys:
         seat.result = 1.0
       else:
-        seat.result = 0.0
+        seat.result = loser_score
       seat.put()
     self.put()
 
@@ -90,9 +92,10 @@ class Seat(db.Model):
   '''
   game = db.ReferenceProperty(Game)
   player = db.ReferenceProperty(Player)
-  nickname = db.StringProperty()         # player's nickname in the game
-  kibitz = db.BooleanProperty()          # just looking, not actually playing
-  result = db.FloatProperty()            # 1.0 for a "victory", 0.0 for a "loss"
+  nickname = db.StringProperty()                 # player's nickname in the game
+  kibitz = db.BooleanProperty()                  # just looking, not actually playing
+  result = db.FloatProperty()                    # 1.0 for a "victory", 0.0 for a "loss"
+  last_access = db.DateTimeProperty(auto_now=True)    # the last time the player accessed the server.
 
   @staticmethod
   def GetSeat(game, player):
@@ -111,13 +114,28 @@ class GameState(db.Model):
   Stores state of the game that can be changed.
   '''
   game = db.ReferenceProperty(Game)                   # back-reference; don't change this.
-  created = db.DateTimeProperty(auto_now_add=True)       # when this state was created
-  modified = db.DateTimeProperty(auto_now=True)       # when this state was created
+  created = db.DateTimeProperty(auto_now_add=True)    # when this state was created
+  modified = db.DateTimeProperty(auto_now=True)       # when this state was modified
   completed = db.BooleanProperty(default=False)       # is the game over?
 
   def Setup(self, game):
     self.game = game
     self.completed = False
+
+  def HandleAjax(self, request, response, seat):
+    if request.get("action") == "ask_for_update":
+      if not self.modified or not seat.last_access:
+        output = "1"
+      else:
+        output = "1" if self.modified > seat.last_access else "0"
+      logging.info("FOOFOO %s %s" % (self.modified, seat.last_access))
+    else:
+      seat.put();    # refreshes the update time
+      raise BadAjaxParameters
+
+    response.headers['Content-Type'] = 'text/plain'
+    response.out.write(output)
+
 
 ##########################################
 
@@ -143,19 +161,19 @@ class DucePage(webapp.RequestHandler):
     elif filename == "/faq.html":
       self.FaqPage()
     elif filename == "/admin.html":
-      self.AdminPage();
+      self.AdminPage()
     elif filename == "/suggestion_box.html":
       self.SuggestionBoxPage()
     elif filename == "/get_players_in_game.ajax":
-      self.GetPlayersInGameAjax();
+      self.GetPlayersInGameAjax()
     elif filename == "/get_comment.ajax":
-      self.GetCommentAjax();
+      self.GetCommentAjax()
     elif filename == "/put_comment.ajax":
-      self.PutCommentAjax();
+      self.PutCommentAjax()
+    elif filename in ["/gamespecific.ajax", "/play.cgi"]:
+      self.GameSpecificPage(filename)     
     elif filename == "/action.cgi":
-      self.ActionPage();
-    elif filename == "/play.cgi":
-      self.PlayPage();
+      self.ActionPage()
     else:
       self.redirect(self.home_url)
 
@@ -228,7 +246,7 @@ class DucePage(webapp.RequestHandler):
     if command == "toggle":
       self.PlayerToggle()
     if command == "startgame":
-      if game.ruleset in game_list.names:
+      if self.request.get("ruleset") in game_list.names:
         game = self.CreateGame()
         self.StartGame(game)
       else:
@@ -292,30 +310,37 @@ class DucePage(webapp.RequestHandler):
         self.player.public = True
     self.player.put()
 
-  def PlayPage(self):
+  def GameSpecificPage(self, filename):
     try:
       game = Game.get_by_id(int(self.request.get("game_id")))
       seat = Seat.GetSeat(game, self.player)
 
       state = game.GetState()
-      state.PlayPage(self.request, self.response, seat)
 
-      self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write("The game %s is not implemented!\n" % game.ruleset)
-      self.DebugPage()
+      if filename == "/play.cgi":
+        state.PlayPage(self.request, self.response, seat)
+      elif filename == "/gamespecific.ajax":
+        state.HandleAjax(self.request, self.response, seat)
+      else:
+        raise BadGameSpecificCommand
+
       return
     except GameHasNoState:
-      self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write("The selected game ( %s ) doesn't seem to have a GameState!\n" % self.request.get("game_id"))
-      self.DebugPage()
+      self.ErrorPage("ERROR: The selected game ( %s ) doesn't seem to have a GameState!\n" % self.request.get("game_id"))
     except ValueError:
-      self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write("'%s' is not a valid game ID.\n" % self.request.get("game_id"))
-      self.DebugPage()
+      self.ErrorPage("ERROR: '%s' is not a valid game ID.\n" % self.request.get("game_id"))
     except game_list.UnrecognizedGame:
-      self.response.headers['Content-Type'] = 'text/plain'
-      self.response.out.write("The game name '%s' was not recognized.\n" % game.ruleset)
-      self.DebugPage()
+      self.ErrorPage("ERROR: The game name '%s' was not recognized.\n" % game.ruleset)
+    except BadGameSpecificCommand:
+      self.ErrorPage("ERROR: The command '%s' is not a game-specific command.\n" % filename)
+    except BadAjaxParameters:
+      self.ErrorPage("ERROR: The ajax parameters were not recognized.\n")
+
+  def ErrorPage(self, message):
+    logging.error(message)
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write(message)
+    self.DebugPage()
 
   def SuggestionBoxPage(self):
     all_player_query = Player.all()
