@@ -63,11 +63,6 @@
     form.submit();
   }
 
-  function PlayGame(game_id) {
-    url = '{{server_url}}play.cgi?game_id=' + game_id;
-    window.location.replace(url);
-  }
-
 </script>
 
 <h2>Your Games</h2>
@@ -113,7 +108,7 @@
     </script>
     <TD>{% if seat.game.completed %}Yes{% else %}No{% endif %}</TD>
     <TD>{{seat.game.GetState.active_seat.nickname}}</TD>
-    <TD><input type=submit value="Play" onClick="PlayGame({{seat.game.key.id}});">
+    <TD><a href="{{server_url}}play.cgi?game_id={{seat.game.key.id}}">Play</a>
     <TR>
   {% endfor %}
   </TABLE>

@@ -531,7 +531,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
   }
 
   puzzle_data.prototype.reportSolutionToServer = function() {
-    _WHP_reportPuzzleSolved(this.puznum+1);
+    keyed_state_controller.reportPuzzleSolved(this.puznum+1);
   }
 
   puzzle_data.prototype.get_background_color = function(index) {
@@ -1393,10 +1393,10 @@ puzzle's homepage</a> to see my TODO list for this gadget and send suggestions.
 
 <span id="showversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;font-size:x-small"
    onclick="_gel('version').style.display='inline';_gel('showversion').style.display='none';_gel('hideversion').style.display='inline';_IG_AdjustIFrameHeight()">
-Version 6.0</span>
+Version 6.2</span>
 <span id="hideversion" style="cursor:pointer;cursor:hand;color:blue;text-decoration:underline;display:none;font-size:x-small"
    onclick="_gel('version').style.display='none';_gel('showversion').style.display='inline';_gel('hideversion').style.display='none';_IG_AdjustIFrameHeight()">
-Version 6.0</span>
+Version 6.2</span>
 <span id="version" style="display:none;font-size:x-small">
 <BR>   v1.0 : initial release.
 <BR>   v2.0 : Created 'homepage', changed message.
@@ -1409,6 +1409,7 @@ Version 6.0</span>
 <BR>   v5.2 : Removed UID generator.
 <BR>   v6.0 : Added login wrapper, added prototype.js library.
 <BR>   v6.1 : Did a rollback of login wrapper, problems with appengine bugs.
+<BR>   v6.2 : Fixed a bug where puzzle completion wasn't getting saved.
 </span>
 
 <span style="visibility:hidden" id="opensocialtest">

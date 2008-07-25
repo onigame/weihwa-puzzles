@@ -4,6 +4,8 @@
 </head>
 <body>
 
+<script type="text/javascript" src="/js/prototype.js"></script>
+
 <h1>Tic Tac Toe</h1>
 
 <hr>
@@ -13,121 +15,235 @@
   <hr>
 {% endif %}
 
-{% if game_ended %}
+<!-- {{state.game.key.id}} -->
 
-  The game is over.
+<div id="game_over">Loading...</div>
+<div id="winner"></div>
+<div id="current_player"></div>
 
-  The winner was
-  {% ifequal state.result.winner.key seat.key %}
-    <b>You!</b>
-  {% else %}
-    {{state.result.winner.nickname}}.
-  {% endifequal %}
+<HR>
 
   <table border=1>
    <tr>
-   <td id="p0">{{grid.0}}</td>
-   <td id="p1">{{grid.1}}</td>
-   <td id="p2">{{grid.2}}</td>
+   <td><div id="p0"></div><div id="b0" style="display:none"><input type=submit value="Here" onClick="ClickButton(0);"></div></td>
+   <td><div id="p1"></div><div id="b1" style="display:none"><input type=submit value="Here" onClick="ClickButton(1);"></div></td>
+   <td><div id="p2"></div><div id="b2" style="display:none"><input type=submit value="Here" onClick="ClickButton(2);"></div></td>
    </tr><tr>
-   <td id="p3">{{grid.3}}</td>
-   <td id="p4">{{grid.4}}</td>
-   <td id="p5">{{grid.5}}</td>
+   <td><div id="p3"></div><div id="b3" style="display:none"><input type=submit value="Here" onClick="ClickButton(3);"></div></td>
+   <td><div id="p4"></div><div id="b4" style="display:none"><input type=submit value="Here" onClick="ClickButton(4);"></div></td>
+   <td><div id="p5"></div><div id="b5" style="display:none"><input type=submit value="Here" onClick="ClickButton(5);"></div></td>
    </tr><tr>
-   <td id="p6">{{grid.6}}</td>
-   <td id="p7">{{grid.7}}</td>
-   <td id="p8">{{grid.8}}</td>
+   <td><div id="p6"></div><div id="b6" style="display:none"><input type=submit value="Here" onClick="ClickButton(6);"></div></td>
+   <td><div id="p7"></div><div id="b7" style="display:none"><input type=submit value="Here" onClick="ClickButton(7);"></div></td>
+   <td><div id="p8"></div><div id="b8" style="display:none"><input type=submit value="Here" onClick="ClickButton(8);"></div></td>
    </tr>
   </table>
 
-{% else %}
+<HR>
 
-  The current player is: 
-  {% ifequal state.active_seat.key seat.key %}
-    <b>You!</b>
-  {% else %}
-    {{state.active_seat.nickname}}.
-  {% endifequal %}
+  Your symbol is: <span id="symbol"></span>
 
-  <hr>
 
-  <table border=1>
-   <tr>
-   <td id="p0">{{grid.0}}</td>
-   <td id="p1">{{grid.1}}</td>
-   <td id="p2">{{grid.2}}</td>
-   </tr><tr>
-   <td id="p3">{{grid.3}}</td>
-   <td id="p4">{{grid.4}}</td>
-   <td id="p5">{{grid.5}}</td>
-   </tr><tr>
-   <td id="p6">{{grid.6}}</td>
-   <td id="p7">{{grid.7}}</td>
-   <td id="p8">{{grid.8}}</td>
-   </tr>
-  </table>
+<script type="text/javascript">
 
-  {% if is_active %}
-    Play somewhere.
-    <div id="controls"></div>
-    <hr>
-    <script type="text/javascript" src="/js/prototype.js"></script>
-    <script type="text/javascript">
+  function AjaxIf(what, if_true, if_false) {
+    new Ajax.Request("gamespecific.ajax", {
+      parameters: ("game_id={{state.game.key.id}}&action=get&what=" + what),
+      onSuccess : function(resp) { (resp.responseText == "1") ? if_true() : if_false(); }
+    });
+  }
 
-      function addButton(n) {
-        num = n;
-        form = document.createElement("form");
-        form.id = "choose" + num;
-        form.method = "post";
+  function AjaxGet(what, process) {
+    new Ajax.Request("gamespecific.ajax", {
+      parameters: ("game_id={{state.game.key.id}}&action=get&what=" + what),
+      onSuccess : function(resp) { process(resp.responseText); }
+    });
+  }
 
-        d1 = document.createElement("input");
-        d1.type = "hidden";
-        d1.name = "game_id";
-        d1.value = "{{seat.game.key.id}}";
-        form.appendChild(d1);
+  function AjaxPing(if_updated, if_not_updated) {
+    new Ajax.Request("gamespecific.ajax", {
+      parameters: ("game_id={{state.game.key.id}}&action=ask_for_update"),
+      onSuccess : function(resp) { (resp.responseText == "1") ? if_updated() : if_not_updated(); }
+    });
+  }
 
-        d1 = document.createElement("input");
-        d1.type = "hidden";
-        d1.name = "action";
-        d1.value = "choose";
-        form.appendChild(d1);
+////////////////////////////
 
-        d1 = document.createElement("input");
-        d1.type = "hidden";
-        d1.name = "chose";
-        d1.value = "" + num;
-        form.appendChild(d1);
+  function UpdateGameState(callback) {
+    UpdateGrid(function() {
+      AjaxIf("is_over", function() {
+        $("game_over").innerHTML = "The game is over.";
+        $("current_player").innerHTML = "";
+        HideButtons();
+        UpdateWinner(callback);
+      }, function() {
+        $("game_over").innerHTML = "The game is still going!";
+        $("winner").innerHTML = "";
+        UpdateCurrentPlayer(callback);
+      });
+    });
+  }
 
-        d1 = document.createElement("input");
-        d1.type = "submit";
-        d1.value = "Here";
-        form.appendChild(d1);
+  function UpdateWinner(callback) {
+    AjaxIf("is_draw", function() {
+      $("winner").innerHTML = "The game was a draw.";
+      callback();
+    }, function() {
+      AjaxIf("is_winner", function() {
+        $("winner").innerHTML = "<b>You</b> were the winner!";
+        callback();
+      }, function() {
+        AjaxGet("winner_nickname", function(result) {
+          $("winner").innerHTML = "The winner was " + result + ".";
+        });
+        callback();
+      });
+    });
+  }
 
-        new Insertion.Bottom("p" + n, form)
-      };
+  function UpdateCurrentPlayer(callback) {
+    AjaxIf("is_active", function() {
+      $("current_player").innerHTML = "<b>You</b> are the current player.";
+      ShowButtons();
+      callback();
+    }, function() {
+      HideButtons();
+      AjaxGet("active_nickname", function(result) {
+        $("current_player").innerHTML = "The current player is " + result + ".";
+        callback();
+      });
+    });
+  }
 
-      i = 9;
-      i.times(addButton);
-    </script>
-  {% else %}
-    It is not your turn.  Please wait until it is your turn.  <!-- TODO:  Send an e-mail reminder -->
-  {% endif %}
+  var blank = '(blank)';
+  var symbols = [
+    '<img alt="X" src="/images/X.png">',
+    '<img alt="O" src="/images/O.png">'
+  ];
 
-{% endif %}
+  var grid = [];
+
+  function UpdateGrid(callback) {
+    AjaxGet("grid", function(result) {
+      grid = result.split(",");
+      for (var i=0; i<9; ++i) {
+        if (grid[i] == "-1") {
+          $("p" + i).innerHTML = blank;
+        } else {
+          $("p" + i).innerHTML = symbols[grid[i]];
+        }
+      }
+      AjaxGet("my_value", function(result) {
+        $("symbol").innerHTML = symbols[result];
+        callback();
+      });
+    });
+  }
+
+  function HideButtons() {
+    for (var i=0; i<9; ++i) {
+      $("b"+i).style.display = "none";
+    }
+  }
+
+  function ShowButtons() {
+    for (var i=0; i<9; ++i) {
+      if (grid[i] == "-1") {
+        $("b"+i).style.display = "block";
+      } 
+    }
+  }
+
+  function DisableButtons() {
+    for (var i=0; i<9; ++i) {
+      $("b"+i).childNodes[0].disabled = true;
+    }
+  }
+
+  function EnableButtons() {
+    for (var i=0; i<9; ++i) {
+      $("b"+i).childNodes[0].disabled = false;
+    }
+  }
+
+  function ClickButton(i) {
+    DisableButtons();
+    HideButtons();
+    new Ajax.Request("gamespecific.ajax", {
+      parameters: ("game_id={{state.game.key.id}}&action=put&chose=" + i),
+      onSuccess : function(resp) {
+        EnableButtons();
+        PauseTimer();
+        UpdateGameState(function() {
+          UnpauseTimer();
+        }); 
+      }
+    });
+  }
+
+</script>
 
 <hr>
  
-<input type=submit value="Refresh" onclick="Refresh();">
+<input id="refreshbutton" type=submit value="Refresh" onclick="Refresh();" disabled=true>
+Next auto-refresh in <span id="refreshtime">[loading...]</span> seconds
 
 <script type="text/javascript">
-  function Refresh() {
-    window.location.replace(document.URL);  // so we don't resubmit POST data
+  var refresh_time_base = 3;
+  var refresh_time_current_base = refresh_time_base;
+  var refresh_time = refresh_time_current_base;
+  var refresh_decay = 1.5;
+  var paused = false;
+
+  function RefreshInterval() {
+    if (paused) {
+      $("refreshtime").innerHTML = "[loading now...]";
+    } else {
+      refresh_time -= 1;
+      if (refresh_time <= 0) {
+        refresh_time_current_base *= refresh_decay;
+        Refresh();
+      } else {
+        $("refreshtime").innerHTML = Math.floor(refresh_time);
+      }
+    }
   }
+
+  function PauseTimer() {
+    paused = true;
+  }
+
+  function UnpauseTimer() {
+    paused = false;
+  }
+
+  function Refresh() {
+    $("refreshbutton").disabled = true;
+    PauseTimer();
+    AjaxPing(function() {
+      UpdateGameState(function() {
+        refresh_time_current_base = refresh_time_base;
+        refresh_time = refresh_time_current_base;
+        $("refreshbutton").disabled = false;
+        UnpauseTimer();
+      });
+    }, function() {
+      refresh_time = refresh_time_current_base;
+      $("refreshbutton").disabled = false;
+      UnpauseTimer();
+    });
+  }
+
+  function StartTimer() {
+    setInterval(RefreshInterval, 1000);
+  }
+
+  UpdateGameState(StartTimer);
 </script>
 
+<HR>
+
 <a href=".">Back</a>
-
-
 
 </body>
 </html>

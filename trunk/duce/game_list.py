@@ -1,10 +1,13 @@
 import guess_my_die_roll
 import tic_tac_toe
 
+from exceptions import DuceException
+
 ###############################
 # Exceptions
 
-UnrecognizedGame = "The game (ruleset) was not recognized."
+class UnrecognizedGame(DuceException):
+  "The game (ruleset) was not recognized."
 
 ###############################
 

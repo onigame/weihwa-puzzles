@@ -706,11 +706,11 @@ var curname = '';
 ////////////////////////////////////////////////////
 // Reports a puzzle solved to the server.
 
-  _WHP_reportPuzzleSolved = function(puzNum) {
+  _WHP_puz_controller.prototype.reportPuzzleSolved = function(puzNum) {
     var passgen = new _WHP_Random((new Date()).getTime());
     var url = '{{server_urls.server_url}}datastore/rps?'
               + 'id=' + this.get_whp_uid()
               + '&puznum=' + puzNum
               + '&password=' + passgen.getInt(100000000);
-    _WHP_Fetch(url, null);
+    _WHP_Fetch(url, function() {});
   }
