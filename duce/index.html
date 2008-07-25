@@ -35,9 +35,11 @@
   function PlayerCount() {
     var total = 0;
     for (var i=0; i<opponent_ids.length; ++i) {
-      if (_gel("cg-" + opponent_ids[i]).checked)
+      if ($("cg-" + opponent_ids[i]).checked)
         total++;
     }
+    if ($("newinvite").checked)
+      total++;
     return total;
   }
 
@@ -46,9 +48,15 @@
       alert("Sorry, that game requires two players.");
       return;
     }
+    if ($("newinvite").checked) {
+      if (!($("invitee").value.match(/\@/))) {
+        alert("You need to enter a valid e-mail address!")
+        return;
+      }
+    }
     var form = _gel("startgameform");
     form.action = '{{server_url}}action.cgi';
-    _gel("cg-{{player.user.uid}}").disabled = false;
+    $("cg-{{player.user.uid}}").disabled = false;
     addElement(form, 'input', [
       'type', 'hidden',
       'name', 'command',
@@ -127,6 +135,7 @@
            <input type=checkbox name="cg-{{pl.user.uid}}" id="cg-{{pl.user.uid}}" {% ifequal pl.user.uid player.user.uid %} checked disabled {% endifequal %}>
            {{pl.user.name}}
          {% endfor %}
+         <LI><input type=checkbox name="newinvite" id="newinvite"> (invite an e-mail address:) <input id="invitee" name="invitee">
        </UL>
          Game:
          <select name="ruleset">
