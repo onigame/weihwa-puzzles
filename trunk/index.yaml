@@ -23,7 +23,7 @@ indexes:
   - name: timestamp
     direction: desc
 
-# Used 1620 times in query history.
+# Used 10 times in query history.
 - kind: GameState
   properties:
   - name: game

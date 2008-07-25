@@ -8,6 +8,7 @@ from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from google.appengine.api import mail
 
 import puzzles
 import sanitize
@@ -23,6 +24,12 @@ class Player(db.Model):
   l4g = db.BooleanProperty()                   # "looking for game"
   comment = db.TextProperty()                  # right now, just used as a suggestion/comment box
 
+  def GetEmail(self):
+    return self.user.google_id
+
+  def GetDefaultNickname(self):
+    return self.user.name
+
 class Game(db.Model):
   # key is "game_id", which is a number
   name = db.StringProperty()                          # assigned by creator, need not be unique
@@ -33,6 +40,9 @@ class Game(db.Model):
   variant = db.StringProperty()                       # what variant, if any
   started = db.BooleanProperty(default=False)         # has the game started?
   completed = db.BooleanProperty(default=False)       # is the game over?
+
+  def GetId(self):
+    return self.key().id()
 
   def GetAllSeats(self):
     result = []
@@ -106,7 +116,7 @@ class Seat(db.Model):
     for seat in seat_query:
       result.append(seat)
     if len(result) != 1:
-      raise SeatCountError, len(result) + game.key().id() + player.key().name()
+      raise SeatCountError, len(result) + game.GetId() + player.key().name()
     return result[0]
 
 class GameState(db.Model):
@@ -249,6 +259,7 @@ class DucePage(webapp.RequestHandler):
       if self.request.get("ruleset") in game_list.names:
         game = self.CreateGame()
         self.StartGame(game)
+        self.AnnounceGame(game)
       else:
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write("The game %s is not implemented yet.\n" % game.ruleset)
@@ -277,6 +288,11 @@ class DucePage(webapp.RequestHandler):
           return;
         players.append(dp)
 
+    if (self.request.get("newinvite")):
+      u = puzzles.GetOrCreateUser(self.request.get("invitee"))
+      new_player = Player.get_or_insert(u.uid, user=u, public=True, l4g=False)
+      players.append(new_player)
+
     game = Game()
     game.name = "Unnamed"
     game.creator = self.player
@@ -287,7 +303,7 @@ class DucePage(webapp.RequestHandler):
       seat = Seat(parent=game)
       seat.game = game
       seat.player = p
-      seat.nickname = p.user.name
+      seat.nickname = p.GetDefaultNickname()
       seat.kibitz = False
       seat.put()
     return game
@@ -299,6 +315,45 @@ class DucePage(webapp.RequestHandler):
     game.state = state
     game.started = True
     game.put()
+
+  def AnnounceGame(self, game):
+    if os.environ.get('SERVER_NAME') == 'weihwa-puzzles.appspot.com':
+      weihwa_email = 'weihwa.feedback@gmail.com'
+      server_url = 'http://weihwa-puzzles.appspot.com/duce/'
+    else:
+      weihwa_email = 'whuang@google.com'
+      server_url = 'http://enigma.sfo.corp.google.com:8080/duce/'
+
+    msg = mail.EmailMessage()
+    msg.sender = weihwa_email
+    msg.subject = "Duce: %s, a new %s game, has been started by %s" % (game.name, game.ruleset, game.creator.GetDefaultNickname())
+    seats = game.GetAllSeats()
+    msg.to = ';'.join([s.player.GetEmail() for s in seats])
+
+    player_display = ""
+    for s in seats:
+      player_display += "  * %s [%s]\n" % (s.nickname, s.player.GetEmail())
+
+    msg.body = """
+Ahoy!
+
+A new game of %s has been started on Duce (Wei-Hwa's game server)
+by %s.  
+
+The name of the game is: %s
+
+The players are:
+%s
+
+Visit %splay.cgi=%s to play this game, or 
+cisit %s to check on all your Duce Games.
+
+Thank you for playtesting Duce,
+
+Wei-Hwa Huang
+""" % ( game.ruleset, game.creator.GetDefaultNickname(), game.name, 
+        player_display, server_url, game.GetId(), server_url )
+    msg.send()
 
   def PlayerToggle(self):
     field = self.request.get("field")
@@ -391,7 +446,7 @@ class DucePage(webapp.RequestHandler):
         else:
           self.response.out.write(", ")
         in_game_nick = player.nickname
-        whp_nick = player.player.user.name
+        whp_nick = player.player.GetDefaultNickname()
         self.response.out.write(in_game_nick)
         if in_game_nick != whp_nick:
           self.response.out.write(" (%s)" % whp_nick)
