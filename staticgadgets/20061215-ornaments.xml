@@ -41,6 +41,7 @@ body,td,a,p,.h{font-family:arial,sans-serif;}
 </div>
 
 <script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/puzzle-utils5.js"></script>
+<script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/igoogle_draglib.js"></script>
 <script type="text/javascript" src="http://weihwa-puzzles.appspot.com/js/igoogle_gridlib.js"></script>
 <!---
 <script type="text/javascript" src="http://www.corp.google.com/~whuang/puzzlemodule/puzzle-utils5.js"></script>
